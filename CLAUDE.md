@@ -15,7 +15,7 @@ and keep `ROADMAP.md` up to date (tick items, add what you learned).
 | `tools/LevelSim` | Bot simulator: win rates, invariant fuzzing, move-count tuning, game traces. |
 | `tools/gen_meta.py` | Creates missing `.meta` files. |
 | `.github/workflows/core-tests.yml` | Engine CI (no Unity license needed). |
-| `.github/workflows/build-android.yml` | APK build via game-ci (needs Unity license secrets; `main` + manual). |
+| `.github/workflows/build-android.yml` | APK build via game-ci on `main` + manual; skipped (green) until Unity license secrets exist. |
 
 ## Rules
 
