@@ -32,6 +32,11 @@
 *.opendb
 *.VC.db
 
+# ── dotnet tooling outside Assets (engine tests / simulator) is versioned
+!/tools/**/*.csproj
+/tools/**/bin/
+/tools/**/obj/
+
 # ── IDE / Editor
 .vs/
 .vscode/

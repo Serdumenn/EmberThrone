@@ -1,0 +1,31 @@
+{
+  "id": 10,
+  "name": "Throne Siege",
+  "moves": 24,
+  "colors": 5,
+  "difficulty": "hard",
+  "goals": [
+    {
+      "type": "collectible"
+    },
+    {
+      "type": "box"
+    }
+  ],
+  "board": [
+    "........",
+    "..$..$..",
+    "........",
+    "33....33",
+    "........",
+    "..3333..",
+    "........",
+    "1......1",
+    "........"
+  ],
+  "collectibles": {
+    "total": 2,
+    "maxOnBoard": 2,
+    "spawnChance": 0.15
+  }
+}
