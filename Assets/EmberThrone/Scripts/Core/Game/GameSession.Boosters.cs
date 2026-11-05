@@ -20,7 +20,7 @@ namespace EmberThrone.Core
             switch (type)
             {
                 case BoosterType.Hammer:
-                    if (!_board.Exists(target)) return Finish(false);
+                    if (!CanBeHit(target)) return Finish(false);
                     NewStep(StepKind.Booster);
                     Emit(new BoosterUsedEvent(type, target));
                     RunWaves(next => Hit(target, ClearReason.Booster, next));
@@ -31,7 +31,7 @@ namespace EmberThrone.Core
                 {
                     if (!_board.InBounds(target)) return Finish(false);
                     var line = Line(target, type == BoosterType.RowBlast);
-                    if (line.Count == 0) return Finish(false);
+                    if (!line.Exists(CanBeHit)) return Finish(false);
                     NewStep(StepKind.Booster);
                     Emit(new BoosterUsedEvent(type, target));
                     RunWaves(next =>

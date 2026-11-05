@@ -96,6 +96,41 @@ namespace EmberThrone.Core.Tests
         }
 
         [Test]
+        public void Hammer_OnCollectible_IsRejected_AndNotCounted()
+        {
+            var s = T.Session(T.Even, T.Odd, "YP$GY", T.Odd, T.Even);
+            var o = s.UseBooster(BoosterType.Hammer, T.P(2, 2));
+            Assert.IsFalse(o.Accepted);
+            Assert.AreEqual(0, o.Steps.Count);
+            Assert.AreEqual(0, s.Stats.BoostersUsed);
+        }
+
+        [Test]
+        public void Hammer_OnEmptyCell_NeedsAFloorToHit()
+        {
+            string[] board = { "YP_GY", T.Odd, T.Even, T.Odd, T.Even };
+            var bare = T.Session(T.Level(board));
+            Assert.IsFalse(bare.UseBooster(BoosterType.Hammer, T.P(2, 4)).Accepted);
+            Assert.AreEqual(0, bare.Stats.BoostersUsed);
+
+            var floored = T.Session(T.Level(board, floor: new[] { "00100", "00000", "00000", "00000", "00000" }));
+            var o = floored.UseBooster(BoosterType.Hammer, T.P(2, 4));
+            Assert.IsTrue(o.Accepted);
+            Assert.AreEqual(0, o.EventsOf<FloorDamagedEvent>().Single().HpLeft);
+            Assert.AreEqual(1, floored.Stats.BoostersUsed);
+        }
+
+        [Test]
+        public void LineBlast_WithNothingToHit_IsRejected()
+        {
+            var s = T.Session(T.Level(new[] { "OGY", "$$$", "YPO" }));
+            var o = s.UseBooster(BoosterType.RowBlast, T.P(0, 1));
+            Assert.IsFalse(o.Accepted);
+            Assert.AreEqual(0, s.Stats.BoostersUsed);
+            Assert.IsTrue(s.UseBooster(BoosterType.ColumnBlast, T.P(0, 1)).Accepted, "the column still has gems");
+        }
+
+        [Test]
         public void RowAndColumnBlast_ClearLines()
         {
             var s = T.Session(T.Even, T.Odd, T.Even, T.Odd, T.Even);

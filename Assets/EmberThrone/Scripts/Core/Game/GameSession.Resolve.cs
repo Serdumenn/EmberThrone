@@ -198,6 +198,16 @@ namespace EmberThrone.Core
             }
         }
 
+        /// <summary>Whether <see cref="Hit"/> on this cell would change anything, so boosters are not wasted on no-ops.</summary>
+        bool CanBeHit(GridPos p)
+        {
+            if (!_board.Exists(p)) return false;
+            var cell = _board.CellAt(p);
+            if (cell.Cover > 0) return true;
+            if (cell.Piece == null) return cell.Floor > 0;
+            return cell.Piece.Kind != PieceKind.Collectible;
+        }
+
         Piece ConvertToSpecial(GridPos p, PieceKind kind, bool countAsCleared)
         {
             var cell = _board.CellAt(p);
