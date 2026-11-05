@@ -121,5 +121,7 @@ Assets/Plugins/Android/googlemobileads-unity.aar.meta
 .agent/
 /AI_Sessions/
 
+# Licensed packs that must not be redistributed (the repo is public), as in PongMobilePrototype
+ArtSource/_licensed/
+
 /GDD/
-/Docs/

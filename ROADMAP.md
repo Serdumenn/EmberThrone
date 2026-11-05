@@ -26,6 +26,8 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] Dikey ekran, farklı ekran oranları ve çentik uyumu (20:9, 21:9, 16:9, tablet 3:4 denendi)
 - [x] Play mode testleri: sanal fareyle giriş, bütün özel taş ikilileri, botun 10 seviyeyi bitirmesi; görünüm her hamlede motorla karşılaştırılıyor
 - [x] GitHub Actions: test + APK akışı (PongMobilePrototype örnek alındı)
+- [x] Pong'daki repo düzeni: etiketle imzalı AAB akışı, Git LFS, tescilli lisans, README, `docs/` (CI, yayın, tasarım kararları, QA), tek branch `main`
+- [x] Kod denetimi ve 10 düzeltme ([docs/qa/audit-2026-11-05.md](docs/qa/audit-2026-11-05.md))
 - [ ] Unity secret'larını bu repoya ekle (sahibi yapacak), ilk bulut APK'sını al
 - [ ] Gerçek telefonda dene: his, dokunma, performans (henüz hiç cihazda çalışmadı)
 - [ ] Bulutta test edilecek: `Sprites/Default` ve yazı tipi Android build'inde sorunsuz mu
@@ -55,14 +57,16 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [ ] Teklifler, remote config, A/B test, analitik hunileri, push bildirim
 
 ## Faz 6 — Yayın
-- [ ] Google Play Billing (IAP), AAB + imzalama, Play Console
+- [x] İmzalı AAB akışı (`release-android.yml`, etiketle çalışır)
+- [ ] Yükleme anahtarı + imza secret'ları (sahibi yapacak, [docs/release/README.md](docs/release/README.md))
+- [ ] Google Play Billing (IAP), Play Console
 - [ ] Soft launch (tek ülke), KPI: D1 ≥ %40, D7 ≥ %15, seviye bazlı kayıp analizi
 - [ ] Gerçek oyuncu verisiyle bot kalibrasyonu ve seviye ayarı
 
 ## Sahibinin vereceği kararlar
-1. GitHub secret'ları (PongMobilePrototype'takilerin aynısı) → APK derlemesi için
+1. GitHub secret'ları (PongMobilePrototype'takilerin aynısı) → APK derlemesi için ([docs/CI-ANDROID.md](docs/CI-ANDROID.md))
 2. Tema ve sanat yönü onayı
-3. Paket adı / şirket adı (ilk mağaza yüklemesine kadar değişebilir: şu an `com.serdumenn.emberthrone`)
+3. ~~Paket adı / şirket adı~~ Karar verildi (2026-11-06): `com.oceanforge.emberthrone`, şirket adı SERDUMEN (Pong ile aynı düzen)
 4. GDD/ belgeleri ile bu yol haritası ayrışıyor, hangisi geçerli?
    - Özel taşlar: GDD'de TNT ve 3x3 bomba var, güdümlü yok; motorda güdümlü var, TNT yok, bomba 5x5
    - Booster'lar: GDD çekiç, bomba, renk fırçası; motor çekiç, satır, sütun, karıştır

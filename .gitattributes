@@ -1,2 +1,29 @@
-# Auto detect text files and perform LF normalization
 * text=auto
+*.sh text eol=lf
+
+# Git LFS for binary assets, as in PongMobilePrototype (see docs/design/README.md).
+# Existing history is not rewritten; the rules apply to files added from now on.
+Assets/EmberThrone/**/*.png filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.psd filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.tga filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.wav filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.mp3 filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.ogg filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.ttf filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.otf filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.fbx filter=lfs diff=lfs merge=lfs -text
+Assets/EmberThrone/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
+Assets/_Game/**/*.png filter=lfs diff=lfs merge=lfs -text
+Assets/_Game/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+Assets/_Game/**/*.psd filter=lfs diff=lfs merge=lfs -text
+Assets/_Game/**/*.wav filter=lfs diff=lfs merge=lfs -text
+Assets/_Game/**/*.ogg filter=lfs diff=lfs merge=lfs -text
+Assets/_Game/**/*.ttf filter=lfs diff=lfs merge=lfs -text
+ArtSource/**/*.png filter=lfs diff=lfs merge=lfs -text
+ArtSource/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+ArtSource/**/*.psd filter=lfs diff=lfs merge=lfs -text
+ArtSource/**/*.wav filter=lfs diff=lfs merge=lfs -text
+ArtSource/**/*.ttf filter=lfs diff=lfs merge=lfs -text
+ArtSource/**/*.otf filter=lfs diff=lfs merge=lfs -text
+docs/**/*.png filter=lfs diff=lfs merge=lfs -text

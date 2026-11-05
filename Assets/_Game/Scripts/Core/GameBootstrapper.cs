@@ -17,7 +17,8 @@ namespace EmberThrone.Core
     {
         private static GameBootstrapper _instance;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        // Not started automatically: the game runs from EmberThrone.Game.GameApp and does not use these
+        // services yet. Call this from there when they are wired in (Phase 3).
         private static void Bootstrap()
         {
             // Ensure only one bootstrapper exists

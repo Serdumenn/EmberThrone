@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths-ignore:
       - 'docs/**'
+      - 'ArtSource/**'
       - '**/*.md'
   workflow_dispatch:
 
@@ -16,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  UNITY_VERSION: 6000.3.11f1
+  UNITY_VERSION: 6000.3.25f1
   BUILD_NAME: EmberThrone
   BUILDS_PATH: builds
   APP_VERSION: 0.1.${{ github.run_number }}
