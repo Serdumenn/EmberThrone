@@ -1,0 +1,33 @@
+name: Core Tests
+
+# Fast gate for the pure C# engine. Needs no Unity license, runs on every branch.
+on:
+  push:
+    paths:
+      - 'Assets/EmberThrone/**'
+      - 'tools/**'
+      - '.github/workflows/core-tests.yml'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Every Assets file has a .meta
+        run: python3 tools/gen_meta.py --check
+
+      - name: Engine unit tests
+        run: dotnet test tools/CoreTests/EmberThrone.Core.Tests.csproj -c Release
+
+      - name: Level simulation (bot win rates + invariant checks)
+        run: dotnet run --project tools/LevelSim -c Release -- --runs 100 --validate --fail-on-error Assets/EmberThrone/Resources/Levels

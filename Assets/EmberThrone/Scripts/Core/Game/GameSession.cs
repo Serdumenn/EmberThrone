@@ -1,0 +1,392 @@
+using System;
+using System.Collections.Generic;
+
+namespace EmberThrone.Core
+{
+    public enum GameState
+    {
+        Playing,
+        Won,
+        Lost,
+    }
+
+    public enum BoosterType
+    {
+        /// <summary>Hits a single cell.</summary>
+        Hammer,
+        /// <summary>Hits every cell of the target's row.</summary>
+        RowBlast,
+        /// <summary>Hits every cell of the target's column.</summary>
+        ColumnBlast,
+        /// <summary>Shuffles the free gems.</summary>
+        Shuffle,
+    }
+
+    /// <summary>
+    /// One play-through of a level. Pure logic: every call resolves synchronously and returns a
+    /// <see cref="MoveOutcome"/> describing what happened, step by step, for the presentation layer.
+    /// Deterministic for a given level + seed + input sequence.
+    /// </summary>
+    public sealed partial class GameSession
+    {
+        readonly GameRules _rules;
+        readonly LevelDefinition _level;
+        readonly Board _board;
+        readonly Pcg32 _rng;
+        readonly List<Goal> _goals;
+        readonly SessionStats _stats;
+        int _movesLeft;
+        GameState _state;
+        int _collectiblesToSpawn;
+
+        // Resolution context (only valid during a call)
+        MoveOutcome _outcome;
+        BoardStep _step;
+        readonly List<GridPos> _strikeTargets = new List<GridPos>();
+
+        public GameSession(LevelDefinition level, int seed, GameRules rules = null)
+        {
+            _level = level ?? throw new ArgumentNullException(nameof(level));
+            _rules = rules ?? new GameRules();
+            _rng = new Pcg32(unchecked((ulong)seed));
+            _board = BoardFactory.Create(level, _rng, _rules);
+            _goals = Goal.CreateAll(level, _board);
+            _stats = new SessionStats();
+            _movesLeft = level.Moves;
+            _state = GameState.Playing;
+            _collectiblesToSpawn = level.Collectibles?.Total ?? 0;
+
+            // Let '_' cells fill, resolve anything that falls into place, guarantee a move.
+            Begin();
+            Settle();
+            InitialOutcome = Finish(true);
+        }
+
+        GameSession(GameSession other, ulong? reseed)
+        {
+            _rules = other._rules;
+            _level = other._level;
+            _board = other._board.Clone();
+            _rng = reseed.HasValue ? new Pcg32(reseed.Value) : other._rng.Clone();
+            _goals = new List<Goal>(other._goals.Count);
+            foreach (var g in other._goals) _goals.Add(g.Clone());
+            _stats = other._stats.Clone();
+            _movesLeft = other._movesLeft;
+            _state = other._state;
+            _collectiblesToSpawn = other._collectiblesToSpawn;
+            InitialOutcome = new MoveOutcome { Accepted = true, MovesLeft = _movesLeft, State = _state };
+        }
+
+        // ---------------------------------------------------------------- public state
+
+        public Board Board => _board;
+        public LevelDefinition Level => _level;
+        public GameRules Rules => _rules;
+        public int MovesLeft => _movesLeft;
+        public GameState State => _state;
+        public IReadOnlyList<Goal> Goals => _goals;
+        public SessionStats Stats => _stats;
+        public Pcg32 Random => _rng;
+
+        /// <summary>Events produced while preparing the board (e.g. an initial shuffle).</summary>
+        public MoveOutcome InitialOutcome { get; private set; }
+
+        public bool AllGoalsComplete
+        {
+            get
+            {
+                foreach (var g in _goals)
+                    if (!g.IsComplete) return false;
+                return true;
+            }
+        }
+
+        /// <summary>Deep copy. Pass <paramref name="reseed"/> so lookahead bots cannot see future refills.</summary>
+        public GameSession Clone(ulong? reseed = null) => new GameSession(this, reseed);
+
+        public List<Move> FindValidMoves() => MoveFinder.FindAllMoves(_board);
+
+        public Move? FindHint() => MoveFinder.FindHint(_board, _rules);
+
+        public bool IsValidSwap(GridPos a, GridPos b) => _state == GameState.Playing && MoveFinder.IsValidSwap(_board, a, b);
+
+        // ---------------------------------------------------------------- player actions
+
+        public MoveOutcome Apply(Move move)
+        {
+            return move.Type == MoveType.Tap ? TryTap(move.A) : TrySwap(move.A, move.B);
+        }
+
+        /// <summary>Swap two adjacent pieces. Rejected swaps (no match) come back with a reverted SwapEvent.</summary>
+        public MoveOutcome TrySwap(GridPos a, GridPos b)
+        {
+            Begin();
+            if (_state != GameState.Playing || !_board.InBounds(a) || !_board.InBounds(b) || !a.IsAdjacent(b)) return Finish(false);
+            var ca = _board.CellAt(a);
+            var cb = _board.CellAt(b);
+            if (!MoveFinder.IsSwappable(ca) || !MoveFinder.IsSwappable(cb)) return Finish(false);
+
+            var pa = ca.Piece;
+            var pb = cb.Piece;
+            NewStep(StepKind.Swap);
+            ca.Piece = pb;
+            cb.Piece = pa;
+
+            if (pa.IsSpecial || pb.IsSpecial)
+            {
+                Emit(new SwapEvent(a, b, false));
+                ConsumeMove();
+                Activation act;
+                if (pa.IsSpecial && pb.IsSpecial) act = Activation.Combo(pa, b, pb, a);
+                else if (pa.IsSpecial) act = Activation.Single(pa, b, pb.IsGem ? pb.Color : GemColor.None);
+                else act = Activation.Single(pb, a, pa.IsGem ? pa.Color : GemColor.None);
+                RunWaves(next => Execute(act, next));
+                Settle();
+                return Finish(true);
+            }
+
+            var groups = MatchFinder.FindGroups(_board);
+            bool touches = false;
+            foreach (var g in groups)
+            {
+                if (g.Contains(a) || g.Contains(b)) { touches = true; break; }
+            }
+            if (!touches)
+            {
+                ca.Piece = pa;
+                cb.Piece = pb;
+                Emit(new SwapEvent(a, b, true));
+                return Finish(false);
+            }
+
+            Emit(new SwapEvent(a, b, false));
+            ConsumeMove();
+            var preferred = new[] { b, a }; // the special appears where the dragged piece landed
+            RunWaves(next => ApplyMatches(groups, preferred, next));
+            Settle();
+            return Finish(true);
+        }
+
+        /// <summary>Tap a special to fire it (costs a move).</summary>
+        public MoveOutcome TryTap(GridPos p)
+        {
+            Begin();
+            if (_state != GameState.Playing || !_board.InBounds(p) || !MoveFinder.IsTappable(_board.CellAt(p))) return Finish(false);
+            var piece = _board.CellAt(p).Piece;
+            ConsumeMove();
+            RunWaves(next => Execute(Activation.Single(piece, p, GemColor.None), next));
+            Settle();
+            return Finish(true);
+        }
+
+        /// <summary>Continue after losing (e.g. "+5 moves" offer).</summary>
+        public void AddMoves(int count)
+        {
+            if (count <= 0) return;
+            _movesLeft += count;
+            if (_state == GameState.Lost)
+            {
+                _state = GameState.Playing;
+                _stats.ContinuesUsed++;
+            }
+        }
+
+        // ---------------------------------------------------------------- flow
+
+        void Begin()
+        {
+            _outcome = new MoveOutcome();
+            _step = null;
+        }
+
+        MoveOutcome Finish(bool accepted)
+        {
+            var o = _outcome;
+            o.Accepted = accepted;
+            o.MovesLeft = _movesLeft;
+            o.State = _state;
+            o.Steps.RemoveAll(s => s.Events.Count == 0);
+            if (o.ClearRounds > _stats.MaxClearRounds) _stats.MaxClearRounds = o.ClearRounds;
+            _outcome = null;
+            _step = null;
+            return o;
+        }
+
+        BoardStep NewStep(StepKind kind)
+        {
+            _step = new BoardStep(kind);
+            _outcome.Steps.Add(_step);
+            return _step;
+        }
+
+        void Emit(BoardEvent e)
+        {
+            if (_step == null) NewStep(StepKind.Clear);
+            _step.Events.Add(e);
+        }
+
+        void ConsumeMove()
+        {
+            _movesLeft--;
+            _stats.MovesMade++;
+        }
+
+        /// <summary>Runs a first wave, then keeps firing triggered specials wave by wave.</summary>
+        void RunWaves(Action<List<Activation>> firstWave)
+        {
+            _outcome.ClearRounds++;
+            NewStep(StepKind.Clear);
+            _strikeTargets.Clear();
+            var next = new List<Activation>();
+            firstWave(next);
+            int guard = 0;
+            while (next.Count > 0 && guard++ < 1000)
+            {
+                var current = next;
+                next = new List<Activation>();
+                NewStep(StepKind.Clear);
+                _strikeTargets.Clear();
+                foreach (var act in current) Execute(act, next);
+            }
+        }
+
+        /// <summary>Gravity → collect → cascades until stable, then win/lose/shuffle checks.</summary>
+        void Settle()
+        {
+            for (int round = 0; round < _rules.MaxCascadeRounds; round++)
+            {
+                RunGravity();
+                if (CollectAtExits()) continue;
+                var groups = MatchFinder.FindGroups(_board);
+                if (groups.Count == 0) break;
+                RunWaves(next => ApplyMatches(groups, null, next));
+            }
+            EndOfAction();
+        }
+
+        void EndOfAction()
+        {
+            if (_state != GameState.Playing) return;
+            if (AllGoalsComplete)
+            {
+                _state = GameState.Won;
+                NewStep(StepKind.End);
+                Emit(new GameEndedEvent(true));
+                return;
+            }
+            if (_movesLeft <= 0)
+            {
+                _state = GameState.Lost;
+                NewStep(StepKind.End);
+                Emit(new GameEndedEvent(false));
+                return;
+            }
+            EnsureMovesAvailable();
+        }
+
+        void EnsureMovesAvailable()
+        {
+            if (!_rules.ShuffleWhenNoMoves || MoveFinder.HasAnyMove(_board)) return;
+            NewStep(StepKind.Shuffle);
+            var ev = new ShuffleEvent();
+            if (Shuffler.Shuffle(_board, _rng, _rules, _level.ColorCount, ev))
+            {
+                Emit(ev);
+                _stats.Shuffles++;
+                return;
+            }
+            // Shuffling cannot help (too few free gems): hand the player a bomb instead.
+            var gems = FreeGems();
+            if (gems.Count > 0)
+            {
+                ConvertToSpecial(gems[_rng.Next(gems.Count)], PieceKind.Bomb, false);
+                return;
+            }
+            _state = GameState.Lost;
+            NewStep(StepKind.End);
+            Emit(new GameEndedEvent(false));
+        }
+
+        void RunGravity()
+        {
+            var step = new BoardStep(StepKind.Gravity);
+            if (!Gravity.Run(_board, _rules, SpawnPiece, step.Events)) return;
+            _outcome.Steps.Add(step);
+            _step = step;
+        }
+
+        Piece SpawnPiece(GridPos at)
+        {
+            var settings = _level.Collectibles;
+            if (settings != null && _collectiblesToSpawn > 0 &&
+                _board.CountPieces(PieceKind.Collectible) < settings.MaxOnBoard &&
+                _rng.NextDouble() < settings.SpawnChance)
+            {
+                _collectiblesToSpawn--;
+                return _board.CreatePiece(PieceKind.Collectible);
+            }
+            return _board.CreatePiece(PieceKind.Gem, _rng.Next(_level.ColorCount));
+        }
+
+        bool CollectAtExits()
+        {
+            bool any = false;
+            for (int x = 0; x < _board.Width; x++)
+            {
+                for (int y = 0; y < _board.Height; y++)
+                {
+                    if (!_board.IsExit(x, y)) continue;
+                    var cell = _board.CellAt(x, y);
+                    if (cell.Piece == null || cell.Piece.Kind != PieceKind.Collectible || cell.Cover > 0) continue;
+                    if (!any) NewStep(StepKind.Collect);
+                    any = true;
+                    var pos = new GridPos(x, y);
+                    Emit(new PieceCollectedEvent(cell.Piece.Id, pos));
+                    cell.Piece = null;
+                    Progress(GoalType.Collectible, GemColor.None, pos);
+                }
+            }
+            return any;
+        }
+
+        void Progress(GoalType type, int color, GridPos source)
+        {
+            for (int i = 0; i < _goals.Count; i++)
+            {
+                var g = _goals[i];
+                if (g.Type != type || g.IsComplete) continue;
+                if (type == GoalType.Color && g.Color != color) continue;
+                g.Remaining--;
+                Emit(new GoalProgressEvent(i, g.Remaining, source));
+                return;
+            }
+        }
+
+        bool GoalActive(GoalType type)
+        {
+            foreach (var g in _goals)
+                if (g.Type == type && !g.IsComplete) return true;
+            return false;
+        }
+
+        bool ColorGoalActive(int color)
+        {
+            foreach (var g in _goals)
+                if (g.Type == GoalType.Color && g.Color == color && !g.IsComplete) return true;
+            return false;
+        }
+
+        List<GridPos> FreeGems()
+        {
+            var list = new List<GridPos>();
+            for (int y = 0; y < _board.Height; y++)
+                for (int x = 0; x < _board.Width; x++)
+                {
+                    var c = _board.CellAt(x, y);
+                    if (c.Exists && c.Cover == 0 && c.Piece != null && c.Piece.Kind == PieceKind.Gem && !c.Piece.Triggered)
+                        list.Add(new GridPos(x, y));
+                }
+            return list;
+        }
+    }
+}
