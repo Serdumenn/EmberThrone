@@ -153,6 +153,17 @@ namespace EmberThrone.Core.Tests
         }
 
         [Test]
+        public void Stars_FollowMovesLeft()
+        {
+            var rules = new GameRules();
+            Assert.AreEqual(1, rules.StarsFor(0));
+            Assert.AreEqual(1, rules.StarsFor(2));
+            Assert.AreEqual(2, rules.StarsFor(3));
+            Assert.AreEqual(2, rules.StarsFor(5));
+            Assert.AreEqual(3, rules.StarsFor(6));
+        }
+
+        [Test]
         public void StartingSpecials_ArePlaced()
         {
             var s = T.Session(T.Even, T.Odd, T.Even, T.Odd, T.Even);

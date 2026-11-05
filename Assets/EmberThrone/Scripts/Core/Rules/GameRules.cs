@@ -26,6 +26,19 @@ namespace EmberThrone.Core
         public int MaxShuffleAttempts = 200;
         public int MaxInitialFillAttempts = 30;
 
+        /// <summary>Moves left at the win needed for 2 stars (SYS-CORE-001 §4.2).</summary>
+        public int TwoStarMovesLeft = 3;
+
+        /// <summary>Moves left at the win needed for 3 stars (SYS-CORE-001 §4.2).</summary>
+        public int ThreeStarMovesLeft = 6;
+
+        /// <summary>Stars for a won level.</summary>
+        public int StarsFor(int movesLeft)
+        {
+            if (movesLeft >= ThreeStarMovesLeft) return 3;
+            return movesLeft >= TwoStarMovesLeft ? 2 : 1;
+        }
+
         public GameRules Clone() => (GameRules)MemberwiseClone();
     }
 }
