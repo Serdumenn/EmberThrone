@@ -1,26 +1,37 @@
-name: Android Build (APK)
+name: Tests and Android Build (APK)
 
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   UNITY_VERSION: 6000.3.11f1
   BUILD_NAME: EmberThrone
   BUILDS_PATH: builds
+  APP_VERSION: 0.1.${{ github.run_number }}
 
 jobs:
-  # Repository secrets needed for cloud builds:
-  #   Unity Personal: UNITY_EMAIL + UNITY_PASSWORD + UNITY_LICENSE (contents of Unity_lic.ulf)
-  #   Unity Pro/Plus: UNITY_EMAIL + UNITY_PASSWORD + UNITY_SERIAL
-  # Without them the build job is skipped (not failed), so main stays green during local development.
+  # Repository secrets (Settings > Secrets and variables > Actions), the same ones PongMobilePrototype uses:
+  #   UNITY_EMAIL + UNITY_PASSWORD + UNITY_SERIAL (or UNITY_LICENSE: contents of C:\ProgramData\Unity\Unity_lic.ulf)
+  # Without them the jobs below are skipped with a notice, so main stays green.
   check-license:
-    runs-on: ubuntu-latest
+    name: Check Unity secrets
+    runs-on: ubuntu-24.04
     outputs:
       ready: ${{ steps.check.outputs.ready }}
     steps:
-      - name: Check Unity license secrets (values are never printed)
+      - name: Check Unity secrets are present (no printing)
         id: check
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -31,55 +42,90 @@ jobs:
         run: |
           if [ -n "${UNITY_EMAIL}" ] && [ -n "${UNITY_PASSWORD}" ] && { [ -n "${UNITY_SERIAL}" ] || [ -n "${UNITY_LICENSE}" ]; }; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
-            echo "Unity license secrets present."
+            echo "Secrets present."
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Android build skipped::Add UNITY_EMAIL, UNITY_PASSWORD and UNITY_LICENSE (Personal) or UNITY_SERIAL (Pro/Plus) repository secrets to enable cloud APK builds."
+            echo "::notice title=Android build skipped::Add UNITY_EMAIL, UNITY_PASSWORD and UNITY_SERIAL (or UNITY_LICENSE) repository secrets to enable cloud APK builds."
           fi
 
-  build-android:
+  test:
+    name: Tests (EditMode + PlayMode)
     needs: check-license
     if: needs.check-license.outputs.ready == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout (with LFS)
+        uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v6
+        with:
+          path: Library
+          key: Library-Test-${{ env.UNITY_VERSION }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Test-${{ env.UNITY_VERSION }}-
+
+      - name: Run EditMode and PlayMode tests
+        uses: game-ci/unity-test-runner@v4.3.2
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: all
+          artifactsPath: test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Test Results
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: test-results
+          retention-days: 14
+          if-no-files-found: ignore
+
+  build-android:
+    name: Build Android APK
+    needs: test
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
 
     steps:
       - name: Checkout (with LFS)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           lfs: true
-          fetch-depth: 1
-
-      - name: Show disk before cleanup
-        run: |
-          df -h
-          docker system df || true
 
       - name: Free disk space
         shell: bash
         run: |
           set -euxo pipefail
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf /opt/hostedtoolcache
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost /opt/hostedtoolcache
           sudo apt-get clean
           docker system prune -af --volumes
           df -h
-          docker system df || true
 
       - name: Cache Unity Library
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: Library
-          key: Library-${{ runner.os }}-${{ env.UNITY_VERSION }}-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectSettings.asset') }}
+          key: Library-Android-${{ env.UNITY_VERSION }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-${{ runner.os }}-${{ env.UNITY_VERSION }}-
-            Library-${{ runner.os }}-
+            Library-Android-${{ env.UNITY_VERSION }}-
 
       - name: Build Android APK
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v5
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -91,10 +137,28 @@ jobs:
           androidExportType: androidPackage
           buildName: ${{ env.BUILD_NAME }}
           buildsPath: ${{ env.BUILDS_PATH }}
+          versioning: Custom
+          version: ${{ env.APP_VERSION }}
+          androidVersionCode: ${{ github.run_number }}
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.BUILD_NAME }}-${{ github.sha }}
-          path: ${{ env.BUILDS_PATH }}/Android/*.apk
+          path: ${{ env.BUILDS_PATH }}/Android/${{ env.BUILD_NAME }}.apk
+          archive: false
+          retention-days: 14
           if-no-files-found: error
+
+      - name: Build summary
+        shell: bash
+        run: |
+          APK="${{ env.BUILDS_PATH }}/Android/${{ env.BUILD_NAME }}.apk"
+          {
+            echo "### EmberThrone ${APP_VERSION}"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Version | ${APP_VERSION} (code ${{ github.run_number }}) |"
+            echo "| APK size | $(du -h "$APK" | cut -f1) |"
+            echo "| Commit | \`${GITHUB_SHA::7}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -86,14 +86,14 @@ namespace EmberThrone.Game
             float height = Mathf.Max(1f, top - bottom);
 
             float ppu = Mathf.Min(width / (View.Width + BoardMargin * 2f), height / (View.Height + BoardMargin * 2f));
-            cam.orthographicSize = Screen.height / (2f * ppu);
+            cam.orthographicSize = UiRoot.ScreenHeight / (2f * ppu);
 
             // Move the camera so the world origin (board center) lands on the center of the free area.
             float centerX = safe.xMin + width * 0.5f;
             float centerY = bottom + height * 0.5f;
             cam.transform.position = new Vector3(
-                (Screen.width * 0.5f - centerX) / ppu,
-                (Screen.height * 0.5f - centerY) / ppu,
+                (UiRoot.ScreenWidth * 0.5f - centerX) / ppu,
+                (UiRoot.ScreenHeight * 0.5f - centerY) / ppu,
                 -10f);
         }
 

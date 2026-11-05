@@ -23,6 +23,7 @@ namespace EmberThrone.Game.Tests
 
         GameApp _app;
         Mouse _mouse;
+        System.Collections.Generic.Dictionary<int, int> _savedStars;
         InputSettings.BackgroundBehavior _background;
         InputSettings.EditorInputBehaviorInPlayMode _editorInput;
 
@@ -31,6 +32,7 @@ namespace EmberThrone.Game.Tests
         [UnitySetUp]
         public IEnumerator SetUp()
         {
+            _savedStars = LevelProgress.Snapshot();
             _background = InputSystem.settings.backgroundBehavior;
             _editorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
@@ -52,6 +54,7 @@ namespace EmberThrone.Game.Tests
             InputSystem.settings.backgroundBehavior = _background;
             InputSystem.settings.editorInputBehaviorInPlayMode = _editorInput;
             Object.Destroy(_app.gameObject);
+            LevelProgress.Restore(_savedStars); // the bot's wins must not show up as the owner's stars
             yield return null;
         }
 
@@ -277,7 +280,6 @@ namespace EmberThrone.Game.Tests
         [UnityTest]
         public IEnumerator Win_ShowsStars_AndSavesThem()
         {
-            PlayerPrefs.DeleteKey("et.stars.4242");
             var level = Level(10, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even);
             level.Id = 4242;
             yield return Begin(level);
@@ -288,7 +290,7 @@ namespace EmberThrone.Game.Tests
             Assert.AreEqual("Kazandın!", Game.Popup.Title);
             Assert.AreEqual(Game.Session.Rules.StarsFor(Game.Session.MovesLeft), LevelProgress.GetStars(4242));
             Assert.IsTrue(Game.Hud.GoalChecked(0));
-            PlayerPrefs.DeleteKey("et.stars.4242");
+            PlayerPrefs.DeleteKey(LevelProgress.StarsKey + 4242);
         }
 
         [UnityTest]
@@ -342,7 +344,7 @@ namespace EmberThrone.Game.Tests
         [UnityTest]
         public IEnumerator Board_StaysInTheFreeArea_WithANotch()
         {
-            int w = Screen.width, h = Screen.height;
+            int w = UiRoot.ScreenWidth, h = UiRoot.ScreenHeight;
             UiRoot.SafeAreaOverride = new Rect(w * 0.02f, h * 0.05f, w * 0.96f, h * 0.88f);
             _app.StartLevel(_app.Levels[0], 0, Seed);
             yield return null;

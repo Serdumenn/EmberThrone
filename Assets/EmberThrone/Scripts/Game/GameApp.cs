@@ -113,7 +113,8 @@ namespace EmberThrone.Game
     public static class LevelProgress
     {
         const string LevelsFolder = "Levels";
-        const string StarsKey = "et.stars.";
+        public const string StarsKey = "et.stars.";
+        const int MaxLevelId = 9999;
 
         public static List<LevelDefinition> LoadLevels()
         {
@@ -140,6 +141,22 @@ namespace EmberThrone.Game
         {
             if (stars <= GetStars(levelId)) return;
             PlayerPrefs.SetInt(StarsKey + levelId, stars);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>All saved stars, so tests can put the player's progress back afterwards.</summary>
+        public static Dictionary<int, int> Snapshot()
+        {
+            var stars = new Dictionary<int, int>();
+            for (int id = 0; id <= MaxLevelId; id++)
+                if (PlayerPrefs.HasKey(StarsKey + id)) stars[id] = GetStars(id);
+            return stars;
+        }
+
+        public static void Restore(Dictionary<int, int> stars)
+        {
+            for (int id = 0; id <= MaxLevelId; id++) PlayerPrefs.DeleteKey(StarsKey + id);
+            foreach (var pair in stars) PlayerPrefs.SetInt(StarsKey + pair.Key, pair.Value);
             PlayerPrefs.Save();
         }
     }

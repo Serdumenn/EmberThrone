@@ -23,6 +23,7 @@ namespace EmberThrone.EditorTools
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(BootstrapScene, true) };
             // Play mode must keep running while the editor window is not focused (agents drive it from outside).
             PlayerSettings.runInBackground = true;
+            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36; // same as PongMobilePrototype; explicit so CI builds match
             AssetDatabase.SaveAssets();
             if (!EditorApplication.isPlaying) EditorSceneManager.OpenScene(BootstrapScene, OpenSceneMode.Single);
             Debug.Log("[EmberThrone] Bootstrap scene ready and set as the only build scene.");

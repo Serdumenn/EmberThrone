@@ -15,10 +15,23 @@ namespace EmberThrone.Game
         public const float ReferenceWidth = 1080f;
         public const float ReferenceHeight = 1920f;
 
-        /// <summary>Editor and test hook to try notches on any screen. Null uses the device's safe area.</summary>
+        /// <summary>Test hook: lay out for this screen size, so tests can try any phone shape.</summary>
+        public static Vector2Int? ScreenSizeOverride;
+
+        /// <summary>Test hook to try notches on any screen. Null uses the device's safe area.</summary>
         public static Rect? SafeAreaOverride;
 
-        public static Rect SafeArea => SafeAreaOverride ?? Screen.safeArea;
+        public static int ScreenWidth => ScreenSizeOverride?.x ?? Screen.width;
+        public static int ScreenHeight => ScreenSizeOverride?.y ?? Screen.height;
+
+        public static Rect SafeArea
+        {
+            get
+            {
+                if (SafeAreaOverride.HasValue) return SafeAreaOverride.Value;
+                return ScreenSizeOverride.HasValue ? new Rect(0f, 0f, ScreenWidth, ScreenHeight) : Screen.safeArea;
+            }
+        }
 
         public event Action LayoutChanged;
 
@@ -28,7 +41,7 @@ namespace EmberThrone.Game
         public RectTransform Popups { get; private set; }
 
         /// <summary>Screen pixels per canvas unit. Computed here because CanvasScaler updates a frame late.</summary>
-        public static float Scale => Mathf.Min(Screen.width / ReferenceWidth, Screen.height / ReferenceHeight);
+        public static float Scale => Mathf.Min(ScreenWidth / ReferenceWidth, ScreenHeight / ReferenceHeight);
 
         RectTransform _safe;
         int _width;
@@ -66,13 +79,13 @@ namespace EmberThrone.Game
 
         void LateUpdate()
         {
-            if (Screen.width != _width || Screen.height != _height || SafeArea != _lastSafe) ApplyLayout();
+            if (ScreenWidth != _width || ScreenHeight != _height || SafeArea != _lastSafe) ApplyLayout();
         }
 
         void ApplyLayout()
         {
-            _width = Screen.width;
-            _height = Screen.height;
+            _width = ScreenWidth;
+            _height = ScreenHeight;
             _lastSafe = SafeArea;
             _safe.anchorMin = new Vector2(_lastSafe.xMin / _width, _lastSafe.yMin / _height);
             _safe.anchorMax = new Vector2(_lastSafe.xMax / _width, _lastSafe.yMax / _height);

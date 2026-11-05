@@ -86,7 +86,7 @@ namespace EmberThrone.Game
             }
         }
 
-        float PixelsPerCell() => Screen.height / (2f * _camera.orthographicSize);
+        float PixelsPerCell() => UiRoot.ScreenHeight / (2f * _camera.orthographicSize);
 
         static GridPos Neighbor(GridPos cell, Vector2 delta)
         {
