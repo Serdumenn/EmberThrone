@@ -41,8 +41,8 @@ namespace EmberThrone.Game
             Instance = this;
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 0;
-            Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
+            Art.Preload();
             gameObject.AddComponent<Tweens>();
             Camera = BuildCamera();
             Ui = UiRoot.Create(transform);
@@ -75,7 +75,9 @@ namespace EmberThrone.Game
         {
             // Android's back button arrives as Escape.
             var keyboard = Keyboard.current;
-            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame && Game != null) ShowLevelSelect();
+            if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+            if (Game != null) ShowLevelSelect();
+            else Application.Quit();
         }
 
         public bool HasLevel(int index) => index >= 0 && index < _levels.Count;
@@ -92,11 +94,13 @@ namespace EmberThrone.Game
         public void StartLevel(LevelDefinition level, int index, int seed)
         {
             CloseCurrent();
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
             Game = GameController.Create(this, transform, level, index, seed);
         }
 
         void CloseCurrent()
         {
+            Screen.sleepTimeout = SleepTimeout.SystemSetting;
             Tweens.KillAll();
             if (Game != null)
             {
@@ -114,7 +118,6 @@ namespace EmberThrone.Game
     {
         const string LevelsFolder = "Levels";
         public const string StarsKey = "et.stars.";
-        const int MaxLevelId = 9999;
 
         public static List<LevelDefinition> LoadLevels()
         {
@@ -141,22 +144,6 @@ namespace EmberThrone.Game
         {
             if (stars <= GetStars(levelId)) return;
             PlayerPrefs.SetInt(StarsKey + levelId, stars);
-            PlayerPrefs.Save();
-        }
-
-        /// <summary>All saved stars, so tests can put the player's progress back afterwards.</summary>
-        public static Dictionary<int, int> Snapshot()
-        {
-            var stars = new Dictionary<int, int>();
-            for (int id = 0; id <= MaxLevelId; id++)
-                if (PlayerPrefs.HasKey(StarsKey + id)) stars[id] = GetStars(id);
-            return stars;
-        }
-
-        public static void Restore(Dictionary<int, int> stars)
-        {
-            for (int id = 0; id <= MaxLevelId; id++) PlayerPrefs.DeleteKey(StarsKey + id);
-            foreach (var pair in stars) PlayerPrefs.SetInt(StarsKey + pair.Key, pair.Value);
             PlayerPrefs.Save();
         }
     }

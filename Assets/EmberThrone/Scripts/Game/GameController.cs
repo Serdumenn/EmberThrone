@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using EmberThrone.Core;
 using UnityEngine;
 
@@ -46,25 +47,47 @@ namespace EmberThrone.Game
             _level = level;
             _levelIndex = levelIndex;
             Session = new GameSession(level, seed);
-
-            var boardObject = new GameObject("Board");
-            boardObject.transform.SetParent(transform, false);
-            View = boardObject.AddComponent<BoardView>();
-            View.Build(Session);
-            View.GoalProgressed += e => _hud.SetGoal(e.GoalIndex, e.Remaining);
+            BuildView();
 
             _hud = HudView.Create(app.Ui.Content, Session, level.Id + ". " + level.Name, app.ShowLevelSelect);
 
             _input = gameObject.AddComponent<BoardInput>();
             _input.Init(app.Camera, View);
-            _input.Pressed += p => View.SetLifted(p, true);
+            _input.Pressed += p =>
+            {
+                if (View.IsGrabbableAt(p)) View.SetLifted(p, true);
+            };
             _input.Released += p => View.SetLifted(p, false);
             _input.Swiped += RequestSwap;
             _input.Tapped += OnTap;
-            _input.SetEnabled(true);
 
             app.Ui.LayoutChanged += FitCamera;
             FitCamera();
+
+            // A level can already be over once its board has settled.
+            SaveIfWon();
+            if (Session.State == GameState.Playing) _input.SetEnabled(true);
+            else StartCoroutine(EndLevel());
+        }
+
+        void BuildView()
+        {
+            var boardObject = new GameObject("Board");
+            boardObject.transform.SetParent(transform, false);
+            View = boardObject.AddComponent<BoardView>();
+            View.Build(Session);
+            View.GoalProgressed += e => _hud.SetGoal(e.GoalIndex, e.Remaining);
+        }
+
+        /// <summary>Redraws everything from the engine's state, which a view failure cannot have damaged.</summary>
+        void RebuildView()
+        {
+            Tweens.KillAll(); // they still point at the old pieces
+            Destroy(View.gameObject);
+            BuildView();
+            _input.Init(_app.Camera, View);
+            _hud.SetMoves(Session.MovesLeft, false);
+            for (int i = 0; i < Session.Goals.Count; i++) _hud.SetGoal(i, Session.Goals[i].Remaining, false);
         }
 
         void OnDestroy()
@@ -149,15 +172,46 @@ namespace EmberThrone.Game
             IsBusy = true;
             _input.SetEnabled(false);
             _hud.SetMoves(outcome.MovesLeft);
+            SaveIfWon(); // the win counts even if the player leaves during the animation
 
-            yield return View.Play(outcome);
+            yield return PlayGuarded(outcome);
 
             CheckSync();
             IsBusy = false;
 
-            if (outcome.State == GameState.Won) yield return ShowWin();
-            else if (outcome.State == GameState.Lost) yield return ShowLose();
-            else _input.SetEnabled(true);
+            if (outcome.State == GameState.Playing) _input.SetEnabled(true);
+            else yield return EndLevel();
+        }
+
+        /// <summary>
+        /// Steps through the view's nested routines here, because a coroutine cannot catch what
+        /// happens inside a routine it yields to. A view bug must not freeze the board.
+        /// </summary>
+        IEnumerator PlayGuarded(MoveOutcome outcome)
+        {
+            var stack = new Stack<IEnumerator>();
+            stack.Push(View.Play(outcome));
+            while (stack.Count > 0)
+            {
+                object current;
+                try
+                {
+                    if (!stack.Peek().MoveNext())
+                    {
+                        stack.Pop();
+                        continue;
+                    }
+                    current = stack.Peek().Current;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    RebuildView();
+                    yield break;
+                }
+                if (current is IEnumerator nested) stack.Push(nested);
+                else yield return current;
+            }
         }
 
         void CheckSync()
@@ -170,11 +224,17 @@ namespace EmberThrone.Game
 
         // ---------------------------------------------------------------- end of level
 
+        void SaveIfWon()
+        {
+            if (Session.State == GameState.Won) LevelProgress.SaveStars(_level.Id, Session.Rules.StarsFor(Session.MovesLeft));
+        }
+
+        IEnumerator EndLevel() => Session.State == GameState.Won ? ShowWin() : ShowLose();
+
         IEnumerator ShowWin()
         {
             yield return new WaitForSeconds(Timing.WinDelay);
             int stars = Session.Rules.StarsFor(Session.MovesLeft);
-            LevelProgress.SaveStars(_level.Id, stars);
             var next = _app.HasLevel(_levelIndex + 1)
                 ? new ResultPopup.Choice("Sonraki seviye", Palette.Accent, () => _app.StartLevel(_levelIndex + 1))
                 : new ResultPopup.Choice("Tekrar oyna", Palette.Accent, () => _app.StartLevel(_levelIndex));

@@ -31,8 +31,8 @@ namespace EmberThrone.Game.Tests
         public IEnumerator SetUp()
         {
             Directory.CreateDirectory(Folder);
-            _savedStars = LevelProgress.Snapshot();
-            LevelProgress.Restore(new System.Collections.Generic.Dictionary<int, int>());
+            _savedStars = StarsBackup.Snapshot();
+            StarsBackup.Restore(new System.Collections.Generic.Dictionary<int, int>());
             Time.timeScale = 1f;
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = new Vector2Int(1080, 1920);
@@ -49,7 +49,7 @@ namespace EmberThrone.Game.Tests
             UiRoot.ScreenSizeOverride = null;
             Object.Destroy(_app.gameObject);
             Object.Destroy(_target);
-            LevelProgress.Restore(_savedStars);
+            StarsBackup.Restore(_savedStars);
             yield return null;
         }
 

@@ -529,8 +529,10 @@ namespace EmberThrone.Game
                 case ComboKind.RocketBomb:
                     for (int i = -1; i <= 1; i++)
                     {
-                        RocketFx(e.Pos.Offset(0, i), true, warm);
-                        end = Mathf.Max(end, RocketFx(e.Pos.Offset(i, 0), false, warm));
+                        var row = e.Pos.Offset(0, i);
+                        var column = e.Pos.Offset(i, 0);
+                        if (InBounds(row)) end = Mathf.Max(end, RocketFx(row, true, warm));
+                        if (InBounds(column)) end = Mathf.Max(end, RocketFx(column, false, warm));
                     }
                     break;
                 case ComboKind.BombBomb:
@@ -676,6 +678,7 @@ namespace EmberThrone.Game
             public readonly List<Vector3> Points = new List<Vector3>();
             public readonly List<float> Times = new List<float>();
             public bool FadesIn;
+            public bool Landed;
             public int Segment;
         }
 
@@ -747,7 +750,6 @@ namespace EmberThrone.Game
                 foreach (var t in tracks) Advance(t, time);
                 yield return null;
             }
-            foreach (var t in tracks) Land(t);
         }
 
         static void Advance(FallTrack t, float time)
@@ -756,8 +758,7 @@ namespace EmberThrone.Game
             int last = times.Count - 1;
             if (time >= times[last])
             {
-                t.View.T.localPosition = t.Points[last];
-                if (t.FadesIn) t.View.R.color = Color.white;
+                if (!t.Landed) Land(t);
                 return;
             }
             while (t.Segment < last - 1 && time >= times[t.Segment + 1]) t.Segment++;
@@ -777,6 +778,7 @@ namespace EmberThrone.Game
 
         static void Land(FallTrack t)
         {
+            t.Landed = true;
             var v = t.View;
             v.R.color = Color.white;
             v.T.localPosition = t.Points[t.Points.Count - 1];

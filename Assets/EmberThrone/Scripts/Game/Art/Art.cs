@@ -13,7 +13,6 @@ namespace EmberThrone.Game
         public static readonly Color Panel = Hex("2B2033");
         public static readonly Color PanelLight = Hex("443350");
         public static readonly Color Accent = Hex("F2842B");
-        public static readonly Color AccentDark = Hex("8A4A1E");
         public static readonly Color Good = Hex("4CC96A");
         public static readonly Color Text = Hex("FFF6EA");
         public static readonly Color TextDim = Hex("BBA9C4");
@@ -55,6 +54,29 @@ namespace EmberThrone.Game
 
         // ---------------------------------------------------------------- public sprites
 
+        /// <summary>Bakes every sprite at startup, so the first special or effect never stalls a move.</summary>
+        public static void Preload()
+        {
+            for (int color = 0; color < GemColor.Count; color++) Gem(color);
+            Rocket(true);
+            Rocket(false);
+            Bomb();
+            Homing();
+            ColorBomb();
+            Crown();
+            for (int hp = 1; hp <= 9; hp++) Box(hp);
+            for (int hp = 1; hp <= 3; hp++)
+            {
+                Cover(hp);
+                Floor(hp);
+            }
+            Tile();
+            Selection();
+            Ring();
+            Disc();
+            Chevron();
+        }
+
         public static Sprite Gem(int color)
         {
             return Get("gem" + color, () =>
@@ -86,11 +108,13 @@ namespace EmberThrone.Game
             string key = horizontal ? "rocketH" : "rocketV";
             return Get(key, () =>
             {
+                var leftHead = new[] { new Vector2(-0.8f, 0f), new Vector2(-0.38f, 0.42f), new Vector2(-0.38f, -0.42f) };
+                var rightHead = new[] { new Vector2(0.8f, 0f), new Vector2(0.38f, -0.42f), new Vector2(0.38f, 0.42f) };
                 Sdf body = p =>
                 {
                     float shaft = SdSegment(p, new Vector2(-0.34f, 0f), new Vector2(0.34f, 0f), 0.2f);
-                    float left = SdPolygon(p, new[] { new Vector2(-0.8f, 0f), new Vector2(-0.38f, 0.42f), new Vector2(-0.38f, -0.42f) }) - 0.03f;
-                    float right = SdPolygon(p, new[] { new Vector2(0.8f, 0f), new Vector2(0.38f, -0.42f), new Vector2(0.38f, 0.42f) }) - 0.03f;
+                    float left = SdPolygon(p, leftHead) - 0.03f;
+                    float right = SdPolygon(p, rightHead) - 0.03f;
                     return Mathf.Min(shaft, Mathf.Min(left, right));
                 };
                 var cream = Palette.Hex("FFE2B0");
@@ -111,7 +135,8 @@ namespace EmberThrone.Game
             {
                 Sdf ball = p => SdCircle(p - new Vector2(-0.05f, -0.1f), 0.64f);
                 Sdf fuse = p => SdSegment(p, new Vector2(0.28f, 0.42f), new Vector2(0.48f, 0.62f), 0.08f);
-                Sdf spark = p => SdPolygon(p - new Vector2(0.56f, 0.72f), Star(4, 0.26f, 0.08f, 0f));
+                var sparkStar = Star(4, 0.26f, 0.08f, 0f);
+                Sdf spark = p => SdPolygon(p - new Vector2(0.56f, 0.72f), sparkStar);
                 var iron = Palette.Hex("3A3F52");
                 var rope = Palette.Hex("B08A5A");
                 var flame = Palette.Hex("FFD24A");

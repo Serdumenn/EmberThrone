@@ -6,7 +6,6 @@ namespace EmberThrone.Game
 {
     public static class Ease
     {
-        public static float Linear(float t) => t;
         public static float InQuad(float t) => t * t;
         public static float OutQuad(float t) => 1f - (1f - t) * (1f - t);
         public static float OutCubic(float t) { float u = 1f - t; return 1f - u * u * u; }
@@ -42,8 +41,6 @@ namespace EmberThrone.Game
         static readonly Predicate<Item> IsFinished = i => i.Finished;
 
         readonly List<Item> _items = new List<Item>();
-
-        public static int ActiveCount => _instance == null ? 0 : _instance._items.Count;
 
         void Awake() => _instance = this;
 

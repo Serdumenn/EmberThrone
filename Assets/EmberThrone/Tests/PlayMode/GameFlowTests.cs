@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Linq;
+using System.Text.RegularExpressions;
 using EmberThrone.Core;
 using NUnit.Framework;
 using UnityEngine;
@@ -32,7 +33,7 @@ namespace EmberThrone.Game.Tests
         [UnitySetUp]
         public IEnumerator SetUp()
         {
-            _savedStars = LevelProgress.Snapshot();
+            _savedStars = StarsBackup.Snapshot();
             _background = InputSystem.settings.backgroundBehavior;
             _editorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
@@ -54,7 +55,7 @@ namespace EmberThrone.Game.Tests
             InputSystem.settings.backgroundBehavior = _background;
             InputSystem.settings.editorInputBehaviorInPlayMode = _editorInput;
             Object.Destroy(_app.gameObject);
-            LevelProgress.Restore(_savedStars); // the bot's wins must not show up as the owner's stars
+            StarsBackup.Restore(_savedStars);
             yield return null;
         }
 
@@ -145,9 +146,11 @@ namespace EmberThrone.Game.Tests
                 yield return null;
                 Assert.IsNull(Game.View.FindMismatch(Game.Session.Board), "level index " + i);
                 Assert.AreEqual(_app.Levels[i].Moves.ToString(), Game.Hud.MovesText);
+                Assert.AreEqual(SleepTimeout.NeverSleep, Screen.sleepTimeout);
             }
             _app.ShowLevelSelect();
             yield return null;
+            Assert.AreEqual(SleepTimeout.SystemSetting, Screen.sleepTimeout);
             Assert.IsNull(_app.Game);
             Assert.AreEqual(_app.Levels.Count, _app.LevelSelect.ButtonCount);
         }
@@ -284,13 +287,46 @@ namespace EmberThrone.Game.Tests
             level.Id = 4242;
             yield return Begin(level);
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            Assert.Greater(LevelProgress.GetStars(4242), 0, "saved before the animations, in case the player leaves");
             yield return WaitIdle();
             Assert.AreEqual(GameState.Won, Game.Session.State);
             yield return new WaitForSeconds(Timing.WinDelay + 0.1f);
             Assert.AreEqual("Kazandın!", Game.Popup.Title);
             Assert.AreEqual(Game.Session.Rules.StarsFor(Game.Session.MovesLeft), LevelProgress.GetStars(4242));
             Assert.IsTrue(Game.Hud.GoalChecked(0));
-            PlayerPrefs.DeleteKey(LevelProgress.StarsKey + 4242);
+        }
+
+        [UnityTest]
+        public IEnumerator Level_FinishedOnStart_ShowsItsWindow()
+        {
+            // A box goal on a board without boxes has nothing left to do.
+            yield return Begin(Level(10, new GoalDefinition(GoalType.Box), Even, Odd, Even, Odd, Even));
+            Assert.AreEqual(GameState.Won, Game.Session.State);
+            yield return new WaitForSeconds(Timing.WinDelay + 0.1f);
+            Assert.AreEqual("Kazandın!", Game.Popup.Title);
+        }
+
+        [UnityTest]
+        public IEnumerator ViewFailure_RedrawsTheBoard_AndPlayGoesOn()
+        {
+            _app.StartLevel(_app.Levels[0], 0, Seed);
+            yield return null;
+            var move = Game.Session.FindValidMoves().First(m => m.Type == MoveType.Swap);
+            int before = Game.Session.MovesLeft;
+            Object.DestroyImmediate(Game.View.transform.Find("Pieces").gameObject);
+
+            LogAssert.Expect(LogType.Exception, new Regex("MissingReferenceException"));
+            Game.RequestSwap(move.A, move.B);
+            yield return WaitIdle();
+
+            Assert.AreEqual(before - 1, Game.Session.MovesLeft);
+            Assert.AreEqual((before - 1).ToString(), Game.Hud.MovesText);
+            Assert.IsNull(Game.View.FindMismatch(Game.Session.Board));
+
+            var next = Game.Session.FindValidMoves().First(m => m.Type == MoveType.Swap);
+            yield return Drag(next.A, next.B);
+            yield return WaitIdle();
+            Assert.AreEqual(before - 2, Game.Session.MovesLeft, "input works again");
         }
 
         [UnityTest]

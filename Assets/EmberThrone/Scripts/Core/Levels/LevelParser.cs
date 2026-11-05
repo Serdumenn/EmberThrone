@@ -24,13 +24,15 @@ namespace EmberThrone.Core
     /// </code>
     /// Board tokens: . random gem | # hole | _ empty | R G B Y P O gem | 1-9 box HP |
     /// - rocket(row) | '|' rocket(column) | * bomb | ^ homing | @ color bomb | $ collectible.
-    /// Goal types: color, box, floor, cover, collectible. Count -1 / omitted = all on the board.
+    /// Goal types: color, box, floor, cover, collectible (1 to 3 goals). Count -1 / omitted = all on the board.
     /// </summary>
     public static class LevelParser
     {
         public const int MinSize = 3;
         public const int MaxWidth = 12;
         public const int MaxHeight = 14;
+        /// <summary>SYS-CORE-001 DL-002; the goal panel is laid out for this many.</summary>
+        public const int MaxGoals = 3;
 
         public static LevelDefinition FromJson(string json)
         {
@@ -239,6 +241,7 @@ namespace EmberThrone.Core
             if (level.Moves <= 0) throw new LevelFormatException("'moves' must be > 0");
             if (level.ColorCount < 3 || level.ColorCount > GemColor.Count) throw new LevelFormatException("'colors' must be 3..6");
             if (level.Goals.Count == 0) throw new LevelFormatException("At least one goal is required");
+            if (level.Goals.Count > MaxGoals) throw new LevelFormatException("At most " + MaxGoals + " goals are allowed");
             bool anySpawner = false;
             int collectiblesOnBoard = 0;
             foreach (var c in level.Cells)
