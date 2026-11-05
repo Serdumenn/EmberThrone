@@ -36,8 +36,16 @@ dotnet test tools/CoreTests/EmberThrone.Core.Tests.csproj -c Release
 dotnet run --project tools/LevelSim -c Release -- --runs 100 --validate --fail-on-error Assets/EmberThrone/Resources/Levels
 ```
 
-Fresh cloud container: `apt-get install -y dotnet-sdk-8.0` (Ubuntu 24.04 repo).
-Unity itself is not available in the container; Unity-side code is verified by the Android CI build.
+## Where you are running
+
+- **Owner's computer (preferred for anything Unity-side: scenes, UI, animation, builds).**
+  Verify Unity code yourself instead of guessing: open the project in the editor and read the console, or run
+  EditMode tests headless (close the editor first — batchmode cannot open a project that is already open):
+  - Windows: `"C:\Program Files\Unity\Hub\Editor\6000.3.11f1\Editor\Unity.exe" -batchmode -nographics -projectPath . -runTests -testPlatform EditMode -testResults TestResults/editmode.xml`
+  - macOS: `/Applications/Unity/Hub/Editor/6000.3.11f1/Unity.app/Contents/MacOS/Unity` with the same arguments.
+  The editor writes `.meta` files itself; commit them.
+- **Cloud container.** No Unity, no phone. `apt-get install -y dotnet-sdk-8.0` (Ubuntu 24.04 repo) for the dotnet checks;
+  Unity-side code is verified only by the Android CI build (needs license secrets). Prefer pure C# work here.
 
 ## Level tools
 
