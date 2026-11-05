@@ -1,0 +1,28 @@
+{
+  "id": 7,
+  "name": "Crown Drop",
+  "moves": 26,
+  "colors": 5,
+  "difficulty": "normal",
+  "goals": [
+    {
+      "type": "collectible"
+    }
+  ],
+  "board": [
+    "..$..$..",
+    "........",
+    "........",
+    "........",
+    "........",
+    "1..11..1",
+    "........",
+    "........",
+    "........"
+  ],
+  "collectibles": {
+    "total": 2,
+    "maxOnBoard": 2,
+    "spawnChance": 0.15
+  }
+}
