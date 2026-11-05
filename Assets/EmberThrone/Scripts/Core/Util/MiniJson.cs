@@ -52,9 +52,12 @@ namespace EmberThrone.Core
         public static int GetInt(Dictionary<string, object> obj, string key, int fallback)
         {
             if (!TryGet(obj, key, out var v)) return fallback;
-            if (v is long l) return checked((int)l);
-            if (v is double d && Math.Abs(d - Math.Round(d)) < 1e-9) return (int)Math.Round(d);
-            throw new FormatException("'" + key + "' must be an integer");
+            double value;
+            if (v is long l) value = l;
+            else if (v is double d && Math.Abs(d - Math.Round(d)) < 1e-9) value = Math.Round(d);
+            else throw new FormatException("'" + key + "' must be an integer");
+            if (value < int.MinValue || value > int.MaxValue) throw new FormatException("'" + key + "' is out of range");
+            return (int)value;
         }
 
         public static double GetDouble(Dictionary<string, object> obj, string key, double fallback)
