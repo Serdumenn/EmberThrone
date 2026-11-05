@@ -18,6 +18,7 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] Proje ayarları: dikey ekran, geçerli Android paket adı, IL2CPP + ARM64
 
 ## Faz 1 — Oynanabilir prototip (sıradaki)
+- [ ] Yerel oturuma geç (Unity bulutta çalışmıyor); Unity editörünü AI'ın yönetebileceği MCP köprüsünü kur
 - [ ] Unity sahne kurulumu kodla (tek bootstrap sahnesi, prefab bağımlılığı minimum)
 - [ ] Tahta görünümü, dokunma/kaydırma girişi, hamle olaylarını animasyonla oynatma
 - [ ] Geçici görseller (renkli şekiller), seviye seçimi, kazandın/kaybettin pencereleri
