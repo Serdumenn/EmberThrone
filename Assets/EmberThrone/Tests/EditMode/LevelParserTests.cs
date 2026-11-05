@@ -93,6 +93,8 @@ namespace EmberThrone.Core.Tests
                 "{\"moves\": 10, \"goals\": [{\"type\":\"color\",\"color\":\"R\"}], \"board\": [\"...\", \"...\", \"...\"]}"));
             Assert.Throws<LevelFormatException>(() => LevelParser.FromJson(
                 "{\"moves\": 10, \"goals\": [{\"type\":\"cover\"}], \"board\": [\"...\", \".1.\", \"...\"], \"cover\": [\"000\", \"010\", \"000\"]}"));
+            Assert.Throws<LevelFormatException>(() => LevelParser.FromJson(
+                "{\"moves\": 99999999999, \"goals\": [{\"type\":\"box\"}], \"board\": [\"...\", \".1.\", \"...\"]}"));
         }
     }
 }
