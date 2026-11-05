@@ -20,16 +20,22 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 ## Faz 1 — Oynanabilir prototip (sıradaki)
 - [x] Yerel oturuma geç (Unity bulutta çalışmıyor); Unity editörünü AI'ın yönetebileceği MCP köprüsünü kur (MCP for Unity v10.3.0, kurulum: CLAUDE.md)
 - [x] Motor kodu Unity'de ilk kez derlendi, EditMode testleri geçti
-- [ ] Unity sahne kurulumu kodla (tek bootstrap sahnesi, prefab bağımlılığı minimum)
-- [ ] Tahta görünümü, dokunma/kaydırma girişi, hamle olaylarını animasyonla oynatma
-- [ ] Geçici görseller (renkli şekiller), seviye seçimi, kazandın/kaybettin pencereleri
-- [ ] CI'da Unity derlemesi + APK (Unity lisans secret'ı gerekiyor)
+- [x] Unity sahne kurulumu kodla (tek boş bootstrap sahnesi, prefab yok)
+- [x] Tahta görünümü, dokunma/kaydırma girişi (yeni Input System), hamle olaylarını animasyonla oynatma
+- [x] Geçici görseller (koddan üretilen şekiller), hedef paneli, hamle sayacı, seviye seçimi, kazandın/kaybettin pencereleri
+- [x] Dikey ekran, farklı ekran oranları ve çentik uyumu (20:9, 21:9, 16:9, tablet 3:4 denendi)
+- [x] Play mode testleri: sanal fareyle giriş, bütün özel taş ikilileri, botun 10 seviyeyi bitirmesi; görünüm her hamlede motorla karşılaştırılıyor
+- [x] GitHub Actions: test + APK akışı (PongMobilePrototype örnek alındı)
+- [ ] Unity secret'larını bu repoya ekle (sahibi yapacak), ilk bulut APK'sını al
+- [ ] Gerçek telefonda dene: his, dokunma, performans (henüz hiç cihazda çalışmadı)
+- [ ] Bulutta test edilecek: `Sprites/Default` ve yazı tipi Android build'inde sorunsuz mu
 
 ## Faz 2 — Profesyonel görünüm ve his
 - [ ] Sanat yönü: EmberThrone teması (ateş/kor krallığı), renk paleti, karakter
 - [ ] AI ile sprite üretim hattı + tutarlı stil
 - [ ] Parçacık efektleri, ekran sarsıntısı, squash/stretch, combo kutlamaları, ses ve müzik, titreşim
 - [ ] Seviye sonu kutlaması (kalan hamleler → roketler → coin)
+- [ ] Oyun içi booster çubuğu, ipucu (motorda hazır, ekranda yok), "+5 hamle" teklifi
 
 ## Faz 3 — Meta ve ekonomi
 - [ ] Harita / ilerleme, bölge inşa-dekor meta oyunu (yıldızlarla görevler)
@@ -54,6 +60,12 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [ ] Gerçek oyuncu verisiyle bot kalibrasyonu ve seviye ayarı
 
 ## Sahibinin vereceği kararlar
-1. Unity lisans türü (Personal/Pro) + GitHub secret'ları → APK derlemesi için
+1. GitHub secret'ları (PongMobilePrototype'takilerin aynısı) → APK derlemesi için
 2. Tema ve sanat yönü onayı
 3. Paket adı / şirket adı (ilk mağaza yüklemesine kadar değişebilir: şu an `com.serdumenn.emberthrone`)
+4. GDD/ belgeleri ile bu yol haritası ayrışıyor, hangisi geçerli?
+   - Özel taşlar: GDD'de TNT ve 3x3 bomba var, güdümlü yok; motorda güdümlü var, TNT yok, bomba 5x5
+   - Booster'lar: GDD çekiç, bomba, renk fırçası; motor çekiç, satır, sütun, karıştır
+   - Engeller: GDD 7 tip (ateş, zincir, tel kafes...); motor kutu, zemin, buz, toplanan obje
+   - Tahta: GDD 9x9; seviyeler 8x9
+   - Sosyal ve sunucu: GDD klan sistemini kapsam dışı sayar ve Firebase der; bu yol haritası klan + Nakama der
