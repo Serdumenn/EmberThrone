@@ -13,6 +13,9 @@
 [Uu]serSettings/
 [Mm]emoryCaptures/
 [Aa]ssets/AssetStoreTools*
+/TestResults/
+/[Aa]ssets/Screenshots/
+/[Aa]ssets/Screenshots.meta
 
 # ── Unity Temp
 .utmp/
