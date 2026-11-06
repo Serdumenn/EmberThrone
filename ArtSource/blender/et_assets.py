@@ -1,11 +1,6 @@
-"""EmberThrone asset builders. Load et_core.py first, then this file, then call sprite(...) or render_all().
-
-Each builder makes one object group centered on the origin, about 2 units across, facing the camera (-Y).
-"""
 import bpy, bmesh, math
 from mathutils import Vector
 
-# body color, inner glow color
 PIECES = {
     'R': ('#e00a24', '#ff5a4a'),
     'O': ('#f25a00', '#ffa040'),
@@ -46,7 +41,6 @@ def sprite(name, build, scale=2.6, tilt=10.0, size=512, samples=160, glass=False
     return render(name)
 
 
-# ---------------------------------------------------------------- helpers for primitives
 def _active(mat=None, smooth=True, bev=None, seg=3):
     ob = bpy.context.active_object
     if mat: ob.data.materials.append(mat)
@@ -99,7 +93,6 @@ def group(objs, loc=(0, 0, 0), rot=(0, 0, 0), scale=1.0):
     return e
 
 
-# ---------------------------------------------------------------- specials
 def build_rocket(vertical=False):
     R90 = math.radians(90)
     body = mat_glossy('rk_body', '#ffe4a0', rough=0.12, emis=0.06)
@@ -182,10 +175,7 @@ def build_orb():
     return sphere(0.92, mat=mat_orb(), seg=64)
 
 
-# ---------------------------------------------------------------- obstacles
 def build_crate(level=1):
-    # level 3 is charred: darker planks, cross straps and a padlock
-    # darker than the first kit: crates must stand out on the light board cells
     wood = mat_wood('plank', '#d6802e', '#9a4c18', scale=0.8) if level < 3 else mat_wood('plank3', '#a8602a', '#5e2c10', scale=0.8)
     dark = mat_wood('frame', '#a85a22', '#6a3010', scale=0.9)
     steel = mat_metal('steel', '#d4dbe8', rough=0.25)
@@ -218,7 +208,6 @@ def build_crate(level=1):
 
 
 def mat_ash(name, light, dark, embers=1.0, crack_scale=2.2):
-    """Soft grey ash with soot noise and ember-lit cracks (the floor layer: cleared by matches on top)."""
     m = mat_glossy(name, light, rough=0.8, coat=0.0)
     nt = m.node_tree; p = _p(m)
     tc = nt.nodes.new('ShaderNodeTexCoord')
@@ -240,14 +229,12 @@ def mat_ash(name, light, dark, embers=1.0, crack_scale=2.2):
 
 
 def build_floor(level=1):
-    """A slab of ash lying on the cell; level 2 is darker and more cracked."""
     if level == 1: ash = mat_ash('ash1', '#7e757f', '#4f4753', embers=0.4)
     else: ash = mat_ash('ash2', '#5c5262', '#2e2734', embers=0.7, crack_scale=3.0)
     return box((1.9, 0.26, 1.9), mat=ash, bev=0.16, seg=4)
 
 
 def build_lantern():
-    """The collectible: a glowing ember lantern, brought down to the bottom of the board."""
     gold = mat_gold('lantern_gold')
     glass = mat_glossy('lantern_glass', '#ffd27a', rough=0.05, emis=2.6, emis_color='#ffa424', sss=0.3)
     objs = [cyl(0.5, 0.95, loc=(0, 0, -0.05), rot=(0, 0, math.radians(22.5)), mat=glass, verts=8, bev=0.03)]
@@ -262,7 +249,6 @@ def build_lantern():
 
 
 def build_homing():
-    """The 2x2 special: a little ember bird that flies to its target."""
     body = mat_glossy('bird', '#ff6414', rough=0.14, emis=0.25, emis_color='#ff9a30', sss=0.2)
     belly = mat_glossy('belly', '#ffe08a', rough=0.18)
     wing = mat_glossy('wing', '#ffc21a', rough=0.12, emis=0.15, emis_color='#ffd060')
@@ -289,7 +275,6 @@ def build_ice():
     return box((1.96, 0.7, 1.96), mat=mat_ice(), bev=0.24, seg=6)
 
 
-# ---------------------------------------------------------------- boosters
 def build_hammer():
     wood = mat_glossy('handle', '#a8582a', rough=0.35, coat=0.6)
     steel = mat_glossy('steel', '#9eaac2', rough=0.24, metallic=0.75, coat=1.0)
@@ -345,7 +330,6 @@ def build_gear():
     return group(objs)
 
 
-# ---------------------------------------------------------------- currency and rewards
 def flame_outline(k=1.0):
     pts = [(0, 0.66), (0.1, 0.44), (0.17, 0.53), (0.3, 0.32), (0.37, 0.06), (0.31, -0.2), (0.17, -0.34), (0, -0.38),
            (-0.17, -0.34), (-0.31, -0.2), (-0.37, 0.04), (-0.31, 0.26), (-0.21, 0.4), (-0.15, 0.24), (-0.06, 0.46)]
@@ -405,7 +389,6 @@ def build_chest():
     objs.append(box((0.42, 0.14, 0.5), loc=(0, -0.6, -0.08), mat=gold, bev=0.06))
     objs.append(cyl(0.06, 0.1, loc=(0, -0.68, -0.04), rot=(R90, 0, 0), mat=dark))
     objs.append(box((0.05, 0.1, 0.14), loc=(0, -0.68, -0.14), mat=dark, bev=0.01))
-    # a glow of coins escaping the lid seam
     objs.append(box((1.7, 1.0, 0.04), loc=(0, 0, 0.18), mat=mat_emit('seam', '#ffd060', 6), bev=0.01))
     return group(objs, rot=(0, 0, 24))
 
@@ -472,7 +455,6 @@ def build_scroll():
     return group(objs, rot=(0, -10, 14))
 
 
-# ---------------------------------------------------------------- mascot: the ember spirit
 def lathe(name, prof, mat, n=48, curl=0.0, curl_from=0.4):
     bm = bmesh.new(); rings = []
     for r, z in prof:
@@ -560,8 +542,6 @@ def build_mascot(mood='happy'):
     return group(objs, rot=(0, -6, -8))
 
 
-# ---------------------------------------------------------------- the full sprite list
-# name: (builder, sprite() keyword arguments). The values are the ones the style frames were rendered with.
 ASSETS = {
     **{'piece_' + k: (lambda k=k: build_piece(k), {}) for k in 'ROYGBP'},
     'sp_rocket': (lambda: build_rocket(False), {}),
@@ -595,7 +575,6 @@ ASSETS = {
 
 
 def render_assets(names=None):
-    """Render the named sprites (all of them when names is None). Each takes about 10-25 s on the GPU."""
     done = []
     for name in (names or ASSETS):
         build, kw = ASSETS[name]

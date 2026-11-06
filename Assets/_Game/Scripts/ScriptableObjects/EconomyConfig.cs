@@ -1,20 +1,11 @@
-// TECH-001 §4 + META-001 — EconomyConfig ScriptableObject
-// Coin/gem caps, FTUE generosity, booster fiyatları, can sistemi.
-// Remote Config ile runtime override edilebilir (TECH-001 §6.3).
-
 using System;
 using UnityEngine;
 
 namespace EmberThrone.Data
 {
-    /// <summary>
-    /// Global economy parameters. Single instance — loaded at boot.
-    /// Values can be overridden at runtime via Firebase Remote Config.
-    /// </summary>
     [CreateAssetMenu(fileName = "EconomyConfig", menuName = "EmberThrone/Economy Config", order = 3)]
     public class EconomyConfig : ScriptableObject
     {
-        // ─── Currency Caps ───────────────────────────
         [Header("─── Currency Caps (META-001) ───")]
         [Tooltip("Soft currency (coin) cap")]
         public int coinSoftCap = 5000;
@@ -22,7 +13,6 @@ namespace EmberThrone.Data
         [Tooltip("Hard currency (gem) cap")]
         public int gemSoftCap = 15000;
 
-        // ─── Level Rewards ───────────────────────────
         [Header("─── Level Completion Rewards ───")]
         [Tooltip("Base coin reward for completing a level")]
         public int levelCompleteCoinBase = 50;
@@ -30,7 +20,6 @@ namespace EmberThrone.Data
         [Tooltip("Bonus coins per remaining move")]
         public int coinsPerRemainingMove = 10;
 
-        // ─── FTUE Generosity (META-001 §FTUE) ───────
         [Header("─── FTUE Generosity ───")]
         [Tooltip("Starting coin gift (pre-L1)")]
         public int ftueStartingCoins = 500;
@@ -44,7 +33,6 @@ namespace EmberThrone.Data
         [Tooltip("Flat coin bonus per level during FTUE (L1-10)")]
         public int ftueLevelCoinBonus = 100;
 
-        // ─── Lives System ────────────────────────────
         [Header("─── Lives (Can) System ───")]
         [Tooltip("Maximum lives count")]
         public int maxLives = 5;
@@ -55,7 +43,6 @@ namespace EmberThrone.Data
         [Tooltip("Cost in gems for full life refill")]
         public int fullRefillGemCost = 10;
 
-        // ─── Extra Move (Spend Trigger) ──────────────
         [Header("─── Extra Move — SYS-CORE-001 ───")]
         [Tooltip("Base gem cost for +5 moves offer")]
         public int extraMoveBaseCost = 20;
@@ -70,7 +57,6 @@ namespace EmberThrone.Data
         [Range(0f, 1f)]
         public float extraMoveGoalThreshold = 0.7f;
 
-        // ─── Booster Costs ───────────────────────────
         [Header("─── Booster Costs ───")]
         [Tooltip("BST-001 Hammer cost in coins")]
         public int hammerCostCoins = 200;
@@ -81,7 +67,6 @@ namespace EmberThrone.Data
         [Tooltip("BST-003 ColorBrush cost in coins")]
         public int colorBrushCostCoins = 600;
 
-        // ─── Daily Rewards ───────────────────────────
         [Header("─── Daily Rewards ───")]
         [Tooltip("Daily login coin reward")]
         public int dailyRewardCoins = 100;
@@ -89,7 +74,6 @@ namespace EmberThrone.Data
         [Tooltip("Daily login gem reward (every 7th day)")]
         public int weeklyBonusGems = 5;
 
-        // ─── Chest Rewards ───────────────────────────
         [Header("─── Chest System ───")]
         [Tooltip("Standard chest coin range (min)")]
         public int standardChestCoinMin = 50;
@@ -100,7 +84,6 @@ namespace EmberThrone.Data
         [Tooltip("Premium chest gem cost")]
         public int premiumChestGemCost = 30;
 
-        // ─── Validation ──────────────────────────────
 #if UNITY_EDITOR
         private void OnValidate()
         {

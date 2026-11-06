@@ -2,9 +2,6 @@
 <html>
 <head>
 <meta charset="utf-8">
-<!-- UI chrome source for UI Toolkit. render.py opens this page once per component (?c=name&t=theme)
-     and saves a transparent PNG; Components.uss stretches it with -unity-slice-*.
-     1em = 100 reference pixels (1080x1920 canvas). Colors follow docs/design/design-system.md. -->
 <style>
   :root { --p0: #ff9440; --p1: #e2541a; --p2: #a3330c; --dark: #4a1604; --nav0: #b4400f; --nav1: #6a1f06; --face0: #fff8e9; --face1: #ffe5bb; }
   :root.gece { --p0: #7d86ff; --p1: #4b4ee0; --p2: #2a2a9c; --dark: #120f45; --nav0: #3b38b8; --nav1: #1c186a; --face0: #f7f8ff; --face1: #dfe4ff; }
@@ -23,13 +20,10 @@
 </head>
 <body>
 <script>
-// name: [width, height, html]. Layers: outline+lip (dark), body, face. Everything stays inside the box:
-// UI Toolkit cannot draw outside an element, and has no gradients or shadows of its own.
 const E = n => (n / 100) + 'em';
 const L = (ins, r, cls = '', style = '') => `<div class="l ${cls}" style="inset:${ins};border-radius:${r};${style}"></div>`;
 const lip = 10, ol = 3;
 function framed(r, inner, opts = {}) {
-  // dark outline and bottom lip, gold rim, then the inner face
   const rim = opts.rim ?? 7.5;
   return L('0', E(r), '', 'background:var(--dark)')
     + L(`${E(ol)} ${E(ol)} ${E(ol + lip)} ${E(ol)}`, E(r - ol), 'gold', 'box-shadow:inset 0 .04em 0 rgba(255,255,255,.7)')

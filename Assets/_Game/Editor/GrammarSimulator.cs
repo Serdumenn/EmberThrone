@@ -1,7 +1,3 @@
-// TECH-001 §5 — Grammar Simulator (Editor Tool)
-// LevelConfig SO'larını zorluk eğrisine göre otomatik üretir.
-// Menü: EmberThrone > Grammar Simulator
-
 #if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
@@ -10,20 +6,14 @@ using EmberThrone.Data;
 
 namespace EmberThrone.Editor
 {
-    /// <summary>
-    /// Editor window for procedural level generation.
-    /// Generates LevelConfig ScriptableObject assets based on Grammar Rules.
-    /// </summary>
     public class GrammarSimulator : EditorWindow
     {
-        // ─── Configuration ───────────────────────────
         private int _chapterId = 1;
         private int _startLevel = 1;
         private int _endLevel = 15;
         private bool _overwriteExisting = false;
         private string _outputFolder = "Assets/_Game/ScriptableObjects/Definitions/Levels";
 
-        // ─── State ───────────────────────────────────
         private Vector2 _scrollPos;
         private string _lastLog = "";
         private int _generatedCount = 0;
@@ -52,8 +42,6 @@ namespace EmberThrone.Editor
             EditorGUILayout.EndScrollView();
         }
 
-        // ─── UI Sections ─────────────────────────────
-
         private void DrawHeader()
         {
             EditorGUILayout.LabelField("🔥 EmberThrone Grammar Simulator", EditorStyles.boldLabel);
@@ -75,7 +63,6 @@ namespace EmberThrone.Editor
             _endLevel = EditorGUILayout.IntField("Bitiş Level", _endLevel);
             EditorGUILayout.EndHorizontal();
 
-            // Auto-calculate level range for chapter
             if (GUILayout.Button("Chapter'a Göre Otomatik Ayarla"))
             {
                 _startLevel = (_chapterId - 1) * 15 + 1;
@@ -85,7 +72,6 @@ namespace EmberThrone.Editor
             _overwriteExisting = EditorGUILayout.Toggle("Mevcut SO'ları Üstüne Yaz", _overwriteExisting);
             _outputFolder = EditorGUILayout.TextField("Çıktı Klasörü", _outputFolder);
 
-            // Validation
             if (_startLevel > _endLevel)
             {
                 EditorGUILayout.HelpBox("Başlangıç level, bitiş level'dan büyük olamaz!", MessageType.Error);
@@ -140,11 +126,8 @@ namespace EmberThrone.Editor
             EditorGUILayout.HelpBox(_lastLog, MessageType.None);
         }
 
-        // ─── Generation ──────────────────────────────
-
         private void GenerateLevels()
         {
-            // Ensure output folder exists
             if (!AssetDatabase.IsValidFolder(_outputFolder))
             {
                 CreateFolderRecursive(_outputFolder);
@@ -157,7 +140,6 @@ namespace EmberThrone.Editor
             {
                 string assetPath = $"{_outputFolder}/Level_{levelId:D3}.asset";
 
-                // Check existing
                 if (!_overwriteExisting && AssetDatabase.LoadAssetAtPath<LevelConfig>(assetPath) != null)
                 {
                     skippedCount++;
@@ -189,54 +171,42 @@ namespace EmberThrone.Editor
         {
             var config = ScriptableObject.CreateInstance<LevelConfig>();
 
-            // Random seed based on level for reproducibility
             var rng = new System.Random(levelId * 31337);
 
             var band = GrammarRules.GetBandForLevel(levelId);
             int chapterId = ((levelId - 1) / 15) + 1;
             int posInChapter = ((levelId - 1) % 15) + 1;
 
-            // ─── Identity ─────────────────────────
             config.levelId = levelId;
             config.chapterId = chapterId;
 
-            // ─── Grid ─────────────────────────────
             var (gridWMin, gridWMax) = GrammarRules.GetGridWidthRange(band);
             var (gridHMin, gridHMax) = GrammarRules.GetGridHeightRange(band);
             config.gridWidth = rng.Next(gridWMin, gridWMax + 1);
             config.gridHeight = rng.Next(gridHMin, gridHMax + 1);
 
-            // ─── Colors ───────────────────────────
             var (colorMin, colorMax) = GrammarRules.GetColorCountRange(band);
             config.availableColors = rng.Next(colorMin, colorMax + 1);
 
-            // ─── Moves ────────────────────────────
             var (moveMin, moveMax) = GrammarRules.GetMoveRange(band);
             config.maxMoves = rng.Next(moveMin, moveMax + 1);
 
-            // ─── Gravity ──────────────────────────
-            config.gravityDirection = GravityDirection.Down; // Default, exotic directions for later
+            config.gravityDirection = GravityDirection.Down;
 
-            // ─── Difficulty ───────────────────────
             config.difficultyBand = band;
             var (failMin, failMax) = GrammarRules.GetFailRateRange(band);
             config.expectedFailRate = failMin + (float)(rng.NextDouble() * (failMax - failMin));
 
-            // ─── Goals ────────────────────────────
             config.goals = GenerateGoals(rng, band, levelId);
 
-            // ─── Obstacles ────────────────────────
             config.obstacles = GenerateObstacles(rng, band, levelId);
 
-            // ─── Special Piece Weights ────────────
             config.specialPieceWeights = GenerateSpecialPieceWeights(rng, band);
 
-            // ─── Metadata ─────────────────────────
             config.isGrammarGenerated = true;
             config.isOverridden = false;
             config.isCriticalLevel = (posInChapter == 5 || posInChapter == 10 || posInChapter == 15);
 
-            // ─── Solvability ──────────────────────
             int totalGoalDifficulty = 0;
             foreach (var goal in config.goals)
                 totalGoalDifficulty += goal.targetCount;
@@ -249,7 +219,6 @@ namespace EmberThrone.Editor
                 config.maxMoves, totalGoalDifficulty, obstacleTotal, config.availableColors
             );
 
-            // Critical levels are slightly harder
             if (config.isCriticalLevel)
             {
                 config.maxMoves = Mathf.Max(config.maxMoves - 2, moveMin);
@@ -257,8 +226,6 @@ namespace EmberThrone.Editor
 
             return config;
         }
-
-        // ─── Sub-Generators ──────────────────────────
 
         private LevelGoal[] GenerateGoals(System.Random rng, DifficultyBand band, int levelId)
         {
@@ -296,20 +263,18 @@ namespace EmberThrone.Editor
 
         private GoalType GetRandomGoalType(System.Random rng, DifficultyBand band, int levelId)
         {
-            // Tutorial: only CollectColor and ScoreTarget
             if (band == DifficultyBand.Tutorial)
             {
                 return rng.Next(0, 2) == 0 ? GoalType.CollectColor : GoalType.ScoreTarget;
             }
 
-            // Weight-based selection for other bands
             var available = new System.Collections.Generic.List<GoalType>
             {
                 GoalType.CollectColor,
                 GoalType.ScoreTarget,
             };
 
-            if (levelId >= 3) // Obstacles available
+            if (levelId >= 3)
                 available.Add(GoalType.DestroyObstacle);
 
             if (band >= DifficultyBand.Onboarding)
@@ -325,7 +290,6 @@ namespace EmberThrone.Editor
             if (availableTypes.Length == 0)
                 return new ObstaclePlacement[0];
 
-            // How many obstacle types to use
             int typeCount = Mathf.Min(rng.Next(1, 3), availableTypes.Length);
             var placements = new ObstaclePlacement[typeCount];
 
@@ -342,7 +306,7 @@ namespace EmberThrone.Editor
                 {
                     obstacleType = availableTypes[rng.Next(0, availableTypes.Length)],
                     count = Mathf.Max(1, countForThis),
-                    positions = new Vector2Int[0], // Random placement
+                    positions = new Vector2Int[0],
                 };
             }
 
@@ -364,12 +328,10 @@ namespace EmberThrone.Editor
             };
         }
 
-        // ─── Utilities ───────────────────────────────
-
         private void CreateFolderRecursive(string path)
         {
             var parts = path.Split('/');
-            string current = parts[0]; // "Assets"
+            string current = parts[0];
 
             for (int i = 1; i < parts.Length; i++)
             {

@@ -2,18 +2,10 @@ using UnityEngine;
 
 namespace EmberThrone.Game
 {
-    /// <summary>
-    /// Screen shake from a decaying "trauma" value: hits add trauma, the shake is its square (small hits barely move,
-    /// big ones punch) and it settles by itself. It moves only the camera, around a rest position the layout sets,
-    /// never the board. Smooth noise, not a random jump every frame.
-    /// </summary>
     public sealed class CameraShake : MonoBehaviour
     {
-        /// <summary>Trauma lost per second: a full shake settles in about 0.6 s.</summary>
         const float Decay = 1.7f;
-        /// <summary>Largest offset, in board cells.</summary>
         const float MaxOffset = 0.22f;
-        /// <summary>Largest roll, in degrees.</summary>
         const float MaxRoll = 1.2f;
         const float Frequency = 28f;
 
@@ -24,14 +16,12 @@ namespace EmberThrone.Game
         public float Trauma => _trauma;
         public Vector3 Rest => _rest;
 
-        /// <summary>Hits add up; they never reset a shake that is already running.</summary>
         public void Add(float amount)
         {
             if (amount <= 0f) return;
             _trauma = Mathf.Clamp01(_trauma + amount);
         }
 
-        /// <summary>Where the camera sits when it is not shaking (the layout's camera position).</summary>
         public void SetRest(Vector3 position)
         {
             _rest = position;

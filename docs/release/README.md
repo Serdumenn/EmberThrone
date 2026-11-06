@@ -49,7 +49,7 @@ Kişisel geliştirici hesaplarında üretimden önce en az 12 test kullanıcıs�
 
 ## Sürüm ve commit düzeni
 - Tek branch vardır: `main`. Her zaman derlenebilir tutulur; her push'ta testler ve geliştirme APK'sı koşar.
-- Commit'leri sahibi GitHub Desktop'tan atar. Yapay zekâ ajanları işi commit edilmemiş değişiklik olarak bırakır.
+- Commit'ler GitHub Desktop'tan atılır.
 - Commit mesajı İngilizce, emir kipinde ve kısa: ilk satır en fazla ~60 karakter (`Add level select screen`, `Fix win save on early exit`). Gerekirse boş bir satırdan sonra açıklama.
 - Bir commit tek bir konuyu kapsar; ilgisiz değişiklikler ayrı commit'lere bölünür.
 - Yayın: GitHub Desktop → **History** → yayınlanacak commit'e sağ tık → **Create Tag** → `v0.1.0` → **Push origin**. Etiket imzalı AAB'yi üretir; sürüm adı etiketten alınır, sürüm kodu kendiliğinden artar (Player Settings'e dokunmak gerekmez).

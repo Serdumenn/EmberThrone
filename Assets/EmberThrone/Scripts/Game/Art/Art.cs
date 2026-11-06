@@ -4,25 +4,17 @@ using UnityEngine;
 
 namespace EmberThrone.Game
 {
-    /// <summary>Board colors. The UI's colors live in Resources/UI/Theme/Tokens.uss; the board ones mirror them.</summary>
     public static class Palette
     {
-        /// <summary>Camera clear color, only seen if the backdrop picture fails to load.</summary>
         public static readonly Color Background = Hex("1A1220");
-        /// <summary>Token --color-board-back, opaque so overlapping cell backs leave no seams.</summary>
         public static readonly Color BoardBack = Hex("221650");
-        /// <summary>Soft white light around the board (style frame v3).</summary>
         public static readonly Color BoardGlow = new Color(1f, 1f, 1f, 0.85f);
-        /// <summary>Tokens --color-tile and --color-tile-alt: the light checker cells.</summary>
         public static readonly Color TileLight = new Color(236f / 255f, 244f / 255f, 1f, 0.93f);
         public static readonly Color TileDark = new Color(208f / 255f, 224f / 255f, 1f, 0.93f);
         public static readonly Color Gold = Hex("FFD24A");
-        /// <summary>Token --color-select: the selected piece's frame.</summary>
         public static readonly Color Select = Hex("7AD83A");
-        /// <summary>Ice drawn over a piece stays a little see-through, so the piece under it is readable.</summary>
         public const float CoverAlpha = 0.82f;
 
-        // Index = GemColor, for effects. The pieces themselves are rendered art (Resources/Board).
         static readonly Color[] Gems =
         {
             Hex("E8463A"), Hex("45C05A"), Hex("3B8EF0"), Hex("F7C531"), Hex("A45CE6"), Hex("F2842B"),
@@ -37,18 +29,11 @@ namespace EmberThrone.Game
         }
     }
 
-    /// <summary>
-    /// Board art. Pieces, specials and obstacles are 3D renders made in Blender (ArtSource/blender, copied to
-    /// Resources/Board); every piece has its own shape as well as its color (UX-001 ACC-004). Small helper
-    /// shapes (tiles, selection frame, effect discs) are generated here. One world unit is one board cell.
-    /// </summary>
     public static class Art
     {
         const int HelperSize = 128;
         const string BoardFolder = "Board/";
 
-        // How many cells wide each render is drawn. Renders have empty space around the object:
-        // at 1.1 a gem fills about 80% of its cell (style frame v3).
         const float PieceCells = 1.1f;
         const float FloorCells = 1.08f;
         const float CoverCells = 1.12f;
@@ -62,10 +47,8 @@ namespace EmberThrone.Game
         static readonly Dictionary<string, Sprite> Cache = new Dictionary<string, Sprite>();
         static Material _material;
 
-        /// <summary>Unlit and always included in builds, so sprites need no asset and no lights in the 2D renderer.</summary>
         public static Material SpriteMaterial => _material != null ? _material : (_material = new Material(Shader.Find("Sprites/Default")));
 
-        /// <summary>Loads every sprite at startup, so the first special or effect never stalls a move.</summary>
         public static void Preload()
         {
             for (int color = 0; color < GemColor.Count; color++) Gem(color);
@@ -94,8 +77,6 @@ namespace EmberThrone.Game
             Splinter();
         }
 
-        // ---------------------------------------------------------------- rendered art
-
         public static Sprite Gem(int color) => Render(GemFiles[Mathf.Clamp(color, 0, GemFiles.Length - 1)]);
 
         public static Sprite Piece(PieceKind kind, int color, int hp)
@@ -119,18 +100,14 @@ namespace EmberThrone.Game
         public static Sprite Homing() => Render("sp_homing");
         public static Sprite ColorBomb() => Render("sp_orb");
 
-        /// <summary>Wooden crate; 2 hits adds steel straps, 3 or more is charred and padlocked.</summary>
         public static Sprite Box(int hp) => Render("ob_box" + Mathf.Clamp(hp, 1, 3));
 
-        /// <summary>The ember lantern the player brings down to the bottom of the board.</summary>
         public static Sprite Collectible() => Render("ob_lantern");
 
         public static Sprite Cover(int hp) => Render("ob_ice", CoverCells);
 
-        /// <summary>Smoldering ash on the cell; 2 hits or more is darker and more cracked.</summary>
         public static Sprite Floor(int hp) => Render(hp >= 2 ? "ob_floor2" : "ob_floor1", FloorCells);
 
-        /// <summary>The castle and village behind the board, 1080x1920; the game scales it to cover the view.</summary>
         public static Sprite Backdrop()
         {
             return Get("bg_game", () =>
@@ -156,9 +133,6 @@ namespace EmberThrone.Game
             return tex;
         }
 
-        // ---------------------------------------------------------------- generated helpers
-
-        /// <summary>A light cell: 93% of the cell, rounded, a little darker along its lower edge.</summary>
         public static Sprite Tile()
         {
             return Get("tile", () => Bake("tile", p =>
@@ -171,7 +145,6 @@ namespace EmberThrone.Game
             }));
         }
 
-        /// <summary>The dark back of one cell; the backs of neighboring cells overlap into one board shape.</summary>
         public static Sprite CellBack()
         {
             return Get("back", () => Bake("back", p =>
@@ -182,7 +155,6 @@ namespace EmberThrone.Game
             }));
         }
 
-        /// <summary>Soft-edged square for the light around the board.</summary>
         public static Sprite Glow()
         {
             return Get("glow", () => Bake("glow", p =>
@@ -241,7 +213,6 @@ namespace EmberThrone.Game
             });
         }
 
-        /// <summary>Four-pointed twinkle with a soft halo, for sparkles.</summary>
         public static Sprite Sparkle()
         {
             return Get("sparkle", () =>
@@ -258,7 +229,6 @@ namespace EmberThrone.Game
             });
         }
 
-        /// <summary>A rounded triangle chip: gem and ice shards.</summary>
         public static Sprite Shard()
         {
             return Get("shard", () =>
@@ -267,7 +237,6 @@ namespace EmberThrone.Game
                 return Bake("shard", p =>
                 {
                     float d = SdPolygon(p, tri) - 0.08f;
-                    // lighter upper half reads as a lit facet
                     var c = Color.Lerp(Color.white, new Color(0.78f, 0.78f, 0.78f), Smooth(0.1f, -0.3f, p.y - p.x * 0.4f) * 0.6f);
                     c.a = Coverage(d, 64);
                     return c;
@@ -275,7 +244,6 @@ namespace EmberThrone.Game
             });
         }
 
-        /// <summary>A long thin wood splinter.</summary>
         public static Sprite Splinter()
         {
             return Get("splinter", () => Bake("splinter", p =>
@@ -296,8 +264,6 @@ namespace EmberThrone.Game
             }
             return v;
         }
-
-        // ---------------------------------------------------------------- distance functions
 
         static float SdRoundBox(Vector2 p, float hx, float hy, float r)
         {
@@ -335,8 +301,6 @@ namespace EmberThrone.Game
             float aa = 2.4f / size;
             return 1f - Smooth(-aa, aa, d);
         }
-
-        // ---------------------------------------------------------------- baking
 
         static Sprite Get(string key, System.Func<Sprite> make)
         {

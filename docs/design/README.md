@@ -11,6 +11,7 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 | [style-frames/index.html](style-frames/index.html) | Style frame v3, Blender'da 3B render. 6 ekran var: ana sayfa (ada), seviye başı, oyun, kazandın, mağaza, sıralama. Ayrıca oyun ekranı 3 oranda, 3B parça seti ve 3 panel rengi seçeneği. Tarayıcıda açılır |
 | [../../ArtSource/blender/](../../ArtSource/blender/README.md) | 3B görselleri üreten Blender scriptleri (taşlar, ikonlar, maskot, ada) |
 | [design-system.md](design-system.md) | Design system "Kor": renk ve yazı token'ları, bileşenler, hareket, ses ve titreşim, erişilebilirlik, UI Toolkit uygulaması |
+| [tech-spec.md](tech-spec.md) | Teknik şartname: ekran ve ölçek, görsel ve font standartları, adlandırma, klasör yapısı, kod kuralları, seviye biçimi, test ve araç komutları |
 | [../../tools/ui_chrome/](../../tools/ui_chrome/render.py) | Arayüz parçalarını 9-slice PNG olarak çizen araç (UI Toolkit'te renk geçişi ve gölge olmadığı için) |
 | `Assets/EmberThrone/Resources/UI/` | Oyundaki arayüzün görünümü: tema (USS), parçalar, 3B ikonlar, font |
 | `GDD/Referances` (yalnız yerelde) | Türün lideri bir oyundan 9 referans ekranı; kalite çıtası ve ekran düzeni için, kopyalanmaz |
@@ -22,8 +23,7 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 
 | Rol | Kim | Sorumluluk |
 |---|---|---|
-| Creative Director, ürün sahibi, kapı onayları, commit, cihaz testi | Fatih | Vizyon, kararlar, GitHub Desktop'tan commit ve push, telefonda deneme |
-| Geliştirme, test, belgeler | Yapay zekâ ajanları | Kod, araçlar, otomatik testler, ekran görüntüsü turu, denetimler |
+| Creative Director, Art Direction, UX, Development, QA | Fatih | Vizyon, kapı onayları, üretim, uygulama, doğrulama, cihaz testi |
 
 ## Fazlar
 
@@ -42,13 +42,12 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 | Tarih | Karar | Gerekçe |
 |---|---|---|
 | 2026-11-05 | Oyun kuralları Unity'den bağımsız, deterministik C# motorunda | Unity'siz test, bot ile seviye ayarı, ileride tekrar ve sunucu doğrulaması |
-| 2026-11-05 | Tek boş sahne; sahne ve arayüz koddan kurulur | Prefab ve sahne referansı kırılmaz, ajanlar metin üzerinden çalışır |
+| 2026-11-05 | Tek boş sahne; sahne ve arayüz koddan kurulur | Prefab ve sahne referansı kırılmaz, her değişiklik kodda görünür |
 | 2026-11-05 | Geçici görseller kodla üretilir; renk + şekil birlikte (UX-001 ACC-004) | Faz 2'deki gerçek sanata kadar görsel dosya yok |
 | 2026-11-05 | Arayüz: uGUI, CanvasScaler Expand (1080×1920) | 1080×1920 alan her ekrana sığar; Pong UI Toolkit'e geçti, Faz 2'de yeniden değerlendirilir |
 | 2026-11-05 | Seviyede en fazla 3 hedef | SYS-CORE-001 DL-002; hedef paneli bu sayıya göre |
 | 2026-11-05 | APK yalnızca GitHub Actions'ta | Ürün sahibinin kararı; Pong ile aynı |
-| 2026-11-05 | Unity editörünü ajanlar MCP for Unity köprüsüyle yönetir | Ücretsiz, MIT, yalnız bu bilgisayardan erişilir |
-| 2026-11-05 | Unity AI paketleri projede kalır | Ürün sahibinin kararı |
+| 2026-11-05 | Unity Assistant ve Inference paketleri projede kalır | Ürün sahibinin kararı |
 | 2026-11-05 | Eski Faz 0 kodu (`Assets/_Game`) main'e birleştirildi, kendiliğinden başlamaz | Ürün sahibinin kararı; Faz 3'te kullanılabilir |
 | 2026-11-05 | Tek branch: `main`; commit'leri ürün sahibi atar | Ürün sahibinin kararı |
 | 2026-11-05 | Unity 6000.3.25f1 | Pong ile aynı sürüm; testler bu sürümde geçti |
@@ -79,7 +78,9 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 | 2026-11-06 | Seviye sonunda kalan hamleler havai fişeğe dönüşür; yalnız gösteri, oyunun durumunu değiştirmez | Kutlama hissi; skor sistemi yok, coin ödülü Faz 3'teki ekonomiyle gelecek |
 | 2026-11-06 | Sarsıntı ve titreşim gücü tek tablodan (`Feel.cs`), olayın büyüklüğüne göre | Küçük olaylar yalnız hafifçe titrer; büyük anlar büyür (brief kararı 5) |
 | 2026-11-06 | Güdümlü özel taş "kor kuşu", toplanan obje "kor feneri", zemin katmanı "için için yanan kül" | Kendi kimliğimiz ve kül krallık teması; türde yaygın uçak ve taç imgelerinden uzak durur |
-| 2026-11-06 | Teknik şartname `CLAUDE.md`'de durur; Pong'daki `docs/design/tech-spec.md`'nin karşılığı | Ajanlar onu her oturumda okur; iki ayrı kopya zamanla birbirinden kopar. Görsel kurallar `design-system.md`'de |
+| 2026-11-06 | Teknik şartname [tech-spec.md](tech-spec.md)'de, Pong'daki gibi | Klasör yapısı, kurallar, seviye biçimi, testler ve araç komutları tek yerde |
+| 2026-11-06 | Unity testleri ve ekran turu batch modunda çalışır; editör köprüsü kaldırıldı | Köprü 8080 portunda Docker Desktop ile çakışıyordu; batch modu editörü açmadan aynı işi yapar |
+| 2026-11-06 | Kodda yorum satırı yok, belgeler nötr dilde, kişisel çalışma dosyaları git'e girmez; commit geçmişi tek yazarlı olarak yeniden yazıldı | Pong ile aynı kural; public repo profesyonel görünür |
 
 ## Asset takibi
 
@@ -106,6 +107,5 @@ Durumlar: `Brief → WIP → Review → Approved → Integrated`
 | Varlık | Lisans | Kaynak | Not |
 |---|---|---|---|
 | Baloo 2 (değiştirilmiş) | SIL OFL 1.1 | fonts.google.com | Değişken fonttan sabit 700/800 ağırlık, yalnız Latin harfleri. Lisans metni `Assets/EmberThrone/Resources/UI/Fonts/OFL.txt` |
-| MCP for Unity | MIT | github.com/CoplayDev/unity-mcp | Editörü ajanlarla yönetmek için |
 | Blender 5.1 | GPL (araç) | blender.org | Render edilen görseller bizimdir; modeller ve scriptler `ArtSource/blender/` |
 | `GDD/Referances` ekran görüntüleri | Başkasına ait | — | Yalnız yerelde, git'e girmez; yalnız kalite kıyası için |

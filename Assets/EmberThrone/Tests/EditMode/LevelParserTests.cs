@@ -35,7 +35,6 @@ namespace EmberThrone.Core.Tests
             Assert.AreEqual(GemColor.Red, level.Goals[1].Color);
             Assert.AreEqual(2, level.Collectibles.Total);
 
-            // top row is y = 3
             Assert.IsFalse(level.GetCell(0, 3).Exists);
             Assert.IsTrue(level.GetCell(1, 3).Spawner, "top existing cell of a column is a spawner by default");
             Assert.IsTrue(level.GetCell(0, 2).Spawner, "column 0 starts below the hole");

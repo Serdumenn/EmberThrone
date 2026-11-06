@@ -1,11 +1,7 @@
-"""EmberThrone environment scenes: the kingdom island (home map) and the castle view behind the board.
-Load et_core.py and et_assets.py first. The island shows the theme: restored, warm districts and one
-ash-grey district that the player has not rekindled yet.
-"""
 import bpy, bmesh, math, random
 from mathutils import Vector
 
-ASH_FROM, ASH_TO = 0.25, 1.85  # angle range (radians) of the unrestored district, upper right of the screen
+ASH_FROM, ASH_TO = 0.25, 1.85
 
 
 def island_radius(t):
@@ -28,7 +24,6 @@ def is_ash(x, y):
 
 
 def mat_ground(name, a, b, ash_a, ash_b, scale=1.4):
-    """Grass that turns to ash inside the unrestored district, with a noisy border."""
     m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; p = _p(m)
     tc = nt.nodes.new('ShaderNodeTexCoord')
     noise = nt.nodes.new('ShaderNodeTexNoise'); noise.inputs['Scale'].default_value = scale; noise.inputs['Detail'].default_value = 4
@@ -220,18 +215,15 @@ def build_island(seed=7, keep_clear=None):
     cloud_bank(-6.6, -6.2, 1.2, 1.0, rng, cloud)
     smoke = mat_glossy('smoke', '#8a8792', rough=0.9, coat=0.0, emis=0.15, emis_color='#9a98a2')
     cloud_bank(2.6, 5.2, 2.6, 0.75, rng, smoke)
-    # sand paths from the castle gate
     path_m = mat_glossy('path', '#f0d49a', rough=0.85, coat=0)
     for ang in (-100, -40, -150, 200):
         a = math.radians(ang)
         pts = [(2.0 * math.cos(a), 2.0 * math.sin(a) + 0.2, 0.64), (3.2 * math.cos(a + 0.2), 3.2 * math.sin(a + 0.2) * 1.2, 0.64), (4.2 * math.cos(a + 0.05), 4.2 * math.sin(a + 0.05) * 1.25, 0.64)]
         t = tube(pts, 0.16, path_m); t.scale = (1, 1, 0.12)
-    # shore rocks
     rock = mat_glossy('rock', '#9a8f86', rough=0.7, coat=0.1)
     for i in range(14):
         tt = rng.uniform(0, 2 * math.pi); x, y = island_xy(tt, 1.1)
         sphere(rng.uniform(0.12, 0.3), loc=(x, y, 0.1), mat=rock, scale=(1.2, 1, 0.7), seg=12)
-    # pier and a little boat
     plank = mat_wood('pier', '#d8924e', '#9a5a2a', scale=0.8)
     tt = math.radians(-70); x, y = island_xy(tt, 1.02)
     box((0.5, 1.8, 0.08), loc=(x + 0.2, y - 0.9, 0.28), mat=plank, bev=0.02)
@@ -285,7 +277,6 @@ def render_island(name='bg_map', samples=96):
 
 
 def render_game_bg(name='bg_game', samples=64):
-    """Close view of the castle from the meadow: sky and roofs above the board, grass and houses below."""
     reset_scene()
     sc = setup_render(1080, 1920, samples, transparent=False)
     sc.render.image_settings.file_format = 'JPEG'; sc.render.image_settings.quality = 90

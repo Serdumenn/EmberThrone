@@ -27,7 +27,6 @@ namespace EmberThrone.Core.Tests
         [Test]
         public void Pcg32_KnownValues_AreStable()
         {
-            // Locks the algorithm: if this changes, saved replays and server validation break.
             var rng = new Pcg32(42);
             var first = new[] { rng.NextUInt(), rng.NextUInt(), rng.NextUInt() };
             var again = new Pcg32(42);

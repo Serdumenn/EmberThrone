@@ -1,20 +1,9 @@
-"""Builds the game's two font files from Google Fonts' Baloo 2 variable font (SIL OFL, no reserved name).
-
-    python tools/fonts/make_baloo2.py Baloo2[wght].ttf
-    (download: https://github.com/google/fonts/tree/main/ofl/baloo2)
-
-Unity's text engine reads only the default instance of a variable font, so this writes static
-Bold (700) and ExtraBold (800) instances, subset to Latin: the Devanagari half of the family
-is 90% of the file and the game does not use it. Output: Assets/EmberThrone/Resources/UI/Fonts.
-Needs fontTools (pip install fonttools). ThemeTests checks the Turkish letters afterwards.
-"""
 import os, pathlib, sys
 from fontTools.ttLib import TTFont
 from fontTools.varLib.instancer import instantiateVariableFont
 from fontTools import subset
 
 OUT = pathlib.Path(__file__).resolve().parents[2] / 'Assets' / 'EmberThrone' / 'Resources' / 'UI' / 'Fonts'
-# Basic Latin, Latin-1, Latin Extended-A (Turkish), punctuation, currency, letterlike symbols, arrows, minus.
 RANGES = [(0x20, 0x7E), (0xA0, 0x24F), (0x2000, 0x206F), (0x20A0, 0x20CF), (0x2100, 0x214F), (0x2190, 0x21FF), (0x2212, 0x2212)]
 TURKISH = 'şŞğĞıİçÇöÖüÜ'
 

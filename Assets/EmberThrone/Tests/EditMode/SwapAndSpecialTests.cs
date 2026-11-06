@@ -117,7 +117,6 @@ namespace EmberThrone.Core.Tests
             Assert.IsTrue(o.Accepted);
             var act = o.EventsOf<SpecialActivatedEvent>().Single();
             Assert.AreEqual(GemColor.Green, act.TargetColor);
-            // Only look at the blast itself; later cascades may clear other colors.
             var blast = o.Steps.First(st => st.Kind == StepKind.Clear).Events.OfType<PieceClearedEvent>().ToList();
             Assert.AreEqual(5, blast.Count);
             Assert.IsTrue(blast.All(e => e.Color == GemColor.Green));

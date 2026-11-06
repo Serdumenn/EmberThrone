@@ -3,13 +3,6 @@ using UnityEngine;
 
 namespace EmberThrone.EditorTools
 {
-    /// <summary>
-    /// Import rules for the game's images: Resources/UI (interface) and Resources/Board (3D renders of pieces
-    /// and obstacles, the game backdrop). The 9-slice chrome keeps its exact pixel size, because USS slice values
-    /// are in pixels. Rendered art gets mipmaps, as it is drawn smaller than it is rendered; board pieces are
-    /// capped at 256 px, about twice a cell on a phone. Android gets ASTC 4x4 (a quarter of the memory, no
-    /// visible loss on gradients); the editor keeps them uncompressed.
-    /// </summary>
     sealed class GameTextureImport : AssetPostprocessor
     {
         const string Ui = "Assets/EmberThrone/Resources/UI/";

@@ -4,24 +4,19 @@ using NUnit.Framework;
 
 namespace EmberThrone.Core.Tests
 {
-    /// <summary>Plays thousands of random moves on feature-heavy boards and checks engine invariants.</summary>
     public class FuzzAndDeterminismTests
     {
         static readonly string[] Levels =
         {
-            // open board, all colors
             @"{""moves"": 40, ""colors"": 6, ""goals"": [{""type"":""color"",""color"":""R"",""count"":60}],
                ""board"": [""........"", ""........"", ""........"", ""........"", ""........"", ""........"", ""........"", ""........"", ""........""]}",
-            // boxes, floor, cover, starting specials
             @"{""moves"": 40, ""colors"": 5, ""goals"": [{""type"":""box""}, {""type"":""floor""}, {""type"":""cover""}],
                ""board"": [""........"", "".-....|."", ""..2332.."", ""..3..3.."", ""..2^*2.."", ""........"", "".@....@."", ""1......1"", ""........""],
                ""floor"": [""........"", ""........"", ""........"", ""...11..."", ""........"", ""11111111"", ""11111111"", "".111111."", ""22222222""],
                ""cover"": [""........"", ""........"", ""........"", ""........"", ""........"", ""..1..1.."", ""...22..."", ""........"", ""1......1""]}",
-            // shaped board with holes and collectibles
             @"{""moves"": 40, ""colors"": 4, ""goals"": [{""type"":""collectible""}, {""type"":""color"",""color"":""B"",""count"":30}],
                ""board"": [""##....##"", ""#......#"", ""...$$..."", ""...##..."", ""..1##1.."", ""........"", ""#......#"", ""##....##""],
                ""collectibles"": {""total"": 4, ""maxOnBoard"": 2, ""spawnChance"": 0.3}}",
-            // narrow funnel forcing diagonal refills
             @"{""moves"": 40, ""colors"": 5, ""goals"": [{""type"":""box""}],
                ""board"": [""#..#..#"", ""......."", "".1.1.1."", ""......."", ""1.1.1.1"", ""......."", ""......."" ]}",
         };
@@ -126,7 +121,6 @@ namespace EmberThrone.Core.Tests
                     if (!m.HasValue) break;
                     s.Apply(m.Value);
                     int onBoard = s.Board.CountPieces(PieceKind.Collectible);
-                    // 2 placed in the layout + spawned ones, never more than maxOnBoard from spawners on top of the layout ones.
                     Assert.LessOrEqual(onBoard, 4);
                     counts.Add(onBoard);
                 }

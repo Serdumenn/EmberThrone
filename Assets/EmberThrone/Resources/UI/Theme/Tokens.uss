@@ -1,5 +1,3 @@
-/* Design tokens, theme "Kor". The only file allowed to contain colors (ThemeTests checks it).
-   Every token is explained in docs/design/design-system.md. */
 :root {
     --color-primary-light: #FF9440;
     --color-primary: #E2541A;

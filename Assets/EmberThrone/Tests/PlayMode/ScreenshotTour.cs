@@ -8,15 +8,6 @@ using UnityEngine.TestTools;
 
 namespace EmberThrone.Game.Tests
 {
-    /// <summary>
-    /// Plays through every screen and animation in slow motion and saves PNGs to TestResults/screens,
-    /// so a person can check how the game looks without playing it. The game draws into its own
-    /// render texture and the UI panel into another, so any phone shape can be shot in one run, whatever
-    /// the Game view's size.
-    /// Run by name: test_names = EmberThrone.Game.Tests.ScreenshotTour.TakeAll (bridge), or with the editor closed:
-    /// Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter EmberThrone.Game.Tests.ScreenshotTour.TakeAll
-    /// (no -nographics: the shots need a graphics device).
-    /// </summary>
     [Explicit("Takes screenshots; run on demand.")]
     public class ScreenshotTour
     {
@@ -67,8 +58,6 @@ namespace EmberThrone.Game.Tests
             _target = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
             _app.Camera.targetTexture = _target;
 
-            // The UI panel draws into its own transparent texture (it would otherwise go straight to the
-            // screen); Shot lays it over the board. Its size also sets the panel's scale, as a screen would.
             _uiTarget = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
             var settings = _app.Ui.Settings;
             settings.targetTexture = _uiTarget;
@@ -109,14 +98,10 @@ namespace EmberThrone.Game.Tests
 
         IEnumerator Shot(string name)
         {
-            // Not WaitForEndOfFrame: batch mode has no Game view, so it never comes. The panel repaints its
-            // texture every frame by itself; the board camera is drawn here, so this also runs headless.
             yield return null;
             _app.Camera.Render();
             var board = Read(_target);
             var ui = Read(_uiTarget);
-            // The panel's texture holds premultiplied color, blended in linear space and stored as sRGB, so the
-            // UI goes over the board the same way: ui + board * (1 - ui alpha), in linear space.
             for (int i = 0; i < board.Length; i++)
             {
                 var u = ui[i];
@@ -153,7 +138,6 @@ namespace EmberThrone.Game.Tests
             while (Game.IsBusy) yield return null;
         }
 
-        /// <summary>Waits a moment of game time, so a shot lands in the middle of an animation.</summary>
         static IEnumerator GameTime(float seconds)
         {
             float end = Time.time + seconds;
@@ -165,7 +149,6 @@ namespace EmberThrone.Game.Tests
         {
             yield return Shot("01_seviye_secimi");
 
-            // A level as it opens, then the tap selection.
             yield return Begin(_app.Levels[0]);
             yield return Shot("02_tahta_ve_hud");
             var firstMove = Game.Session.FindValidMoves().First(m => m.Type == MoveType.Swap);
@@ -174,7 +157,6 @@ namespace EmberThrone.Game.Tests
             yield return Shot("03_secili_tas");
             Game.OnTap(firstMove.A);
 
-            // A swap without a match goes and comes back.
             yield return Begin(Level(20, null, Even, Odd, Even, Odd, Even));
             Time.timeScale = SlowMotion;
             Game.RequestSwap(new GridPos(1, 1), new GridPos(2, 1));
@@ -185,7 +167,6 @@ namespace EmberThrone.Game.Tests
             Time.timeScale = 1f;
             yield return WaitIdle();
 
-            // A match that makes a special: gems fly together, then pieces fall and new ones arrive.
             yield return Begin(Level(20, null, "BPOGY", "OGYPO", "RRBRY", "OGRPO", "YPOGY", "OGYPO", "YPOGY"));
             Time.timeScale = SlowMotion;
             Game.RequestSwap(new GridPos(2, 3), new GridPos(2, 4));
@@ -196,13 +177,11 @@ namespace EmberThrone.Game.Tests
             Time.timeScale = 1f;
             yield return WaitIdle();
 
-            // Specials firing.
             yield return Fire("-", "08_roket_ates");
             yield return Fire("*", "09_bomba_ates");
             yield return Fire("@", "10_renk_bombasi_ates", new GridPos(3, 3));
             yield return Fire("^", "11_gudumlu_ates");
 
-            // A combo: the rocket and bomb swapped together.
             yield return Begin(Level(20, null, "YPOGYO", "OGYPOG", "YP-*YO", "OGYPOG", "YPOGYO", "OGYPOG", "YPOGYO"));
             yield return Shot("12_ozel_taslar_tahtada");
             Time.timeScale = SlowMotion;
@@ -214,7 +193,6 @@ namespace EmberThrone.Game.Tests
             Time.timeScale = 1f;
             yield return WaitIdle();
 
-            // Obstacles in the real levels.
             yield return Begin(_app.Levels[2]);
             yield return Shot("14_kutulu_seviye");
             yield return Begin(_app.Levels[3]);
@@ -226,11 +204,9 @@ namespace EmberThrone.Game.Tests
             yield return Begin(_app.Levels[6]);
             yield return Shot("18_toplanan_obje_seviyesi");
 
-            // Win and lose windows.
             yield return Win("19_kazandin", "19a_kutlama_havai_fisek");
             yield return Lose("20_kaybettin");
 
-            // Other screen shapes. The tall ones get a notch and a gesture bar through the safe area.
             yield return Shape("21_uzun_telefon_20x9", 1080, 2400, new Rect(0f, 90f, 1080f, 2220f));
             yield return Shape("22_cok_uzun_telefon_21x9", 1080, 2520, new Rect(0f, 90f, 1080f, 2330f));
             yield return Shape("23_kisa_telefon_16x9", 720, 1280, null);

@@ -1,10 +1,3 @@
-"""EmberThrone render pipeline: shared scene, light, camera and material helpers.
-
-Runs inside Blender 5.1 (through the MCP bridge or Blender's Python console):
-    exec(open(r"<repo>/ArtSource/blender/et_core.py", encoding="utf-8").read())
-Asset builders live in et_assets.py; render outputs go to OUT_DIR as transparent PNG sprites.
-Every look decision (colors, light positions, bevel sizes) is here so all assets share one style.
-"""
 import bpy, bmesh, math, os
 from mathutils import Vector
 
@@ -18,7 +11,6 @@ def srgb(h, a=1.0):
     return tuple(((x + 0.055) / 1.055) ** 2.4 if x > 0.04045 else x / 12.92 for x in c) + (a,)
 
 
-# ---------------------------------------------------------------- scene
 def reset_scene():
     for o in list(bpy.data.objects): bpy.data.objects.remove(o, do_unlink=True)
     for coll in (bpy.data.meshes, bpy.data.materials, bpy.data.curves, bpy.data.lights, bpy.data.cameras, bpy.data.metaballs):
@@ -90,7 +82,6 @@ def area(name, loc, target=(0, 0, 0), energy=1000, size=2.0, color='#ffffff', sh
 
 
 def studio_rig(scale=1.0, warm_rim=True):
-    """Sprite light rig: crisp key from top-left, warm and cool rims for the glow edge, soft fill, big top box."""
     s = scale
     area('Key', (-5 * s, -7 * s, 7 * s), energy=2400 * s * s, size=1.6 * s, color='#fff6ea')
     area('Fill', (7 * s, -6 * s, 1 * s), energy=160 * s * s, size=7 * s, color='#fff0dc')
@@ -119,7 +110,6 @@ def render(name, out_dir=None):
     return path
 
 
-# ---------------------------------------------------------------- materials
 def _p(m):
     return m.node_tree.nodes['Principled BSDF']
 
@@ -140,8 +130,6 @@ def mat_glossy(name, color, rough=0.16, coat=1.0, emis=0.0, emis_color=None, met
 
 
 def mat_gem(name, color, glow, inner=0.55, rough=0.06):
-    """Candy-gem shader: saturated glossy body, coat for the wet shine, and an inner glow that is
-    strongest on faces looking at the camera (fakes light passing through the stone)."""
     m = mat_glossy(name, color, rough=rough, coat=1.0)
     nt = m.node_tree; p = _p(m)
     p.inputs['IOR'].default_value = 1.75
@@ -198,14 +186,12 @@ def mat_ice(name='Ice'):
     noise = nt.nodes.new('ShaderNodeTexNoise'); noise.inputs['Scale'].default_value = 4.0; noise.inputs['Detail'].default_value = 8.0
     bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.35
     nt.links.new(noise.outputs['Fac'], bump.inputs['Height']); nt.links.new(bump.outputs['Normal'], p.inputs['Normal'])
-    # frosty cracks: thin white lines from a Voronoi edge pattern
     vor = nt.nodes.new('ShaderNodeTexVoronoi'); vor.feature = 'DISTANCE_TO_EDGE'; vor.inputs['Scale'].default_value = 1.6
     mr = nt.nodes.new('ShaderNodeMapRange'); mr.inputs['From Max'].default_value = 0.012; mr.inputs['To Min'].default_value = 0.8; mr.inputs['To Max'].default_value = 0.3
     nt.links.new(vor.outputs['Distance'], mr.inputs['Value']); nt.links.new(mr.outputs['Result'], p.inputs['Emission Strength'])
     return m
 
 
-# ---------------------------------------------------------------- geometry
 def link(ob):
     bpy.context.scene.collection.objects.link(ob); return ob
 
@@ -233,7 +219,6 @@ def smooth_by_angle(ob, angle=35):
 
 
 def round_corners(pts, r, seg=4):
-    """Replace each polygon corner by a small arc so shapes read soft and toy-like."""
     out = []
     n = len(pts)
     for i in range(n):
@@ -257,7 +242,6 @@ def star_pts(n=5, ro=1.0, ri=0.5, rot=90.0):
 
 
 def prism(name, pts2d, depth, mat=None, y0=0.0):
-    """Extrude a 2D outline (x, z) toward the camera (-Y) by depth."""
     bm = bmesh.new()
     vs = [bm.verts.new((x, y0, z)) for x, z in pts2d]
     f = bm.faces.new(vs)
@@ -268,13 +252,12 @@ def prism(name, pts2d, depth, mat=None, y0=0.0):
 
 
 def gem(name, outline, mat, table=0.56, mid=0.82, crown=0.42, band=0.12, back=0.6, bev=0.035, dome=0.12):
-    """Faceted gem facing the camera: table, two crown tiers, a girdle band and a pavilion."""
     bm = bmesh.new(); n = len(outline)
     cx = sum(p[0] for p in outline) / n; cz = sum(p[1] for p in outline) / n
     sc = lambda k, y: [bm.verts.new((cx + (x - cx) * k, y, cz + (z - cz) * k)) for x, z in outline]
     g0 = sc(1.0, 0.0); g1 = sc(1.0, band); m1 = sc(mid, -crown * 0.55); tb = sc(table, -crown)
     bk = bm.verts.new((cx, band + back, cz))
-    tc = bm.verts.new((cx, -crown - dome, cz))  # low dome on the table: its facets catch the light at different angles
+    tc = bm.verts.new((cx, -crown - dome, cz))
     for i in range(n):
         bm.faces.new((tb[(i + 1) % n], tb[i], tc))
     for i in range(n):

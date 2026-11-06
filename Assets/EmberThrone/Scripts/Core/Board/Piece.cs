@@ -1,26 +1,14 @@
 namespace EmberThrone.Core
 {
-    /// <summary>
-    /// Everything that can occupy a cell's piece layer.
-    /// Specials are colorless: they never take part in color matches and are fired by tap,
-    /// by swapping, or by being hit.
-    /// </summary>
     public enum PieceKind
     {
         Gem = 0,
-        /// <summary>Clears its whole row.</summary>
         RocketH = 1,
-        /// <summary>Clears its whole column.</summary>
         RocketV = 2,
-        /// <summary>Area blast (radius from GameRules).</summary>
         Bomb = 3,
-        /// <summary>Hits a plus shape, then flies to the most useful target.</summary>
         Homing = 4,
-        /// <summary>Clears every gem of one color.</summary>
         ColorBomb = 5,
-        /// <summary>Static blocker with HP. Damaged by adjacent matches and by blasts.</summary>
         Box = 6,
-        /// <summary>Falls like a gem, immune to blasts; collected when it reaches the bottom.</summary>
         Collectible = 7,
     }
 
@@ -36,14 +24,11 @@ namespace EmberThrone.Core
 
         public static bool IsBlocker(this PieceKind kind) => kind == PieceKind.Box;
 
-        /// <summary>Whether gravity can move this piece (cover is checked separately).</summary>
         public static bool CanFall(this PieceKind kind) => kind != PieceKind.Box;
 
-        /// <summary>Whether the player may grab this piece (cover is checked separately).</summary>
         public static bool IsSwappable(this PieceKind kind) => kind != PieceKind.Box;
     }
 
-    /// <summary>Gem color indices. Levels use the first N colors.</summary>
     public static class GemColor
     {
         public const int None = -1;
@@ -70,11 +55,8 @@ namespace EmberThrone.Core
     {
         public readonly int Id;
         public PieceKind Kind;
-        /// <summary>Gem color (0..5); -1 for colorless pieces.</summary>
         public int Color;
-        /// <summary>Remaining hit points for blockers.</summary>
         public int Hp;
-        /// <summary>Set while a special is queued for activation during resolution.</summary>
         internal bool Triggered;
 
         public Piece(int id, PieceKind kind, int color, int hp)

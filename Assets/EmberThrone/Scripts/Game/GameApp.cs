@@ -7,10 +7,6 @@ using UnityEngine.SceneManagement;
 
 namespace EmberThrone.Game
 {
-    /// <summary>
-    /// Entry point. The Bootstrap scene is empty on purpose: this class builds the camera, the UI and
-    /// every screen from code, so there are no prefabs or scene references to break.
-    /// </summary>
     public sealed class GameApp : MonoBehaviour
     {
         public const string BootstrapScene = "Bootstrap";
@@ -76,7 +72,6 @@ namespace EmberThrone.Game
 
         void Update()
         {
-            // Android's back button arrives as Escape.
             var keyboard = Keyboard.current;
             if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
             if (Game != null) ShowLevelSelect();
@@ -93,7 +88,6 @@ namespace EmberThrone.Game
 
         public void StartLevel(int index) => StartLevel(_levels[index], index, Environment.TickCount);
 
-        /// <summary>Starts any level definition. The seed makes the game reproducible.</summary>
         public void StartLevel(LevelDefinition level, int index, int seed)
         {
             CloseCurrent();
@@ -117,7 +111,6 @@ namespace EmberThrone.Game
         }
     }
 
-    /// <summary>Levels from Resources/Levels, and the player's stars (local for now; cloud save is Phase 4).</summary>
     public static class LevelProgress
     {
         const string LevelsFolder = "Levels";
@@ -143,7 +136,6 @@ namespace EmberThrone.Game
 
         public static int GetStars(int levelId) => PlayerPrefs.GetInt(StarsKey + levelId, 0);
 
-        /// <summary>Keeps the best result.</summary>
         public static void SaveStars(int levelId, int stars)
         {
             if (stars <= GetStars(levelId)) return;

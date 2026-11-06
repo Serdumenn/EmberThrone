@@ -32,7 +32,7 @@ GDD'deki sıra korunur: çatışmada üstteki kazanır (PTH-001).
 3. **Her eşleşme hissedilir, büyük anlar büyür.** Temel geri bildirim her zaman; zengin kutlama yalnız kilit anlarda: combo, kazanma, alan onarımı (UX-001 §6).
 4. **İlerleme görünür (PIL-02).** Her oturumda krallıkta bir şey değişir.
 5. **Para hız kazandırır, avantaj değil (PIL-03).** Ücretsiz oyuncu her seviyeyi geçebilir.
-6. **Tek kişi ve yapay zekâ ile sürdürülebilir (PIL-04).** Seviyeler ve etkinlikler kural ve araçla üretilir (bot simülatörü), elle değil.
+6. **Tek kişiyle sürdürülebilir (PIL-04).** Seviyeler ve etkinlikler kural ve araçla üretilir (bot simülatörü), elle değil.
 7. **Okunabilirlik.** Metin kontrastı en az 4.5:1, dokunma hedefi en az 48dp.
 
 ## Görsel yön (style frame'ler için çerçeve)
@@ -40,7 +40,7 @@ GDD'deki sıra korunur: çatışmada üstteki kazanır (PTH-001).
 - **Kalite çıtası:** parlak, hacimli taşlar ve kalın çerçeveli paneller
 - **Ekran düzeni:** büyük yeşil "Oyna" butonu, altta sekme çubuğu, üstte hedef ve hamle kutusu, haritada bölge onarımı, oyun öncesi booster seçimi
 
-**Kopyalanmayacaklar** (CLAUDE.md kural 7): kırmızı-altın kraliyet paleti ve kral maskotu, isimler, ikonlar, booster çizimleri. Tür dili tanıdık olacak, kimlik bize ait olacak.
+**Kopyalanmayacaklar** ([tech-spec.md](tech-spec.md), kural 7): kırmızı-altın kraliyet paleti ve kral maskotu, isimler, ikonlar, booster çizimleri. Tür dili tanıdık olacak, kimlik bize ait olacak.
 
 **EmberThrone'un kimliği:** Korları sönmüş, kül grisine dönmüş bir krallık. Oyuncu ilerledikçe sıcak ışıklar yanar, renk geri gelir. Ana duygu "soğuktan sıcağa dönüş".
 
@@ -70,7 +70,7 @@ Ana sayfa fikri: ada üstünde kül olmuş mahalleler var; oyuncu yıldız harca
 - Unity 6000.3.25f1, URP 2D, Android API 36 (en düşük 25), IL2CPP, ARMv7 + ARM64
 - Orta seviye telefonda sabit 60 FPS; ilk AAB 100 MB'ın altında (TECH-001)
 - Animasyon süreleri UX-001 §6.2'ye bağlı (ANI-001…020); olay başına en fazla 50 parçacık
-- Bütün görsel, ses ve fontlar ticari kullanıma ve yeniden dağıtıma uygun lisanslı (repo public). Yapay zekâ ile üretilen görsellerin kaynağı `ArtSource/` altında tutulur
+- Bütün görsel, ses ve fontlar ticari kullanıma ve yeniden dağıtıma uygun lisanslı (repo public). Görsellerin kaynağı (Blender scriptleri) `ArtSource/` altında tutulur
 - Oyun kuralları deterministik C# motorunda: bot ile seviye ayarı ve ileride sunucu doğrulaması için
 - Repo, CI ve yayın düzeni PongMobilePrototype ile aynı
 

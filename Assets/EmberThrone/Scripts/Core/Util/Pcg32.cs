@@ -3,11 +3,6 @@ using System.Collections.Generic;
 
 namespace EmberThrone.Core
 {
-    /// <summary>
-    /// Deterministic PCG32 random generator. Produces identical sequences on every
-    /// platform and runtime (Unity Mono/IL2CPP, .NET), which keeps replays, bot
-    /// simulations and server-side validation in sync. Never use System.Random in Core.
-    /// </summary>
     public sealed class Pcg32
     {
         const ulong Multiplier = 6364136223846793005UL;
@@ -36,7 +31,6 @@ namespace EmberThrone.Core
         public ulong State => _state;
         public ulong Increment => _inc;
 
-        /// <summary>Restores a generator from <see cref="State"/> and <see cref="Increment"/> (save games).</summary>
         public static Pcg32 FromState(ulong state, ulong increment) => new Pcg32(state, increment, true);
 
         public Pcg32 Clone() => new Pcg32(_state, _inc, true);
@@ -53,7 +47,6 @@ namespace EmberThrone.Core
             }
         }
 
-        /// <summary>Uniform integer in [0, maxExclusive) without modulo bias.</summary>
         public int Next(int maxExclusive)
         {
             if (maxExclusive <= 0) throw new ArgumentOutOfRangeException(nameof(maxExclusive));
@@ -66,14 +59,12 @@ namespace EmberThrone.Core
             }
         }
 
-        /// <summary>Uniform integer in [minInclusive, maxExclusive).</summary>
         public int Next(int minInclusive, int maxExclusive)
         {
             if (maxExclusive <= minInclusive) throw new ArgumentOutOfRangeException(nameof(maxExclusive));
             return minInclusive + Next(maxExclusive - minInclusive);
         }
 
-        /// <summary>Uniform double in [0, 1) with 53 bits of precision.</summary>
         public double NextDouble()
         {
             ulong a = NextUInt() >> 5;
@@ -83,7 +74,6 @@ namespace EmberThrone.Core
 
         public bool Chance(double probability) => NextDouble() < probability;
 
-        /// <summary>Fisher-Yates shuffle.</summary>
         public void Shuffle<T>(IList<T> list)
         {
             for (int i = list.Count - 1; i > 0; i--)

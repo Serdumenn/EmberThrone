@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace EmberThrone.Game
 {
-    /// <summary>
-    /// Pooled sprite effects: pops, rings, beams, projectiles and particles. Everything here is cosmetic and runs on
-    /// the tween clock (scaled time), so slow motion and fast tests slow and speed it too. Particle spreads come from a
-    /// hash of the position, so the same move always looks the same.
-    /// </summary>
     public sealed class BoardFx
     {
         public const int SortOrder = 30;
@@ -59,7 +54,6 @@ namespace EmberThrone.Game
             _pool.Push(r);
         }
 
-        /// <summary>A ring grows and fades. Radius is in cells.</summary>
         public float Ring(Vector3 pos, Color color, float fromRadius, float toRadius, float delay, float duration)
         {
             Tweens.After(delay, () =>
@@ -77,10 +71,6 @@ namespace EmberThrone.Game
             return delay + duration;
         }
 
-        /// <summary>
-        /// The burst when a piece is cleared: a ring, shards in its color that arc down, and a twinkle.
-        /// Returns when the pop reads as done; the shards keep falling while the board moves on.
-        /// </summary>
         public float Burst(Vector3 pos, Color color, float delay, int shards = 6)
         {
             var ring = color;
@@ -91,7 +81,6 @@ namespace EmberThrone.Game
             return delay + 0.26f;
         }
 
-        /// <summary>A crate breaking: wood splinters and a puff of dust.</summary>
         public float Splinters(Vector3 pos, float delay, int count = 7)
         {
             Throw(Art.Splinter(), pos, Wood, delay, count, 0.34f, 3.4f, 10f, 0.5f, 0.5f, 2);
@@ -99,7 +88,6 @@ namespace EmberThrone.Game
             return delay + 0.26f;
         }
 
-        /// <summary>Ice cracking: pale shards and a few twinkles.</summary>
         public float IceShards(Vector3 pos, float delay)
         {
             Throw(Art.Shard(), pos, Ice, delay, 8, 0.22f, 3.6f, 8f, 0.45f, 0.4f, 3);
@@ -107,7 +95,6 @@ namespace EmberThrone.Game
             return delay + 0.26f;
         }
 
-        /// <summary>Ash blown away: grey puffs, and embers that drift up.</summary>
         public float AshPuff(Vector3 pos, float delay)
         {
             Puff(pos, Ash, delay, 4, 0.5f);
@@ -115,7 +102,6 @@ namespace EmberThrone.Game
             return delay + 0.26f;
         }
 
-        /// <summary>A firework: flash, wide ring, colored shards and white twinkles.</summary>
         public float Firework(Vector3 pos, Color color, float delay)
         {
             var glow = color;
@@ -127,7 +113,6 @@ namespace EmberThrone.Game
             return delay + 0.4f;
         }
 
-        /// <summary>A glowing spark that flies with a short trail, for the end-of-level fireworks.</summary>
         public float Spark(Vector3 from, Vector3 to, Color color, float delay, float duration)
         {
             const int trail = 5;
@@ -155,7 +140,6 @@ namespace EmberThrone.Game
             return delay + duration;
         }
 
-        /// <summary>Twinkles that pop up around a point and spin away.</summary>
         public void Sparkles(Vector3 pos, int count, float delay, float spread, float size)
         {
             for (int i = 0; i < count; i++)
@@ -181,7 +165,6 @@ namespace EmberThrone.Game
             }
         }
 
-        /// <summary>Soft round clouds that swell and fade.</summary>
         void Puff(Vector3 pos, Color color, float delay, int count, float size)
         {
             for (int i = 0; i < count; i++)
@@ -204,10 +187,6 @@ namespace EmberThrone.Game
             }
         }
 
-        /// <summary>
-        /// Particles thrown out of a point: they arc under gravity (a negative one makes them rise), spin,
-        /// and shrink and fade over the last part of their life.
-        /// </summary>
         void Throw(Sprite sprite, Vector3 pos, Color color, float delay, int count, float size, float speed, float gravity,
             float life, float upBias, int salt)
         {
@@ -245,7 +224,6 @@ namespace EmberThrone.Game
             return h - Mathf.Floor(h);
         }
 
-        /// <summary>A light beam between two points that thins out.</summary>
         public float Beam(Vector3 from, Vector3 to, Color color, float width, float delay, float duration)
         {
             Tweens.After(delay, () =>
@@ -267,7 +245,6 @@ namespace EmberThrone.Game
             return delay + duration;
         }
 
-        /// <summary>A sprite that flies from one point to another, then disappears.</summary>
         public float Fly(Sprite sprite, Vector3 from, Vector3 to, float delay, float duration, float scale = 1f)
         {
             Tweens.After(delay, () =>
@@ -286,7 +263,6 @@ namespace EmberThrone.Game
             return delay + duration;
         }
 
-        /// <summary>A short full-cell flash.</summary>
         public float Flash(Vector3 pos, Color color, float scale, float delay, float duration)
         {
             Tweens.After(delay, () =>

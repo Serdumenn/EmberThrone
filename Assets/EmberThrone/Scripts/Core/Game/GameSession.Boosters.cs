@@ -11,7 +11,6 @@ namespace EmberThrone.Core
 
     public sealed partial class GameSession
     {
-        /// <summary>In-level booster. Does not consume a move.</summary>
         public MoveOutcome UseBooster(BoosterType type, GridPos target)
         {
             Begin();
@@ -63,7 +62,6 @@ namespace EmberThrone.Core
             return Finish(true);
         }
 
-        /// <summary>Pre-level boosters: turns random free gems into the given specials. Call before the first move.</summary>
         public MoveOutcome PlaceStartingSpecials(IList<PieceKind> kinds)
         {
             Begin();

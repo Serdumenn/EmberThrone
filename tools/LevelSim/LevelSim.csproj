@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Bot simulator: estimates level difficulty (win rate) and fuzzes the engine. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>

@@ -5,10 +5,6 @@ using UnityEngine.InputSystem;
 
 namespace EmberThrone.Game
 {
-    /// <summary>
-    /// Turns pointer input (touch on a phone, mouse in the editor) into board gestures, using the new
-    /// Input System: a drag of more than <see cref="DragCells"/> cells is a swipe, anything else is a tap.
-    /// </summary>
     public sealed class BoardInput : MonoBehaviour
     {
         const float DragCells = 0.4f;
@@ -32,7 +28,6 @@ namespace EmberThrone.Game
             _view = view;
         }
 
-        /// <summary>Turned off while an outcome is animating, so input can never overlap a resolution.</summary>
         public void SetEnabled(bool enabled)
         {
             _enabled = enabled;
@@ -73,7 +68,6 @@ namespace EmberThrone.Game
                 {
                     _swiped = true;
                     Swiped?.Invoke(_cell, Neighbor(_cell, delta));
-                    // the swipe may have disabled input and released the cell already
                     if (!_down) return;
                 }
             }

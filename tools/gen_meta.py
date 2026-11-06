@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
-"""Creates missing Unity .meta files (with fresh GUIDs) for everything under Assets/.
 
-Unity normally writes these when the editor imports a file. Because this project is
-edited by AI agents without an editor, run this before every commit that adds files
-under Assets/. Existing .meta files (and their GUIDs) are never touched.
-
-Usage: python3 tools/gen_meta.py [--check]
-  --check   only report missing/orphan .meta files, exit 1 if any
-"""
 import os
 import sys
 import uuid

@@ -2,10 +2,6 @@ using System.Collections.Generic;
 
 namespace EmberThrone.Core
 {
-    /// <summary>
-    /// Resolution output. The presentation layer plays steps in order; events inside one step
-    /// can animate at the same time. Core never waits for animations.
-    /// </summary>
     public enum StepKind
     {
         Swap,
@@ -52,11 +48,9 @@ namespace EmberThrone.Core
 
     public sealed class MoveOutcome
     {
-        /// <summary>False when the move was rejected (no move consumed).</summary>
         public bool Accepted;
         public int MovesLeft;
         public GameState State;
-        /// <summary>Number of clear rounds (1 = no cascade).</summary>
         public int ClearRounds;
         public readonly List<BoardStep> Steps = new List<BoardStep>();
 
@@ -80,7 +74,6 @@ namespace EmberThrone.Core
     public sealed class SwapEvent : BoardEvent
     {
         public readonly GridPos A, B;
-        /// <summary>True when the swap made no match and was animated back.</summary>
         public readonly bool Reverted;
         public SwapEvent(GridPos a, GridPos b, bool reverted) { A = a; B = b; Reverted = reverted; }
     }
@@ -89,7 +82,6 @@ namespace EmberThrone.Core
     {
         public readonly int Color;
         public readonly GridPos[] Cells;
-        /// <summary>Special created by this match, if any.</summary>
         public readonly PieceKind? Special;
         public MatchEvent(int color, GridPos[] cells, PieceKind? special) { Color = color; Cells = cells; Special = special; }
     }
@@ -107,7 +99,6 @@ namespace EmberThrone.Core
         }
     }
 
-    /// <summary>A blocker lost HP but survived.</summary>
     public sealed class PieceDamagedEvent : BoardEvent
     {
         public readonly int PieceId;
@@ -135,7 +126,6 @@ namespace EmberThrone.Core
         public readonly int PieceId;
         public readonly GridPos Pos;
         public readonly PieceKind Kind;
-        /// <summary>Cells of the match that formed it (for "gems fly together" animation).</summary>
         public readonly GridPos[] MergedFrom;
         public SpecialCreatedEvent(int pieceId, GridPos pos, PieceKind kind, GridPos[] mergedFrom)
         {
@@ -146,14 +136,11 @@ namespace EmberThrone.Core
     public sealed class SpecialActivatedEvent : BoardEvent
     {
         public readonly int PieceId;
-        /// <summary>Second piece of a combo, or -1.</summary>
         public readonly int PartnerPieceId;
         public readonly GridPos Pos;
         public readonly PieceKind Kind;
         public readonly ComboKind Combo;
-        /// <summary>Cells hit by this activation, in hit order.</summary>
         public readonly GridPos[] Area;
-        /// <summary>Color used by color bombs, else -1.</summary>
         public readonly int TargetColor;
         public SpecialActivatedEvent(int pieceId, int partnerPieceId, GridPos pos, PieceKind kind, ComboKind combo, GridPos[] area, int targetColor)
         {
@@ -161,7 +148,6 @@ namespace EmberThrone.Core
         }
     }
 
-    /// <summary>A gem was turned into a special (color bomb combos, starting boosters).</summary>
     public sealed class PieceConvertedEvent : BoardEvent
     {
         public readonly int OldPieceId;
@@ -178,14 +164,12 @@ namespace EmberThrone.Core
     {
         public readonly GridPos From;
         public readonly GridPos Target;
-        /// <summary>Special carried to the target (Homing + Rocket/Bomb combos), or null.</summary>
         public readonly PieceKind? Payload;
         public HomingStrikeEvent(GridPos from, GridPos target, PieceKind? payload) { From = from; Target = target; Payload = payload; }
     }
 
     public readonly struct PathStep
     {
-        /// <summary>Gravity tick at which the piece arrives at <see cref="Pos"/>.</summary>
         public readonly int Tick;
         public readonly GridPos Pos;
         public PathStep(int tick, GridPos pos) { Tick = tick; Pos = pos; }
@@ -196,13 +180,11 @@ namespace EmberThrone.Core
     {
         public readonly int PieceId;
         public readonly GridPos From;
-        /// <summary>One entry per cell moved (vertical or diagonal), with timing.</summary>
         public readonly List<PathStep> Path = new List<PathStep>();
         public PieceMovedEvent(int pieceId, GridPos from) { PieceId = pieceId; From = from; }
         public GridPos To => Path.Count > 0 ? Path[Path.Count - 1].Pos : From;
     }
 
-    /// <summary>A new piece entered the board at a spawner cell (from above) at the given tick.</summary>
     public sealed class PieceSpawnedEvent : BoardEvent
     {
         public readonly int PieceId;
@@ -241,7 +223,6 @@ namespace EmberThrone.Core
     {
         public readonly int GoalIndex;
         public readonly int Remaining;
-        /// <summary>Where the progress happened (for "fly to goal panel" effects).</summary>
         public readonly GridPos Source;
         public GoalProgressEvent(int goalIndex, int remaining, GridPos source) { GoalIndex = goalIndex; Remaining = remaining; Source = source; }
     }

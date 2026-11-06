@@ -11,11 +11,6 @@ using VisualElement = UnityEngine.UIElements.VisualElement;
 
 namespace EmberThrone.Game.Tests
 {
-    /// <summary>
-    /// Runs the real game: real view, real input path, real animations (sped up by Time.timeScale).
-    /// Any Debug.LogError fails a test, and that includes the view-versus-engine check after every outcome.
-    /// Rows are written top first, as in level files.
-    /// </summary>
     public class GameFlowTests
     {
         const string Even = "YPOGY";
@@ -59,11 +54,9 @@ namespace EmberThrone.Game.Tests
             yield return null;
         }
 
-        // ---------------------------------------------------------------- helpers
-
         static LevelDefinition Level(int moves, GoalDefinition goal, params string[] board)
         {
-            var spawn = board.Select(r => new string('.', r.Length)).ToArray(); // no spawners: exact results
+            var spawn = board.Select(r => new string('.', r.Length)).ToArray();
             var level = LevelParser.FromLayers(board, null, null, spawn);
             level.Moves = moves;
             level.ColorCount = 6;
@@ -116,10 +109,9 @@ namespace EmberThrone.Game.Tests
             yield return null;
         }
 
-        /// <summary>Taps a UI element with the virtual mouse, through the real event system.</summary>
         IEnumerator TapUi(VisualElement e)
         {
-            yield return null; // layout
+            yield return null;
             Assert.IsNotNull(e.panel, "element is on screen");
             var screen = UiRoot.PanelToScreen(e.worldBound.center);
             SetMouse(screen, false);
@@ -132,7 +124,6 @@ namespace EmberThrone.Game.Tests
             yield return null;
         }
 
-        /// <summary>Waits for the win or lose window (a win first plays its fireworks).</summary>
         IEnumerator WaitForPopup(string why = null)
         {
             float limit = Time.time + 10f;
@@ -153,8 +144,6 @@ namespace EmberThrone.Game.Tests
                 yield return null;
             }
         }
-
-        // ---------------------------------------------------------------- level list and start
 
         [Test]
         public void Boot_ListsEveryLevelFile()
@@ -199,8 +188,6 @@ namespace EmberThrone.Game.Tests
             Assert.AreEqual(_app.Levels.Count, _app.LevelSelect.ButtonCount);
         }
 
-        // ---------------------------------------------------------------- input
-
         [UnityTest]
         public IEnumerator Swipe_OnValidMove_SpendsAMove()
         {
@@ -229,7 +216,6 @@ namespace EmberThrone.Game.Tests
         [UnityTest]
         public IEnumerator TwoTaps_SwapNeighbors()
         {
-            // Y at (2,1) moving up to (2,2) completes three Y in the row above.
             yield return Begin(Level(10, null, "OGPYO", "YPOGP", "GYYOG", "PGYGO", "YOPGY"));
             var move = Game.Session.FindValidMoves().First(m => m.Type == MoveType.Swap);
             int before = Game.Session.MovesLeft;
@@ -268,8 +254,6 @@ namespace EmberThrone.Game.Tests
             yield return WaitIdle();
             Assert.IsNull(Game.LastMismatch);
         }
-
-        // ---------------------------------------------------------------- specials
 
         [UnityTest]
         public IEnumerator FourInARow_CreatesARocket()
@@ -322,8 +306,6 @@ namespace EmberThrone.Game.Tests
             }
         }
 
-        // ---------------------------------------------------------------- end of level
-
         [UnityTest]
         public IEnumerator Win_ShowsStars_AndSavesThem()
         {
@@ -343,7 +325,6 @@ namespace EmberThrone.Game.Tests
         [UnityTest]
         public IEnumerator Level_FinishedOnStart_ShowsItsWindow()
         {
-            // A box goal on a board without boxes has nothing left to do.
             yield return Begin(Level(10, new GoalDefinition(GoalType.Box), Even, Odd, Even, Odd, Even));
             Assert.AreEqual(GameState.Won, Game.Session.State);
             yield return WaitForPopup();
@@ -417,8 +398,6 @@ namespace EmberThrone.Game.Tests
             }
         }
 
-        // ---------------------------------------------------------------- feel
-
         [UnityTest]
         public IEnumerator Win_TurnsMovesLeftIntoFireworks_ThenShowsTheWindow()
         {
@@ -462,8 +441,6 @@ namespace EmberThrone.Game.Tests
             Assert.IsNull(Game.LastMismatch);
         }
 
-        // ---------------------------------------------------------------- layout
-
         [UnityTest]
         public IEnumerator Board_StaysInTheFreeArea_WithANotch()
         {
@@ -490,7 +467,7 @@ namespace EmberThrone.Game.Tests
         {
             int w = UiRoot.ScreenWidth, h = UiRoot.ScreenHeight;
             UiRoot.SafeAreaOverride = new Rect(0f, h * 0.03f, w, h * 0.92f);
-            _app.StartLevel(_app.Levels[8], 8, Seed); // three goals: the widest HUD
+            _app.StartLevel(_app.Levels[8], 8, Seed);
             yield return null;
             yield return null;
             yield return null;

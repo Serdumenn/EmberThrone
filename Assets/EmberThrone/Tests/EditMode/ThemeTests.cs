@@ -7,11 +7,6 @@ using NUnit.Framework;
 
 namespace EmberThrone.Core.Tests
 {
-    /// <summary>
-    /// Guards the design system (docs/design/design-system.md) by reading the theme files, so it runs in Unity and
-    /// with dotnet: colors come only from tokens, text stays readable on its background, every image and slice
-    /// fits, and every font has the Turkish letters.
-    /// </summary>
     public class ThemeTests
     {
         const string TurkishLetters = "şŞğĞıİçÇöÖüÜ";
@@ -28,7 +23,6 @@ namespace EmberThrone.Core.Tests
         static IEnumerable<string> StyleFiles => Directory.GetFiles(ThemeFolder, "*.uss");
         static string Read(string path) => Comment.Replace(File.ReadAllText(path), "");
 
-        /// <summary>Unity runs tests from the project folder, dotnet from its bin folder: walk up from both.</summary>
         static string FindUiFolder()
         {
             foreach (var start in new[] { Directory.GetCurrentDirectory(), TestContext.CurrentContext.TestDirectory })
@@ -69,7 +63,6 @@ namespace EmberThrone.Core.Tests
                     Assert.IsTrue(tokens.ContainsKey(m.Groups[1].Value), Path.GetFileName(file) + ": " + m.Groups[1].Value + " is not a token");
         }
 
-        // design-system.md, "Kontrast". Large text (72 px and up) and outlined text need 3, body text 4.5.
         [TestCase("--color-ink", "--color-face", 7.0)]
         [TestCase("--color-ink", "--color-face-deep", 7.0)]
         [TestCase("--color-ink-muted", "--color-face", 4.5)]
@@ -86,7 +79,6 @@ namespace EmberThrone.Core.Tests
             var tokens = Tokens();
             var fg = ParseColor(tokens[text]);
             var bg = ParseColor(tokens[background]);
-            // A see-through background is checked over both white and black, whichever is worse.
             double ratio = Math.Min(Contrast(fg, Over(bg, 1.0)), Contrast(fg, Over(bg, 0.0)));
             Assert.GreaterOrEqual(ratio, minimum, text + " on " + background);
         }
@@ -148,9 +140,6 @@ namespace EmberThrone.Core.Tests
             }
         }
 
-        // ---------------------------------------------------------------- helpers
-
-        /// <summary>Images and fonts live in Git LFS; a checkout without LFS leaves small text pointers instead.</summary>
         static byte[] ReadBinary(string path)
         {
             var bytes = File.ReadAllBytes(path);
@@ -178,7 +167,6 @@ namespace EmberThrone.Core.Tests
             return new Rgba { R = P(1), G = P(2), B = P(3), A = P(4) };
         }
 
-        /// <summary>The color over a gray backdrop (1 = white, 0 = black).</summary>
         static Rgba Over(Rgba c, double backdrop)
         {
             double under = backdrop * 255.0 * (1.0 - c.A);
@@ -201,7 +189,6 @@ namespace EmberThrone.Core.Tests
             return (Math.Max(la, lb) + 0.05) / (Math.Min(la, lb) + 0.05);
         }
 
-        /// <summary>The characters a TrueType font maps to a glyph (cmap formats 4 and 12).</summary>
         static HashSet<int> CharacterMap(byte[] f)
         {
             int U16(int o) => (f[o] << 8) | f[o + 1];

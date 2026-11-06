@@ -10,14 +10,9 @@ namespace EmberThrone.Game
         Strong,
     }
 
-    /// <summary>
-    /// Short vibrations on Android through the system Vibrator (amplitude control on Android 8+, plain duration
-    /// before). Elsewhere it only counts, so tests can check which events buzz. A failure never reaches the game.
-    /// </summary>
     public static class Haptics
     {
         const string EnabledKey = "et.haptics";
-        /// <summary>Matches in one cascade come in bursts; one buzz per this many seconds is enough.</summary>
         const float MinGap = 0.06f;
 
         static AndroidJavaObject _vibrator;
@@ -25,14 +20,12 @@ namespace EmberThrone.Game
         static bool _initialized;
         static float _last = -1f;
 
-        /// <summary>Player setting (Settings screen, Phase 3). On by default.</summary>
         public static bool Enabled
         {
             get => PlayerPrefs.GetInt(EnabledKey, 1) == 1;
             set => PlayerPrefs.SetInt(EnabledKey, value ? 1 : 0);
         }
 
-        /// <summary>How many pulses were asked for (tests).</summary>
         public static int Count { get; private set; }
         public static HapticLevel LastLevel { get; private set; }
 
@@ -88,10 +81,6 @@ namespace EmberThrone.Game
                 _amplitude = version.GetStatic<int>("SDK_INT") >= 26 && _vibrator != null && _vibrator.Call<bool>("hasAmplitudeControl");
         }
 
-        /// <summary>
-        /// Never called. Unity adds the Android VIBRATE permission only when a script references Handheld.Vibrate,
-        /// so this reference keeps the permission in the manifest.
-        /// </summary>
         static void KeepVibratePermission() => Handheld.Vibrate();
     }
 }

@@ -35,23 +35,6 @@
 - [ ] Match-3 temel mekanik (eşleşme, patlama, düşme)
 - [ ] Sahne yönetimi (boot → menu → game flow)
 
-## Son Sohbet Notu
+## Son Not
 
 Sprint 1 Faz 0 TAMAMLANDI. Tüm foundation sistemleri yerinde: ServiceLocator, EventBus, 3 SO şeması, SaveManager, Object Pooling, Grammar Simulator, Firebase stubs. 19 C# dosyası, tam mimari altyapı hazır. Sırada Faz 1 Core Gameplay var.
-
----
-
-## Her Sohbet Akışı
-
-**Sen:** sadece şunu yazarsın:
-
-```
-PROGRESS.md ve GDD/MASTER-GDD-001_Executive_Summary.docx dosyalarını oku.
-Kaldığımız yerden devam et.
-```
-
-**AI:** PROGRESS.md'yi okur, ne yapılacağını bilir, işe koyulur.
-
-**Sohbet sonunda:** AI PROGRESS.md'yi günceller, tamamlananları işaretler.
-
-

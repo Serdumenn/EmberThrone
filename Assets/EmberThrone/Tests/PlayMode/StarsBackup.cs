@@ -4,10 +4,8 @@ using UnityEngine;
 
 namespace EmberThrone.Game.Tests
 {
-    /// <summary>Keeps the bot's wins out of the player's saved stars.</summary>
     static class StarsBackup
     {
-        /// <summary>Ids of the levels tests build by hand.</summary>
         static readonly int[] TestLevelIds = { 0, 99, 4242 };
 
         static IEnumerable<int> KnownIds() => LevelProgress.LoadLevels().Select(l => l.Id).Concat(TestLevelIds);

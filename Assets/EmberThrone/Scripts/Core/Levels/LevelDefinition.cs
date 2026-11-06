@@ -4,25 +4,17 @@ namespace EmberThrone.Core
 {
     public enum GoalType
     {
-        /// <summary>Collect N gems of one color.</summary>
         Color,
-        /// <summary>Destroy boxes.</summary>
         Box,
-        /// <summary>Clear floor tiles (grass-like layer).</summary>
         Floor,
-        /// <summary>Break covers (ice-like layer).</summary>
         Cover,
-        /// <summary>Bring collectibles to the bottom.</summary>
         Collectible,
     }
 
     public enum CellContent
     {
-        /// <summary>Random gem chosen at level start.</summary>
         Random,
-        /// <summary>Existing cell that starts empty (filled by gravity).</summary>
         Empty,
-        /// <summary>A fixed piece (gem of a given color, special, box, collectible).</summary>
         Fixed,
     }
 
@@ -42,7 +34,6 @@ namespace EmberThrone.Core
     {
         public GoalType Type;
         public int Color = GemColor.None;
-        /// <summary>-1 = "all of them on the board" (Box, Floor, Cover, Collectible).</summary>
         public int Count = -1;
 
         public GoalDefinition() { }
@@ -57,13 +48,11 @@ namespace EmberThrone.Core
 
     public sealed class CollectibleSettings
     {
-        /// <summary>How many collectibles spawn from spawners during the level.</summary>
         public int Total;
         public int MaxOnBoard = 2;
         public double SpawnChance = 0.12;
     }
 
-    /// <summary>Immutable-by-convention level description, loaded from JSON (see LevelParser).</summary>
     public sealed class LevelDefinition
     {
         public int Id;
@@ -72,16 +61,13 @@ namespace EmberThrone.Core
         public int Height;
         public int Moves;
         public int ColorCount = 5;
-        /// <summary>Free tag for designers/tools: "normal", "hard", "superhard".</summary>
         public string Difficulty = "normal";
-        /// <summary>Row-major, y = 0 is the bottom row.</summary>
         public CellSpec[] Cells;
         public readonly List<GoalDefinition> Goals = new List<GoalDefinition>();
         public CollectibleSettings Collectibles;
 
         public CellSpec GetCell(int x, int y) => Cells[y * Width + x];
 
-        /// <summary>Deep copy (tools tweak moves/goals on copies).</summary>
         public LevelDefinition Clone()
         {
             var c = new LevelDefinition

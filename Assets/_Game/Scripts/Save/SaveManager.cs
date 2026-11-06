@@ -1,7 +1,3 @@
-// TECH-001 §7 — SaveManager (Concrete Implementation)
-// JsonUtility ile serialize, Application.persistentDataPath'e yazar.
-// Auto-save: EventBus üzerinden OnLevelCompleted dinler.
-
 using System;
 using System.IO;
 using UnityEngine;
@@ -9,11 +5,6 @@ using EmberThrone.Core;
 
 namespace EmberThrone.Save
 {
-    /// <summary>
-    /// Concrete save/load implementation using JsonUtility.
-    /// Auto-saves on level completion via EventBus.
-    /// Maintains backup for corruption recovery.
-    /// </summary>
     public class SaveManager : ISaveManager
     {
         private const string SAVE_FILE = "save.json";
@@ -30,16 +21,12 @@ namespace EmberThrone.Save
             _savePath = Path.Combine(Application.persistentDataPath, SAVE_FILE);
             _backupPath = Path.Combine(Application.persistentDataPath, BACKUP_FILE);
 
-            // Load existing save or create new
             _currentData = HasSave() ? Load() : SaveData.CreateNew();
 
-            // Auto-save on level completion
             EventBus.Subscribe<OnLevelCompleted>(OnLevelCompleted);
 
             Debug.Log($"[SaveManager] Initialized. Save path: {_savePath}");
         }
-
-        // ─── ISaveManager ────────────────────────────
 
         public void Save()
         {
@@ -49,7 +36,6 @@ namespace EmberThrone.Save
 
                 string json = JsonUtility.ToJson(_currentData, prettyPrint: false);
 
-                // Backup current save before overwriting
                 if (File.Exists(_savePath))
                 {
                     File.Copy(_savePath, _backupPath, overwrite: true);
@@ -83,7 +69,6 @@ namespace EmberThrone.Save
                     throw new Exception("Deserialization returned null");
                 }
 
-                // Version migration (future-proofing)
                 data = MigrateIfNeeded(data);
 
                 _currentData = data;
@@ -121,13 +106,10 @@ namespace EmberThrone.Save
             }
         }
 
-        // ─── Auto-Save Listeners ─────────────────────
-
         private void OnLevelCompleted(OnLevelCompleted evt)
         {
             if (_currentData == null) return;
 
-            // Update progression
             int levelIndex = evt.LevelId - 1;
             if (levelIndex >= 0 && levelIndex < _currentData.completedLevels.Length)
             {
@@ -142,11 +124,8 @@ namespace EmberThrone.Save
 
             _currentData.totalLevelsCompleted++;
 
-            // Auto-save
             Save();
         }
-
-        // ─── Backup Recovery ─────────────────────────
 
         private SaveData TryLoadBackup()
         {
@@ -166,7 +145,6 @@ namespace EmberThrone.Save
                     Debug.Log("[SaveManager] Backup loaded successfully.");
                     _currentData = data;
 
-                    // Restore from backup
                     Save();
                     return data;
                 }
@@ -180,33 +158,15 @@ namespace EmberThrone.Save
             return SaveData.CreateNew();
         }
 
-        // ─── Migration ──────────────────────────────
-
-        /// <summary>
-        /// Handle save version upgrades. Add migration steps as schema evolves.
-        /// </summary>
         private SaveData MigrateIfNeeded(SaveData data)
         {
-            // Example migration pattern:
-            // if (data.saveVersion < 2)
-            // {
-            //     // Migrate from v1 to v2
-            //     data.newField = defaultValue;
-            //     data.saveVersion = 2;
-            // }
-
             return data;
         }
 
-        // ─── Cleanup ─────────────────────────────────
-
-        /// <summary>
-        /// Call on application quit to unsubscribe from events.
-        /// </summary>
         public void Dispose()
         {
             EventBus.Unsubscribe<OnLevelCompleted>(OnLevelCompleted);
-            Save(); // Final save on quit
+            Save();
             Debug.Log("[SaveManager] Disposed and final save written.");
         }
     }

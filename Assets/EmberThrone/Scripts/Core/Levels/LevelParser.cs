@@ -9,29 +9,11 @@ namespace EmberThrone.Core
         public LevelFormatException(string message) : base(message) { }
     }
 
-    /// <summary>
-    /// Level JSON format (rows are written top row first; spaces inside rows are ignored):
-    /// <code>
-    /// {
-    ///   "id": 12, "name": "Ash Gate", "moves": 24, "colors": 5, "difficulty": "hard",
-    ///   "goals": [ {"type":"box"}, {"type":"color","color":"R","count":20} ],
-    ///   "board":    [ "..1111..", ... ],     // required
-    ///   "floor":    [ "00111100", ... ],     // optional, floor HP per cell
-    ///   "cover":    [ "00000000", ... ],     // optional, cover HP per cell
-    ///   "spawners": [ "SSSSSSSS", ... ],     // optional, default = top cell of every column
-    ///   "collectibles": {"total": 3, "maxOnBoard": 2, "spawnChance": 0.12}   // optional
-    /// }
-    /// </code>
-    /// Board tokens: . random gem | # hole | _ empty | R G B Y P O gem | 1-9 box HP |
-    /// - rocket(row) | '|' rocket(column) | * bomb | ^ homing | @ color bomb | $ collectible.
-    /// Goal types: color, box, floor, cover, collectible (1 to 3 goals). Count -1 / omitted = all on the board.
-    /// </summary>
     public static class LevelParser
     {
         public const int MinSize = 3;
         public const int MaxWidth = 12;
         public const int MaxHeight = 14;
-        /// <summary>SYS-CORE-001 DL-002; the goal panel is laid out for this many.</summary>
         public const int MaxGoals = 3;
 
         public static LevelDefinition FromJson(string json)
@@ -101,7 +83,6 @@ namespace EmberThrone.Core
             }
         }
 
-        /// <summary>Builds the cell grid from text layers (top row first). Metadata is left at defaults.</summary>
         public static LevelDefinition FromLayers(string[] board, string[] floor = null, string[] cover = null, string[] spawners = null)
         {
             var rows = Normalize(board, "board");
@@ -263,8 +244,6 @@ namespace EmberThrone.Core
                     throw new LevelFormatException("Collectible goal needs collectibles on the board or 'collectibles.total'");
             }
         }
-
-        // ---------------------------------------------------------------- writing
 
         public static string ToJson(LevelDefinition level)
         {

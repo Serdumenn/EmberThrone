@@ -12,21 +12,12 @@ namespace EmberThrone.Core
 
     public enum BoosterType
     {
-        /// <summary>Hits a single cell.</summary>
         Hammer,
-        /// <summary>Hits every cell of the target's row.</summary>
         RowBlast,
-        /// <summary>Hits every cell of the target's column.</summary>
         ColumnBlast,
-        /// <summary>Shuffles the free gems.</summary>
         Shuffle,
     }
 
-    /// <summary>
-    /// One play-through of a level. Pure logic: every call resolves synchronously and returns a
-    /// <see cref="MoveOutcome"/> describing what happened, step by step, for the presentation layer.
-    /// Deterministic for a given level + seed + input sequence.
-    /// </summary>
     public sealed partial class GameSession
     {
         readonly GameRules _rules;
@@ -39,7 +30,6 @@ namespace EmberThrone.Core
         GameState _state;
         int _collectiblesToSpawn;
 
-        // Resolution context (only valid during a call)
         MoveOutcome _outcome;
         BoardStep _step;
         readonly List<GridPos> _strikeTargets = new List<GridPos>();
@@ -56,7 +46,6 @@ namespace EmberThrone.Core
             _state = GameState.Playing;
             _collectiblesToSpawn = level.Collectibles?.Total ?? 0;
 
-            // Let '_' cells fill, resolve anything that falls into place, guarantee a move.
             Begin();
             Settle();
             InitialOutcome = Finish(true);
@@ -77,8 +66,6 @@ namespace EmberThrone.Core
             InitialOutcome = new MoveOutcome { Accepted = true, MovesLeft = _movesLeft, State = _state };
         }
 
-        // ---------------------------------------------------------------- public state
-
         public Board Board => _board;
         public LevelDefinition Level => _level;
         public GameRules Rules => _rules;
@@ -88,7 +75,6 @@ namespace EmberThrone.Core
         public SessionStats Stats => _stats;
         public Pcg32 Random => _rng;
 
-        /// <summary>Events produced while preparing the board (e.g. an initial shuffle).</summary>
         public MoveOutcome InitialOutcome { get; private set; }
 
         public bool AllGoalsComplete
@@ -101,7 +87,6 @@ namespace EmberThrone.Core
             }
         }
 
-        /// <summary>Deep copy. Pass <paramref name="reseed"/> so lookahead bots cannot see future refills.</summary>
         public GameSession Clone(ulong? reseed = null) => new GameSession(this, reseed);
 
         public List<Move> FindValidMoves() => MoveFinder.FindAllMoves(_board);
@@ -110,14 +95,11 @@ namespace EmberThrone.Core
 
         public bool IsValidSwap(GridPos a, GridPos b) => _state == GameState.Playing && MoveFinder.IsValidSwap(_board, a, b);
 
-        // ---------------------------------------------------------------- player actions
-
         public MoveOutcome Apply(Move move)
         {
             return move.Type == MoveType.Tap ? TryTap(move.A) : TrySwap(move.A, move.B);
         }
 
-        /// <summary>Swap two adjacent pieces. Rejected swaps (no match) come back with a reverted SwapEvent.</summary>
         public MoveOutcome TrySwap(GridPos a, GridPos b)
         {
             Begin();
@@ -161,13 +143,12 @@ namespace EmberThrone.Core
 
             Emit(new SwapEvent(a, b, false));
             ConsumeMove();
-            var preferred = new[] { b, a }; // the special appears where the dragged piece landed
+            var preferred = new[] { b, a };
             RunWaves(next => ApplyMatches(groups, preferred, next));
             Settle();
             return Finish(true);
         }
 
-        /// <summary>Tap a special to fire it (costs a move).</summary>
         public MoveOutcome TryTap(GridPos p)
         {
             Begin();
@@ -179,7 +160,6 @@ namespace EmberThrone.Core
             return Finish(true);
         }
 
-        /// <summary>Continue after losing (e.g. "+5 moves" offer).</summary>
         public void AddMoves(int count)
         {
             if (count <= 0) return;
@@ -190,8 +170,6 @@ namespace EmberThrone.Core
                 _stats.ContinuesUsed++;
             }
         }
-
-        // ---------------------------------------------------------------- flow
 
         void Begin()
         {
@@ -231,7 +209,6 @@ namespace EmberThrone.Core
             _stats.MovesMade++;
         }
 
-        /// <summary>Runs a first wave, then keeps firing triggered specials wave by wave.</summary>
         void RunWaves(Action<List<Activation>> firstWave)
         {
             _outcome.ClearRounds++;
@@ -250,7 +227,6 @@ namespace EmberThrone.Core
             }
         }
 
-        /// <summary>Gravity → collect → cascades until stable, then win/lose/shuffle checks.</summary>
         void Settle()
         {
             for (int round = 0; round < _rules.MaxCascadeRounds; round++)
@@ -295,7 +271,6 @@ namespace EmberThrone.Core
                 _stats.Shuffles++;
                 return;
             }
-            // Shuffling cannot help (too few free gems): hand the player a bomb instead.
             var gems = FreeGems();
             if (gems.Count > 0)
             {

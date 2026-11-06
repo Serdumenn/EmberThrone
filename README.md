@@ -41,7 +41,7 @@ A match-3 puzzle game for Android by **Ocean Forge**.
 - A `v*` tag (for example `v0.1.0`) runs the tests and builds the signed release AAB.
 
 Setup: [docs/CI-ANDROID.md](docs/CI-ANDROID.md) and [docs/release/README.md](docs/release/README.md).
-For AI agents and developers: [CLAUDE.md](CLAUDE.md).
+Technical specification: [docs/design/tech-spec.md](docs/design/tech-spec.md).
 
 ## License
 

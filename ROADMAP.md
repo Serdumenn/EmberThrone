@@ -1,6 +1,6 @@
 # EmberThrone — Yol Haritası
 
-Hedef: türün en iyileri seviyesinde akıcı, sosyal, canlı etkinlikli bir match-3. Kod, seviye ve araçların hepsini yapay zekâ üretir.
+Hedef: türün en iyileri seviyesinde akıcı, sosyal, canlı etkinlikli bir match-3.
 Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler EmberThrone'a özgü.
 
 ## Faz 0 — Temel ✅
@@ -18,7 +18,7 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] Proje ayarları: dikey ekran, geçerli Android paket adı, IL2CPP + ARM64
 
 ## Faz 1 — Oynanabilir prototip (sıradaki)
-- [x] Yerel oturuma geç (Unity bulutta çalışmıyor); Unity editörünü AI'ın yönetebileceği MCP köprüsünü kur (MCP for Unity v10.3.0, kurulum: CLAUDE.md)
+- [x] Yerel geliştirmeye geç (Unity bulutta çalışmıyor); Unity testleri ve ekran turu batch modunda çalışır ([tech-spec](docs/design/tech-spec.md))
 - [x] Motor kodu Unity'de ilk kez derlendi, EditMode testleri geçti
 - [x] Unity sahne kurulumu kodla (tek boş bootstrap sahnesi, prefab yok)
 - [x] Tahta görünümü, dokunma/kaydırma girişi (yeni Input System), hamle olaylarını animasyonla oynatma
@@ -46,7 +46,7 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] Arayüz parçalarını (panel, buton, hap, rozet, sekme…) 9-slice PNG olarak üreten araç ([tools/ui_chrome/](tools/ui_chrome/render.py))
 - [x] Arayüzün UI Toolkit'e geçişi (2026-11-06): token, bileşen ve ekran USS'leri; Baloo 2 (Latin, 69 KB); HUD, kazandın/kaybettin penceresi ve seviye seçimi yeni görünümde; `ThemeTests` (token dışı renk, kontrast, 9-slice, Türkçe harf); testler butonlara sanal fareyle gerçekten dokunuyor
   - öğrenilen: Unity değişken fontun yalnız varsayılan ağırlığını okur, bu yüzden sabit 700/800 dosyaları üretildi (`tools/fonts/`)
-  - öğrenilen: ekran turu artık editör kapalıyken batch modunda da çalışır (köprü gerekmez); 8080 portunu Docker Desktop tutarsa Unity köprüsü açılmaz
+  - öğrenilen: ekran turu editör kapalıyken batch modunda çalışır
 - [ ] Sanat yönü: EmberThrone teması (ateş/kor krallığı), renk paleti, karakter
 - [ ] Sprite hattını genişlet: patlama ve parçacık kareleri, harita mahalleleri, yeni engeller
 - [x] Efektler ve his (2026-11-06): eşleşmede savrulan renkli kırıntılar ve ışıltılar; kutuda kıymık, buzda kristal, külde duman ve kor; roket, bomba ve kombolarda ekran sarsıntısı; "Harika!", "Muhteşem!", "İnanılmaz!" yazıları; Android titreşimi (3 seviye); kazanma penceresinde konfeti

@@ -10,7 +10,6 @@ namespace EmberThrone.Core
         Strike,
     }
 
-    /// <summary>A queued special effect, executed in the next resolution wave.</summary>
     sealed class Activation
     {
         public ActivationType Type;
@@ -26,7 +25,6 @@ namespace EmberThrone.Core
             return new Activation { Type = ActivationType.Single, Piece = piece, Pos = pos, TargetColor = targetColor };
         }
 
-        /// <summary><paramref name="center"/> is where the dragged special landed.</summary>
         public static Activation Combo(Piece moved, GridPos center, Piece partner, GridPos partnerPos)
         {
             return new Activation { Type = ActivationType.Combo, Piece = moved, Pos = center, Partner = partner, PartnerPos = partnerPos };
@@ -40,8 +38,6 @@ namespace EmberThrone.Core
 
     public sealed partial class GameSession
     {
-        // ---------------------------------------------------------------- matches
-
         void ApplyMatches(List<MatchGroup> groups, GridPos[] preferred, List<Activation> next)
         {
             foreach (var g in groups)
@@ -121,8 +117,6 @@ namespace EmberThrone.Core
             }
         }
 
-        // ---------------------------------------------------------------- damage primitives
-
         void RemovePiece(GridPos p, Cell cell, ClearReason reason)
         {
             var piece = cell.Piece;
@@ -161,7 +155,6 @@ namespace EmberThrone.Core
             Progress(GoalType.Box, GemColor.None, p);
         }
 
-        /// <summary>A blast hitting one cell: cover first, then the piece, then the floor.</summary>
         void Hit(GridPos p, ClearReason reason, List<Activation> next)
         {
             if (!_board.Exists(p)) return;
@@ -187,7 +180,7 @@ namespace EmberThrone.Core
                     DamageBlocker(p, cell, reason);
                     return;
                 case PieceKind.Collectible:
-                    return; // immune
+                    return;
                 default:
                     if (!piece.Triggered)
                     {
@@ -198,7 +191,6 @@ namespace EmberThrone.Core
             }
         }
 
-        /// <summary>Whether <see cref="Hit"/> on this cell would change anything, so boosters are not wasted on no-ops.</summary>
         bool CanBeHit(GridPos p)
         {
             if (!_board.Exists(p)) return false;
@@ -219,8 +211,6 @@ namespace EmberThrone.Core
             return sp;
         }
 
-        // ---------------------------------------------------------------- specials
-
         void Execute(Activation act, List<Activation> next)
         {
             switch (act.Type)
@@ -236,7 +226,7 @@ namespace EmberThrone.Core
             var piece = act.Piece;
             var pos = act.Pos;
             var cell = _board.CellAt(pos);
-            if (cell.Piece != piece) return; // already consumed
+            if (cell.Piece != piece) return;
             cell.Piece = null;
             piece.Triggered = false;
             _stats.SpecialsActivated++;
@@ -323,7 +313,7 @@ namespace EmberThrone.Core
                     convertKind = a.Kind == PieceKind.ColorBomb ? b.Kind : a.Kind;
                     convert = color >= 0 ? FreeGemsOfColor(color) : new List<GridPos>();
                     break;
-                default: // ColorColor
+                default:
                     area = AllCells();
                     break;
             }
@@ -382,7 +372,6 @@ namespace EmberThrone.Core
             foreach (var p in area) Hit(p, ClearReason.Explosion, next);
         }
 
-        /// <summary>Picks the most goal-relevant cell (ties broken randomly).</summary>
         GridPos SelectHomingTarget(GridPos origin)
         {
             var best = GridPos.Invalid;
@@ -453,8 +442,6 @@ namespace EmberThrone.Core
             }
             return best;
         }
-
-        // ---------------------------------------------------------------- areas (ordered by distance)
 
         List<GridPos> Line(GridPos c, bool horizontal)
         {

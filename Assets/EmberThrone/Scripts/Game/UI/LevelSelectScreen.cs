@@ -5,7 +5,6 @@ using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
 {
-    /// <summary>Prototype level list, read from Resources/Levels. The map screen (SCR-002) replaces it in Phase 3.</summary>
     public sealed class LevelSelectScreen
     {
         public VisualElement Root { get; private set; }

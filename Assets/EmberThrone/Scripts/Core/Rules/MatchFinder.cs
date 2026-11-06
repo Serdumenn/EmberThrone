@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 namespace EmberThrone.Core
 {
-    /// <summary>A connected set of matched gems of one color (runs of 3+ and 2x2 squares sharing cells).</summary>
     public sealed class MatchGroup
     {
         public int Color;
@@ -12,13 +11,10 @@ namespace EmberThrone.Core
         public int MaxHorizontalRun;
         public int MaxVerticalRun;
         public bool HasSquare;
-        /// <summary>First cell that belongs to both a horizontal and a vertical run, or Invalid.</summary>
         public GridPos Intersection = GridPos.Invalid;
-        /// <summary>Start (left/bottom cell) of the longest run.</summary>
         public GridPos LongestRunStart = GridPos.Invalid;
         public int LongestRunLength;
         public bool LongestRunHorizontal;
-        /// <summary>Bottom-left cell of the first 2x2 square, or Invalid.</summary>
         public GridPos SquareOrigin = GridPos.Invalid;
 
         public bool HasHorizontalRun => MaxHorizontalRun >= 3;
@@ -31,7 +27,6 @@ namespace EmberThrone.Core
 
         public bool Contains(GridPos p) => _set.Contains(p);
 
-        /// <summary>Center cell of the longest run.</summary>
         public GridPos LongestRunCenter
         {
             get
@@ -45,7 +40,6 @@ namespace EmberThrone.Core
 
     public static class MatchFinder
     {
-        /// <summary>Gems match even under a cover; specials, blockers and collectibles never do.</summary>
         public static bool IsMatchable(Cell c)
         {
             return c.Exists && c.Piece != null && c.Piece.Kind == PieceKind.Gem && !c.Piece.Triggered;
@@ -58,7 +52,6 @@ namespace EmberThrone.Core
             return IsMatchable(c) && c.Piece.Color == color;
         }
 
-        /// <summary>Which special a group creates (null = plain match).</summary>
         public static PieceKind? DetermineSpecial(MatchGroup g, GameRules rules)
         {
             if (g.MaxHorizontalRun >= 5 || g.MaxVerticalRun >= 5) return PieceKind.ColorBomb;
@@ -69,7 +62,6 @@ namespace EmberThrone.Core
             return null;
         }
 
-        /// <summary>True if the gem at <paramref name="p"/> is part of any match.</summary>
         public static bool HasMatchAt(Board b, GridPos p)
         {
             if (!b.InBounds(p)) return false;
@@ -88,7 +80,6 @@ namespace EmberThrone.Core
             for (int j = y + 1; SameColor(b, x, j, color); j++) run++;
             if (run >= 3) return true;
 
-            // 2x2 squares containing p
             for (int dx = -1; dx <= 0; dx++)
             {
                 for (int dy = -1; dy <= 0; dy++)
@@ -117,12 +108,11 @@ namespace EmberThrone.Core
             public bool Horizontal;
         }
 
-        /// <summary>Finds every match group on the board, in deterministic order (bottom-left first).</summary>
         public static List<MatchGroup> FindGroups(Board b)
         {
             int w = b.Width, h = b.Height, n = w * h;
             int[] parent = null;
-            byte[] flags = null; // 1 = in H run, 2 = in V run, 4 = in square
+            byte[] flags = null;
             var runs = new List<Run>();
             var squares = new List<int>();
 
@@ -151,7 +141,6 @@ namespace EmberThrone.Core
                 flags = new byte[n];
             }
 
-            // Horizontal runs
             for (int y = 0; y < h; y++)
             {
                 int x = 0;
@@ -178,7 +167,6 @@ namespace EmberThrone.Core
                 }
             }
 
-            // Vertical runs
             for (int x = 0; x < w; x++)
             {
                 int y = 0;
@@ -205,7 +193,6 @@ namespace EmberThrone.Core
                 }
             }
 
-            // 2x2 squares
             for (int y = 0; y < h - 1; y++)
             {
                 for (int x = 0; x < w - 1; x++)
@@ -268,12 +255,10 @@ namespace EmberThrone.Core
                 }
             }
 
-            // An H run and a V run in the same group make a bomb only if they really cross.
             foreach (var g in result)
             {
                 if (g.HasHorizontalRun && g.HasVerticalRun && !g.Intersection.IsValid)
                 {
-                    // Connected only through a square: treat as the stronger straight shape instead.
                     if (g.MaxHorizontalRun >= g.MaxVerticalRun) g.MaxVerticalRun = 0; else g.MaxHorizontalRun = 0;
                 }
             }

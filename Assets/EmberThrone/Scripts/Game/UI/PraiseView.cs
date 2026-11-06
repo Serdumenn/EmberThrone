@@ -3,22 +3,15 @@ using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
 {
-    /// <summary>
-    /// The gold word over the board after a big move ("Harika!", "Muhteşem!", "İnanılmaz!"): it pops in,
-    /// holds, then floats up and fades. A newer word replaces an older one at once.
-    /// </summary>
     public sealed class PraiseView
     {
-        /// <summary>Index = praise level; 0 shows nothing.</summary>
         public static readonly string[] Words = { null, "Harika!", "Muhteşem!", "İnanılmaz!" };
 
-        /// <summary>How far the word floats up while it fades, in panel units.</summary>
         const float Rise = 70f;
 
         Label _label;
         int _run;
 
-        /// <summary>The last word shown (tests), or null.</summary>
         public string Text { get; private set; }
 
         public static PraiseView Create(VisualElement parent)

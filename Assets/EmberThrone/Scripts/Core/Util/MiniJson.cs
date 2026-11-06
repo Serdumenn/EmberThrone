@@ -6,11 +6,6 @@ using System.Text;
 
 namespace EmberThrone.Core
 {
-    /// <summary>
-    /// Small dependency-free JSON reader/writer used by Core (levels, configs).
-    /// Objects map to Dictionary&lt;string, object&gt;, arrays to List&lt;object&gt;,
-    /// integers to long, other numbers to double.
-    /// </summary>
     public static class MiniJson
     {
         public static object Parse(string json)
@@ -29,8 +24,6 @@ namespace EmberThrone.Core
             Write(sb, value, pretty, 0);
             return sb.ToString();
         }
-
-        // ---------------------------------------------------------------- reading helpers
 
         public static Dictionary<string, object> AsObject(object value, string context)
         {
@@ -95,8 +88,6 @@ namespace EmberThrone.Core
             return result;
         }
 
-        // ---------------------------------------------------------------- parser
-
         sealed class Parser
         {
             readonly string _s;
@@ -144,7 +135,7 @@ namespace EmberThrone.Core
             Dictionary<string, object> ParseObject()
             {
                 var result = new Dictionary<string, object>();
-                _i++; // {
+                _i++;
                 SkipWhitespace();
                 if (!AtEnd && _s[_i] == '}') { _i++; return result; }
                 while (true)
@@ -167,7 +158,7 @@ namespace EmberThrone.Core
             List<object> ParseArray()
             {
                 var result = new List<object>();
-                _i++; // [
+                _i++;
                 SkipWhitespace();
                 if (!AtEnd && _s[_i] == ']') { _i++; return result; }
                 while (true)
@@ -184,7 +175,7 @@ namespace EmberThrone.Core
             string ParseString()
             {
                 var sb = new StringBuilder();
-                _i++; // opening quote
+                _i++;
                 while (true)
                 {
                     if (AtEnd) throw Error("Unterminated string");
@@ -232,8 +223,6 @@ namespace EmberThrone.Core
             }
         }
 
-        // ---------------------------------------------------------------- writer
-
         static void Write(StringBuilder sb, object value, bool pretty, int indent)
         {
             switch (value)
@@ -272,7 +261,6 @@ namespace EmberThrone.Core
         static void WriteArray(StringBuilder sb, IList list, bool pretty, int indent)
         {
             if (list.Count == 0) { sb.Append("[]"); return; }
-            // Arrays of scalars stay on one line unless they are strings (board rows read better one per line).
             bool multiline = pretty && ContainsContainersOrStrings(list);
             sb.Append('[');
             for (int i = 0; i < list.Count; i++)

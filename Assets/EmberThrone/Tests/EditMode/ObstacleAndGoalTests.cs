@@ -8,7 +8,6 @@ namespace EmberThrone.Core.Tests
         [Test]
         public void AdjacentMatch_DamagesBoxOnce()
         {
-            // Box sits in the inner corner of an L: touches two matched cells, takes one hit.
             var s = T.Session(T.Even, T.Odd, "RRBRY", "O3RPO", "YPRGY");
             var o = s.TrySwap(T.P(3, 2), T.P(2, 2));
             Assert.IsTrue(o.Accepted);

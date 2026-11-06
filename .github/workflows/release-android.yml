@@ -1,8 +1,5 @@
 name: Release Android (signed AAB)
 
-# Same flow as PongMobilePrototype: a v* tag (or a manual run) tests the game and builds the
-# signed .aab for Google Play. Setup and secrets: docs/release/README.md.
-
 on:
   push:
     tags: [ 'v*' ]

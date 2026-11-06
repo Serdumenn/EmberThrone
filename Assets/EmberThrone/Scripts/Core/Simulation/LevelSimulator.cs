@@ -5,14 +5,12 @@ using System.Text;
 
 namespace EmberThrone.Core.Simulation
 {
-    /// <summary>Chooses the next move for a bot player.</summary>
     public interface IPlayerPolicy
     {
         string Name { get; }
         Move? Choose(GameSession session, Pcg32 rng);
     }
 
-    /// <summary>Uniformly random legal move. Cheap; good for fuzzing.</summary>
     public sealed class RandomPolicy : IPlayerPolicy
     {
         public string Name => "random";
@@ -25,11 +23,6 @@ namespace EmberThrone.Core.Simulation
         }
     }
 
-    /// <summary>
-    /// One-move lookahead: simulates every legal move on a re-seeded copy (so it cannot see real
-    /// refills) and keeps the one with the best goal progress. <see cref="Mistakes"/> is the chance
-    /// to play a random move instead, which roughly models a casual human.
-    /// </summary>
     public sealed class GreedyPolicy : IPlayerPolicy
     {
         public double Mistakes;
@@ -54,7 +47,7 @@ namespace EmberThrone.Core.Simulation
                 var copy = session.Clone(rng.NextUInt());
                 var outcome = copy.Apply(m);
                 if (!outcome.Accepted) continue;
-                double score = Evaluate(session, copy) + rng.NextDouble() * 0.01; // random tie-break
+                double score = Evaluate(session, copy) + rng.NextDouble() * 0.01;
                 if (score > bestScore)
                 {
                     bestScore = score;
@@ -73,12 +66,10 @@ namespace EmberThrone.Core.Simulation
                 var g0 = before.Goals[i];
                 var g1 = after.Goals[i];
                 int progress = Math.Max(0, g0.Remaining) - Math.Max(0, g1.Remaining);
-                // Progress on nearly-finished goals matters more; finishing one is a big plus.
                 score += progress * (g0.Target > 0 ? 100.0 / g0.Target : 1.0) * 10;
                 if (!g0.IsComplete && g1.IsComplete) score += 150;
             }
             score += (after.Stats.SpecialsCreated - before.Stats.SpecialsCreated) * 25;
-            // Keep specials on the board as stored value.
             score += CountSpecials(after.Board) * 5;
             return score;
         }
@@ -127,7 +118,6 @@ namespace EmberThrone.Core.Simulation
         }
     }
 
-    /// <summary>Plays a level many times with a bot to estimate difficulty and to fuzz the engine.</summary>
     public static class LevelSimulator
     {
         public sealed class RunResult

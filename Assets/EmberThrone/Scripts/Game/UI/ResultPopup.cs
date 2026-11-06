@@ -5,13 +5,8 @@ using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
 {
-    /// <summary>
-    /// Win and lose windows (SCR-005a/b). The window slides up from below (SCR-RULE-02); on a win the stars
-    /// fill one after another (ANI-009) over light rays, and the mascot cheers.
-    /// </summary>
     public sealed class ResultPopup
     {
-        /// <summary>Degrees per second of the light rays behind the stars.</summary>
         const float RaySpin = 6f;
 
         public string Title { get; private set; }
@@ -28,7 +23,6 @@ namespace EmberThrone.Game
             public Choice(string label, ButtonKind kind, Action run) { Label = label; Kind = kind; Run = run; }
         }
 
-        /// <summary>Pass stars below 0 for a window without stars (the lose window).</summary>
         public static ResultPopup Show(VisualElement parent, string title, string message, int stars, params Choice[] buttons)
         {
             var popup = new ResultPopup { Title = title };
@@ -38,7 +32,6 @@ namespace EmberThrone.Game
 
         void Build(VisualElement parent, string message, int stars, Choice[] choices)
         {
-            // The scrim takes every touch, so nothing behind the window reacts.
             Root = Ui.El("et-fill et-scrim et-result", parent, "ResultPopup");
             Root.pickingMode = PickingMode.Position;
             var body = Ui.El("et-result__body", Root, "Body");
@@ -93,10 +86,6 @@ namespace EmberThrone.Game
             }
         }
 
-        /// <summary>
-        /// Paper confetti raining behind the window (design-system "Kutlama katmanları", level 3). Each piece has its own
-        /// speed, sway and spin from a fixed sequence, so every win looks alike and a screenshot is repeatable.
-        /// </summary>
         void BuildConfetti()
         {
             const int count = 44;
@@ -111,7 +100,7 @@ namespace EmberThrone.Game
             var layer = Ui.El("et-fill", null, "Confetti");
             Root.Insert(0, layer);
             var pieces = new VisualElement[count];
-            var spots = new Vector4[count]; // x 0..1, delay s, fall speed px/s, sway phase
+            var spots = new Vector4[count];
             for (int i = 0; i < count; i++)
             {
                 float a = Mathf.Repeat(i * 0.618034f, 1f), b = Mathf.Repeat(i * 0.754878f + 0.3f, 1f), c = Mathf.Repeat(i * 0.569840f + 0.6f, 1f);

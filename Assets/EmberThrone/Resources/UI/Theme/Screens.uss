@@ -1,13 +1,7 @@
-/* Screen layouts, in reference pixels (1080x1920 canvas that only grows). */
-
-/* ---------------------------------------------------------------- backdrop */
-
 .et-backdrop--map {
     background-image: url("../Art/bg_map.jpg");
     -unity-background-scale-mode: scale-and-crop;
 }
-
-/* ---------------------------------------------------------------- in-level HUD (height set from HudView.Height) */
 
 .et-hud {
     position: absolute;
@@ -84,8 +78,6 @@
     bottom: -12px;
 }
 
-/* ---------------------------------------------------------------- praise over the board ("Harika!") */
-
 .et-praise {
     position: absolute;
     left: 0;
@@ -96,8 +88,6 @@
     text-shadow: 0 7px 0 var(--color-outline);
     rotate: -6deg;
 }
-
-/* ---------------------------------------------------------------- win and lose windows */
 
 .et-result {
     align-items: center;
@@ -175,8 +165,6 @@
     rotate: -10deg;
     background-image: url("../Art/mascot_joy.png");
 }
-
-/* ---------------------------------------------------------------- level list (until the map screen) */
 
 .et-levels {
     flex-grow: 1;

@@ -1,22 +1,10 @@
-// TECH-001 §5 — Grammar Rules Engine
-// Zorluk bandına göre level parametrelerini belirler.
-// LVL-DESIGN-001 spesifikasyonuna uygun.
-
 #if UNITY_EDITOR
 using EmberThrone.Data;
 
 namespace EmberThrone.Editor
 {
-    /// <summary>
-    /// Difficulty-driven rule engine for procedural level generation.
-    /// Maps DifficultyBand → grid size, colors, moves, obstacles, special pieces.
-    /// </summary>
     public static class GrammarRules
     {
-        /// <summary>
-        /// Get DifficultyBand for a given level number.
-        /// LVL-DESIGN-001 band definitions.
-        /// </summary>
         public static DifficultyBand GetBandForLevel(int levelId)
         {
             if (levelId <= 10) return DifficultyBand.Tutorial;
@@ -27,9 +15,6 @@ namespace EmberThrone.Editor
             return DifficultyBand.Expert;
         }
 
-        /// <summary>
-        /// Get expected fail rate range for a band.
-        /// </summary>
         public static (float min, float max) GetFailRateRange(DifficultyBand band)
         {
             return band switch
@@ -44,9 +29,6 @@ namespace EmberThrone.Editor
             };
         }
 
-        // ─── Grid Parameters ─────────────────────────
-
-        /// <summary>Grid width range for a difficulty band.</summary>
         public static (int min, int max) GetGridWidthRange(DifficultyBand band)
         {
             return band switch
@@ -61,7 +43,6 @@ namespace EmberThrone.Editor
             };
         }
 
-        /// <summary>Grid height range for a difficulty band.</summary>
         public static (int min, int max) GetGridHeightRange(DifficultyBand band)
         {
             return band switch
@@ -76,9 +57,6 @@ namespace EmberThrone.Editor
             };
         }
 
-        // ─── Color Count ─────────────────────────────
-
-        /// <summary>Available color count range for a band.</summary>
         public static (int min, int max) GetColorCountRange(DifficultyBand band)
         {
             return band switch
@@ -93,9 +71,6 @@ namespace EmberThrone.Editor
             };
         }
 
-        // ─── Move Count ──────────────────────────────
-
-        /// <summary>Max moves range for a band.</summary>
         public static (int min, int max) GetMoveRange(DifficultyBand band)
         {
             return band switch
@@ -110,28 +85,21 @@ namespace EmberThrone.Editor
             };
         }
 
-        // ─── Obstacle Unlocks ────────────────────────
-
-        /// <summary>
-        /// Get which obstacle types are available at a given level.
-        /// Based on SYS-CORE-001 unlock progression.
-        /// </summary>
         public static ObstacleType[] GetAvailableObstacles(int levelId)
         {
             var list = new System.Collections.Generic.List<ObstacleType>();
 
-            if (levelId >= 3)  list.Add(ObstacleType.Crate);       // OBS-001
-            if (levelId >= 8)  list.Add(ObstacleType.IceCrate);    // OBS-002
-            if (levelId >= 16) list.Add(ObstacleType.Chained);     // OBS-003
-            if (levelId >= 22) list.Add(ObstacleType.Stone);       // OBS-004
-            if (levelId >= 35) list.Add(ObstacleType.FireBox);     // OBS-005
-            if (levelId >= 50) list.Add(ObstacleType.WireCage);    // OBS-006
-            if (levelId >= 70) list.Add(ObstacleType.Crystal);     // OBS-007
+            if (levelId >= 3)  list.Add(ObstacleType.Crate);
+            if (levelId >= 8)  list.Add(ObstacleType.IceCrate);
+            if (levelId >= 16) list.Add(ObstacleType.Chained);
+            if (levelId >= 22) list.Add(ObstacleType.Stone);
+            if (levelId >= 35) list.Add(ObstacleType.FireBox);
+            if (levelId >= 50) list.Add(ObstacleType.WireCage);
+            if (levelId >= 70) list.Add(ObstacleType.Crystal);
 
             return list.ToArray();
         }
 
-        /// <summary>Obstacle count range for a band.</summary>
         public static (int min, int max) GetObstacleCountRange(DifficultyBand band)
         {
             return band switch
@@ -146,9 +114,6 @@ namespace EmberThrone.Editor
             };
         }
 
-        // ─── Goal Count ──────────────────────────────
-
-        /// <summary>Number of goals per level for a band.</summary>
         public static (int min, int max) GetGoalCountRange(DifficultyBand band)
         {
             return band switch
@@ -163,7 +128,6 @@ namespace EmberThrone.Editor
             };
         }
 
-        /// <summary>Goal target count multiplier for a band.</summary>
         public static (int min, int max) GetGoalTargetRange(DifficultyBand band, GoalType goalType)
         {
             return goalType switch
@@ -200,7 +164,7 @@ namespace EmberThrone.Editor
                 },
                 GoalType.UseSpecialPiece => band switch
                 {
-                    DifficultyBand.Tutorial => (0, 0),   // Not in tutorial
+                    DifficultyBand.Tutorial => (0, 0),
                     DifficultyBand.Onboarding => (1, 2),
                     DifficultyBand.CoreCasual => (2, 3),
                     DifficultyBand.MidChallenge => (2, 4),
@@ -212,13 +176,6 @@ namespace EmberThrone.Editor
             };
         }
 
-        // ─── Solvability Heuristic ──────────────────
-
-        /// <summary>
-        /// Estimate solvability rate based on level parameters.
-        /// Simple heuristic: ratio of moves to total goal difficulty.
-        /// Returns 0-1 where 1 = easily solvable.
-        /// </summary>
         public static float EstimateSolvability(int moves, int totalGoalDifficulty, int obstacleCount, int colorCount)
         {
             if (totalGoalDifficulty <= 0) return 1f;

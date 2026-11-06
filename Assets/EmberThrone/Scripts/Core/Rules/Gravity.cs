@@ -3,11 +3,6 @@ using System.Collections.Generic;
 
 namespace EmberThrone.Core
 {
-    /// <summary>
-    /// Tick-based gravity: every tick each piece moves at most one cell, first straight down,
-    /// then diagonally around static obstacles when nothing can come from above.
-    /// Spawners create new pieces when empty. Paths are recorded with ticks for animation.
-    /// </summary>
     public static class Gravity
     {
         public static bool CanFall(Cell c)
@@ -15,10 +10,6 @@ namespace EmberThrone.Core
             return c.Exists && c.Piece != null && c.Cover == 0 && c.Piece.Kind.CanFall() && !c.Piece.Triggered;
         }
 
-        /// <summary>
-        /// True when the empty cell (x,y) will receive a piece from straight above
-        /// (a falling piece or a spawner further up, with only empty cells in between).
-        /// </summary>
         public static bool HasVerticalSource(Board b, int x, int y)
         {
             for (int yy = y + 1; yy < b.Height; yy++)
@@ -31,7 +22,6 @@ namespace EmberThrone.Core
             return false;
         }
 
-        /// <summary>Runs gravity until the board is stable. Returns true if anything moved or spawned.</summary>
         public static bool Run(Board b, GameRules rules, Func<GridPos, Piece> spawn, List<BoardEvent> events)
         {
             int w = b.Width, h = b.Height;
@@ -62,7 +52,6 @@ namespace EmberThrone.Core
             {
                 bool tickAny = false;
 
-                // 1) straight down, bottom to top so whole columns advance together
                 for (int y = 0; y < h - 1; y++)
                 {
                     for (int x = 0; x < w; x++)
@@ -76,7 +65,6 @@ namespace EmberThrone.Core
                     }
                 }
 
-                // 2) spawners
                 for (int x = 0; x < w; x++)
                 {
                     for (int y = h - 1; y >= 0; y--)
@@ -91,7 +79,6 @@ namespace EmberThrone.Core
                     }
                 }
 
-                // 3) diagonal slides into cells nothing can reach from above
                 bool leftFirst = (tick & 1) == 1;
                 for (int y = 0; y < h - 1; y++)
                 {
@@ -108,7 +95,7 @@ namespace EmberThrone.Core
                             var src = b.CellAt(sx, sy);
                             if (!CanFall(src) || arrivedTick[sy * w + sx] == tick) continue;
                             var below = b.CellAt(sx, y);
-                            if (below.Exists && below.Piece == null) continue; // it will fall straight instead
+                            if (below.Exists && below.Piece == null) continue;
                             MovePiece(sx, sy, x, y, tick);
                             tickAny = true;
                             break;
@@ -125,7 +112,6 @@ namespace EmberThrone.Core
             return any;
         }
 
-        /// <summary>True if running gravity would change nothing.</summary>
         public static bool IsStable(Board b)
         {
             for (int y = 0; y < b.Height; y++)

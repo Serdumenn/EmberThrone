@@ -39,7 +39,6 @@ namespace EmberThrone.Core
             return c.Exists && c.Piece != null && c.Cover == 0 && c.Piece.Kind.IsSpecial() && !c.Piece.Triggered;
         }
 
-        /// <summary>Whether swapping a and b is a legal, move-consuming action.</summary>
         public static bool IsValidSwap(Board b, GridPos a, GridPos c)
         {
             if (!b.InBounds(a) || !b.InBounds(c) || !a.IsAdjacent(c)) return false;
@@ -73,7 +72,6 @@ namespace EmberThrone.Core
             return false;
         }
 
-        /// <summary>All legal moves: taps on specials and valid swaps (each pair listed once).</summary>
         public static List<Move> FindAllMoves(Board b)
         {
             var moves = new List<Move>();
@@ -90,10 +88,6 @@ namespace EmberThrone.Core
             return moves;
         }
 
-        /// <summary>
-        /// Best move for the hint system: special combos first, then swaps that create the strongest
-        /// special, then the biggest plain match.
-        /// </summary>
         public static Move? FindHint(Board b, GameRules rules)
         {
             Move? best = null;

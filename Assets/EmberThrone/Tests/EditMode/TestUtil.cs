@@ -2,10 +2,6 @@ using System.Linq;
 
 namespace EmberThrone.Core.Tests
 {
-    /// <summary>
-    /// Helpers for building exact boards. Rows are written top row first, y = 0 is the bottom row.
-    /// Filler rows below never contain a match and use only Y/P/O/G, so tests can place R and B freely.
-    /// </summary>
     static class T
     {
         public const string Even = "YPOGY";
@@ -15,10 +11,6 @@ namespace EmberThrone.Core.Tests
 
         public static GridPos P(int x, int y) => new GridPos(x, y);
 
-        /// <summary>
-        /// Level from text layers. Spawners are off by default so cleared cells stay empty
-        /// and results are exact. Default goal: collect 999 red (never completes).
-        /// </summary>
         public static LevelDefinition Level(string[] board, int moves = 20, int colors = 6, string[] floor = null,
             string[] cover = null, bool spawners = false, params GoalDefinition[] goals)
         {

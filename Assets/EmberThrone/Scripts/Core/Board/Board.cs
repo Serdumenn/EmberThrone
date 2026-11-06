@@ -2,15 +2,9 @@ using System;
 
 namespace EmberThrone.Core
 {
-    /// <summary>
-    /// One board cell. Layers, bottom to top: Floor (grass-like, HP) → Piece → Cover (ice-like, HP).
-    /// A covered piece cannot be swapped and does not fall; hits break the cover first.
-    /// </summary>
     public sealed class Cell
     {
-        /// <summary>False for holes in shaped boards.</summary>
         public bool Exists;
-        /// <summary>New pieces appear here when the cell is empty.</summary>
         public bool Spawner;
         public Piece Piece;
         public int Floor;
@@ -70,7 +64,6 @@ namespace EmberThrone.Core
             return new Piece(_nextPieceId++, kind, color, hp);
         }
 
-        /// <summary>Must be called once after the cell layout (Exists flags) is final.</summary>
         public void FinalizeLayout()
         {
             _exit = new bool[_cells.Length];
@@ -79,13 +72,12 @@ namespace EmberThrone.Core
                 for (int y = 0; y < Height; y++)
                 {
                     if (!CellAt(x, y).Exists) continue;
-                    _exit[y * Width + x] = true; // lowest existing cell of the column
+                    _exit[y * Width + x] = true;
                     break;
                 }
             }
         }
 
-        /// <summary>Collectibles are collected when they rest on an exit cell.</summary>
         public bool IsExit(int x, int y)
         {
             if (_exit == null) FinalizeLayout();
@@ -112,7 +104,6 @@ namespace EmberThrone.Core
             return n;
         }
 
-        /// <summary>Stable hash of the full board state (for determinism checks and replays).</summary>
         public ulong ComputeHash()
         {
             unchecked

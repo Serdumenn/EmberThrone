@@ -3,10 +3,8 @@ using System.Text;
 
 namespace EmberThrone.Core
 {
-    /// <summary>Text dumps and invariant checks. Used by tests, the simulator and debug tooling.</summary>
     public static class BoardDebug
     {
-        /// <summary>Board as rows (top first) using the level token alphabet; empty cells are '_'.</summary>
         public static string ToText(Board b)
         {
             var sb = new StringBuilder();
@@ -24,10 +22,6 @@ namespace EmberThrone.Core
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Returns broken invariants (empty list = healthy).
-        /// <paramref name="settled"/>: also require a stable board with no pending matches.
-        /// </summary>
         public static List<string> Validate(Board b, bool settled)
         {
             var errors = new List<string>();

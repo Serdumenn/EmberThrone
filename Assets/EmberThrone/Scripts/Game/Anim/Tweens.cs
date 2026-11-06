@@ -19,10 +19,6 @@ namespace EmberThrone.Game
         }
     }
 
-    /// <summary>
-    /// Small tween runner (no third-party dependency). Everything runs on scaled time, so tests can
-    /// fast-forward with Time.timeScale. One instance lives on the GameApp object.
-    /// </summary>
     public sealed class Tweens : MonoBehaviour
     {
         sealed class Item
@@ -49,7 +45,6 @@ namespace EmberThrone.Game
             if (_instance == this) _instance = null;
         }
 
-        /// <summary>Calls <paramref name="update"/> with 0..1 over <paramref name="duration"/> seconds, after the delay.</summary>
         public static void Run(float duration, Action<float> update, float delay = 0f, Action done = null, Action start = null)
         {
             if (_instance == null) return;
@@ -66,7 +61,7 @@ namespace EmberThrone.Game
         void Update()
         {
             float dt = Time.deltaTime;
-            int count = _items.Count; // tweens added by callbacks start next frame
+            int count = _items.Count;
             for (int i = 0; i < count && i < _items.Count; i++)
             {
                 var it = _items[i];
@@ -82,7 +77,7 @@ namespace EmberThrone.Game
                 {
                     it.Started = true;
                     it.Start?.Invoke();
-                    if (_items.Count == 0) return; // a callback killed everything
+                    if (_items.Count == 0) return;
                 }
                 it.Time += step;
                 float t = it.Duration <= 0f ? 1f : Mathf.Clamp01(it.Time / it.Duration);
@@ -98,33 +93,32 @@ namespace EmberThrone.Game
         }
     }
 
-    /// <summary>Animation lengths. Values come from UX-001 §6.2 (ANI-xxx) unless noted.</summary>
     public static class Timing
     {
         public const float Swap = 0.14f;
-        public const float Pop = 0.11f;              // ANI-001
-        public const float GravityTick = 0.055f;     // ANI-002: a typical 3-cell fall takes ~165 ms
+        public const float Pop = 0.11f;
+        public const float GravityTick = 0.055f;
         public const float LandSquash = 0.09f;
-        public const float ObstacleBreak = 0.2f;     // ANI-003
-        public const float SpecialForm = 0.3f;       // ANI-004
+        public const float ObstacleBreak = 0.2f;
+        public const float SpecialForm = 0.3f;
         public const float MergeFlight = 0.16f;
-        public const float RocketPerCell = 0.045f;   // ANI-005: rocket ~400 ms across the board
-        public const float BombPerCell = 0.09f;      // ANI-005: bomb ~500 ms
+        public const float RocketPerCell = 0.045f;
+        public const float BombPerCell = 0.09f;
         public const float HomingPerCell = 0.05f;
-        public const float ColorPerCell = 0.04f;     // ANI-005: color bomb ~600 ms
+        public const float ColorPerCell = 0.04f;
         public const float StrikeFlight = 0.26f;
         public const float Shuffle = 0.35f;
         public const float Collect = 0.28f;
-        public const float CounterBounce = 0.1f;     // ANI-019
-        public const float ModalIn = 0.2f;           // ANI-020
-        public const float StarFill = 0.2f;          // ANI-009
+        public const float CounterBounce = 0.1f;
+        public const float ModalIn = 0.2f;
+        public const float StarFill = 0.2f;
         public const float WinDelay = 0.5f;
-        public const float LoseDelay = 1.5f;         // SYS-CORE-001 §4.3: fail screen waits at least 1.5 s
-        public const float WinSparkInterval = 0.09f; // end of level: one firework per move left
+        public const float LoseDelay = 1.5f;
+        public const float WinSparkInterval = 0.09f;
         public const float WinSparkFlight = 0.32f;
         public const int WinSparksMax = 10;
-        public const float WinWindowPause = 0.25f;   // after the last firework, before the window
-        public const float PraisePop = 0.32f;        // "Harika!": pop in (design-system --dur-pop)
+        public const float WinWindowPause = 0.25f;
+        public const float PraisePop = 0.32f;
         public const float PraiseHold = 0.55f;
         public const float PraiseOut = 0.25f;
     }

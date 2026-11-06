@@ -8,17 +8,6 @@ using System.Threading.Tasks;
 using EmberThrone.Core;
 using EmberThrone.Core.Simulation;
 
-// Usage:
-//   dotnet run --project tools/LevelSim -c Release -- [options] <level.json | folder>...
-// Options:
-//   --runs N          games per level (default 200)
-//   --policy NAME     greedy (default) | random
-//   --mistakes P      greedy bot random-move chance (default 0.15)
-//   --seed S          base seed (default 1)
-//   --validate        check engine invariants after every move (slower)
-//   --tune W          also search the move count that gives win rate W (e.g. 0.6)
-//   --write           with --tune: write the suggested move count back into the JSON
-//   --fail-on-error   exit code 1 if any game hit an engine error
 static class Program
 {
     static int Main(string[] args)
@@ -111,7 +100,6 @@ static class Program
         return failOnError && errorCount > 0 ? 1 : 0;
     }
 
-    /// <summary>Plays one game and prints every move (debugging aid).</summary>
     static void Trace(LevelDefinition level, int seed, IPlayerPolicy policy)
     {
         var session = new GameSession(level, seed);
@@ -140,7 +128,6 @@ static class Program
         return LevelSimulator.Summarize(level, factory().Name, results);
     }
 
-    /// <summary>Smallest move count whose win rate reaches the target (win rate grows with moves).</summary>
     static int TuneMoves(LevelDefinition level, double target, int runs, int seed, Func<IPlayerPolicy> factory, out SimulationReport bestReport)
     {
         int lo = 3, hi = Math.Max(level.Moves * 3, 60);

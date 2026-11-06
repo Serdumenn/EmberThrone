@@ -1,6 +1,5 @@
 namespace EmberThrone.Game
 {
-    /// <summary>Board events that the player should feel, from smallest to biggest.</summary>
     public enum Impact
     {
         Match,
@@ -15,13 +14,8 @@ namespace EmberThrone.Game
         Lose,
     }
 
-    /// <summary>
-    /// How strongly each event shakes the camera and the phone (design-system.md, "Kutlama katmanları").
-    /// Small things only buzz; specials shake a little; combos and the win shake hard. One table keeps it proportional.
-    /// </summary>
     public static class Feel
     {
-        /// <summary>Camera trauma 0..1 (the shake grows with its square).</summary>
         public static float TraumaOf(Impact impact)
         {
             switch (impact)

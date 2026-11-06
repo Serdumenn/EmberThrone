@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 namespace EmberThrone.Core
 {
-    /// <summary>Builds the starting board: fixed pieces from the level, random gems without pre-made matches.</summary>
     public static class BoardFactory
     {
         public static Board Create(LevelDefinition level, Pcg32 rng, GameRules rules)
@@ -41,7 +40,6 @@ namespace EmberThrone.Core
             return board;
         }
 
-        /// <summary>Places gems on the given cells, avoiding colors that would create an immediate match.</summary>
         public static void FillRandom(Board board, List<GridPos> cells, int colorCount, Pcg32 rng)
         {
             foreach (var p in cells) board.CellAt(p).Piece = null;

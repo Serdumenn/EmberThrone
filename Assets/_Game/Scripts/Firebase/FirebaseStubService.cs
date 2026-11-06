@@ -1,25 +1,13 @@
-// TECH-001 §6 — Firebase Stub Service
-// Firebase SDK yüklenmeden çalışan stub implementasyonlar.
-// Tüm çağrıları loglar, varsayılan değerler döner.
-// SDK yüklendiğinde bu sınıf concrete implementasyonla değiştirilecek.
-
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace EmberThrone.Firebase
 {
-    /// <summary>
-    /// Stub implementation of all Firebase interfaces.
-    /// Logs all calls for debugging. Returns safe defaults.
-    /// Replace with real implementations when Firebase SDK is installed.
-    /// </summary>
     public class FirebaseStubService : IFirebaseService, IAnalyticsManager, IRemoteConfigManager
     {
         private const string TAG = "[FirebaseStub]";
 
-        // ─── IFirebaseService ────────────────────────
-
-        public bool IsInitialized => true; // Stub always "ready"
+        public bool IsInitialized => true;
         public bool IsAuthenticated => false;
         public string UserId => "stub_user_offline";
 
@@ -27,8 +15,6 @@ namespace EmberThrone.Firebase
         {
             Debug.Log($"{TAG} Initialize() — stub mode (no Firebase SDK).");
         }
-
-        // ─── IAnalyticsManager ───────────────────────
 
         public void LogEvent(string eventName)
         {
@@ -59,9 +45,7 @@ namespace EmberThrone.Firebase
             Debug.Log($"{TAG} SetUserProperty: {name}={value}");
         }
 
-        // ─── IRemoteConfigManager ────────────────────
-
-        public bool IsFetched => false; // Stub never "fetched"
+        public bool IsFetched => false;
 
         public void FetchAsync()
         {

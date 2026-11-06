@@ -2,7 +2,6 @@ using System;
 
 namespace EmberThrone.Core
 {
-    /// <summary>Board coordinate. X = column (0 = left), Y = row (0 = bottom).</summary>
     public readonly struct GridPos : IEquatable<GridPos>
     {
         public readonly int X;

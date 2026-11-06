@@ -6,12 +6,6 @@ using UnityEngine;
 
 namespace EmberThrone.Game
 {
-    /// <summary>
-    /// Draws a board and plays MoveOutcome steps. It never changes the Board: it reads the board once
-    /// to build its visuals and afterwards follows the events alone, keeping its own record of which
-    /// piece is where. <see cref="FindMismatch"/> compares that record with the engine to catch desyncs.
-    /// One world unit is one cell and the board is centered on the world origin.
-    /// </summary>
     public sealed class BoardView : MonoBehaviour
     {
         const int SortGlow = -3;
@@ -35,13 +29,9 @@ namespace EmberThrone.Game
             public SpriteRenderer R;
         }
 
-        /// <summary>Raised when a goal counter should change on screen, in sync with the animation.</summary>
         public event Action<GoalProgressEvent> GoalProgressed;
-        /// <summary>Raised when something on the board should be felt (shake, vibration), at the moment it shows.</summary>
         public event Action<Impact> Impacted;
-        /// <summary>Raised as each clear wave of a move starts playing: 1 is the move itself, 2+ are cascades.</summary>
         public event Action<int> WaveStarted;
-        /// <summary>Raised when two specials are swapped into a combo.</summary>
         public event Action<ComboKind> ComboFired;
 
         BoardFx _fx;
@@ -61,8 +51,6 @@ namespace EmberThrone.Game
 
         public int Width => _w;
         public int Height => _h;
-
-        // ---------------------------------------------------------------- building
 
         public void Build(GameSession session)
         {
@@ -96,7 +84,6 @@ namespace EmberThrone.Game
                     var pos = new GridPos(x, y);
                     int i = Index(pos);
                     _exists[i] = true;
-                    // Every cell brings its own back and light, so boards with holes keep their shape (style frame v3).
                     NewSprite("Glow", Art.Glow(), Palette.BoardGlow, World(pos), SortGlow).transform.localScale = Vector3.one * 1.42f;
                     NewSprite("Back", Art.CellBack(), Palette.BoardBack, World(pos), SortBack).transform.localScale = Vector3.one * 1.2f;
                     NewSprite("Tile", Art.Tile(), (x + y) % 2 == 0 ? Palette.TileLight : Palette.TileDark, World(pos), SortTile);
@@ -196,15 +183,12 @@ namespace EmberThrone.Game
             }
         }
 
-        // ---------------------------------------------------------------- queries
-
         int Index(GridPos p) => p.Y * _w + p.X;
 
         bool InBounds(GridPos p) => p.X >= 0 && p.Y >= 0 && p.X < _w && p.Y < _h;
 
         public Vector3 World(GridPos p) => new Vector3(p.X - (_w - 1) * 0.5f, p.Y - (_h - 1) * 0.5f, 0f);
 
-        /// <summary>The existing cell under a world position, or GridPos.Invalid.</summary>
         public GridPos CellAtWorld(Vector3 world)
         {
             var p = new GridPos(Mathf.RoundToInt(world.x + (_w - 1) * 0.5f), Mathf.RoundToInt(world.y + (_h - 1) * 0.5f));
@@ -228,7 +212,6 @@ namespace EmberThrone.Game
             if (p.IsValid) _selection.transform.localPosition = World(p);
         }
 
-        /// <summary>Small lift while a finger holds a piece.</summary>
         public void SetLifted(GridPos p, bool lifted)
         {
             if (!InBounds(p)) return;
@@ -238,7 +221,6 @@ namespace EmberThrone.Game
             v.R.sortingOrder = lifted ? SortLifted : SortPiece;
         }
 
-        /// <summary>A little shake for a piece that cannot be moved.</summary>
         public void Nudge(GridPos p)
         {
             if (!InBounds(p)) return;
@@ -247,7 +229,6 @@ namespace EmberThrone.Game
             ShakePiece(v, 0f);
         }
 
-        /// <summary>Null when the view matches the engine; otherwise a description of the first difference.</summary>
         public string FindMismatch(Board board)
         {
             for (int y = 0; y < _h; y++)
@@ -270,8 +251,6 @@ namespace EmberThrone.Game
         }
 
         static string Describe(PieceView v) => v == null ? "empty" : v.Kind + "#" + v.Id;
-
-        // ---------------------------------------------------------------- playing an outcome
 
         public IEnumerator Play(MoveOutcome outcome)
         {
@@ -339,11 +318,8 @@ namespace EmberThrone.Game
             Tweens.Run(duration, t => v.T.localPosition = Vector3.LerpUnclamped(from, to, Ease.OutQuad(t)));
         }
 
-        // ---------------------------------------------------------------- clears, specials, obstacles
-
         IEnumerator PlayEffects(BoardStep step)
         {
-            // First pass: when does each cell get hit? Blasts travel outward, so far cells react later.
             _delays.Clear();
             _mergeTargets.Clear();
             float strikeDelay = 0f;
@@ -381,7 +357,6 @@ namespace EmberThrone.Game
                 }
             }
 
-            // Second pass: update the record immediately and schedule the visuals.
             float end = 0f;
             foreach (var ev in step.Events)
             {
@@ -525,7 +500,6 @@ namespace EmberThrone.Game
 
         float Activate(SpecialActivatedEvent e)
         {
-            // The engine removes activated specials without a clear event.
             if (_pieces.TryGetValue(e.PieceId, out var main)) Consume(main);
             if (e.PartnerPieceId >= 0 && _pieces.TryGetValue(e.PartnerPieceId, out var partner)) Consume(partner);
 
@@ -644,7 +618,7 @@ namespace EmberThrone.Game
         {
             int hp = e.HpLeft;
             var p = e.Pos;
-            _coverHp[Index(p)] = hp; // keep the record exact even while the visual change waits
+            _coverHp[Index(p)] = hp;
             _fx.IceShards(World(p), delay);
             Tweens.After(delay, () => SetCover(p, hp));
             return delay + Timing.ObstacleBreak;
@@ -680,7 +654,6 @@ namespace EmberThrone.Game
 
         float ShufflePieces(ShuffleEvent e)
         {
-            // Engine positions after the shuffle overwrite the record in one go.
             foreach (var entry in e.Entries)
             {
                 var v = _pieces[entry.PieceId];
@@ -708,13 +681,6 @@ namespace EmberThrone.Game
             return Timing.Shuffle;
         }
 
-        // ---------------------------------------------------------------- end of level
-
-        /// <summary>
-        /// The win celebration: one spark per move left flies from <paramref name="from"/> to a cell and bursts into a
-        /// firework. Cosmetic only, the board does not change. <paramref name="launched"/> gets the spark's index as it
-        /// leaves, so the move counter can count down with it. Returns the time until the last firework fades.
-        /// </summary>
         public float Celebrate(Vector3 from, int sparks, Action<int> launched)
         {
             var cells = new List<GridPos>();
@@ -726,7 +692,6 @@ namespace EmberThrone.Game
             float end = 0f;
             for (int i = 0; i < sparks; i++)
             {
-                // Golden-ratio steps spread the targets over the board without repeating soon.
                 var cell = cells[(int)(Mathf.Repeat(i * 0.618034f + 0.31f, 1f) * cells.Count)];
                 var color = Palette.Gem(i % GemColor.Count);
                 float delay = i * Timing.WinSparkInterval;
@@ -740,8 +705,6 @@ namespace EmberThrone.Game
             }
             return end;
         }
-
-        // ---------------------------------------------------------------- gravity
 
         sealed class FallTrack
         {
@@ -758,8 +721,6 @@ namespace EmberThrone.Game
             var tracks = new List<FallTrack>();
             var byPiece = new Dictionary<int, FallTrack>();
 
-            // Update the record: first free every source cell, then fill every destination,
-            // because one piece's destination can be another piece's source.
             foreach (var ev in step.Events)
                 if (ev is PieceMovedEvent m && _pieces.TryGetValue(m.PieceId, out var moved) && _grid[Index(m.From)] == moved)
                     _grid[Index(m.From)] = null;
@@ -799,7 +760,6 @@ namespace EmberThrone.Game
                     var last = track.Points[track.Points.Count - 1];
                     if (start > track.Times[track.Times.Count - 1])
                     {
-                        // it waited here for the cell below to free up
                         track.Points.Add(last);
                         track.Times.Add(start);
                     }

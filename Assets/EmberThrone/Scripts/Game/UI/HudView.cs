@@ -6,10 +6,8 @@ using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
 {
-    /// <summary>In-level HUD (UX-001 §5): home button, level chip, goal panel, move counter. Display only.</summary>
     public sealed class HudView
     {
-        /// <summary>Panel units reserved at the top of the safe area (UX-001 HUD-RULE-01: at most 18% of the screen).</summary>
         public const float Height = 280f;
 
         const string Warn = "et-hud__moves-count--warn";
@@ -28,7 +26,6 @@ namespace EmberThrone.Game
 
         public VisualElement Root { get; private set; }
         public Button HomeButton { get; private set; }
-        /// <summary>The move counter's panel (the end-of-level sparks fly out of it).</summary>
         public VisualElement MovesPanel => _movesPanel;
         public string MovesText => _moves.text;
         public string GoalText(int index) => _slots[index].Count.text;
@@ -44,7 +41,6 @@ namespace EmberThrone.Game
         void Build(VisualElement parent, GameSession session, string levelLabel, Action onBack)
         {
             Root = Ui.El("et-hud", parent, "Hud");
-            // The board fits below this band (GameController.FitCamera), so its height has one source.
             Root.style.height = Height;
 
             var left = Ui.El("et-hud__left", Root);
@@ -52,12 +48,10 @@ namespace EmberThrone.Game
             Ui.El("et-icon et-hud__home-icon", HomeButton);
             Ui.Text(levelLabel, "et-chip et-caption et-hud__level", left, "Level");
 
-            // Goals: one slot per goal, an icon with the count on its corner.
             var goals = Ui.El("et-panel et-hud__goals", Root, "Goals");
             Ui.Text("Hedefler", "et-tag et-outlined", goals);
             foreach (var goal in session.Goals) _slots.Add(BuildSlot(goals, goal));
 
-            // Moves: always the biggest number on screen (HUD-RULE-03).
             _movesPanel = Ui.El("et-panel et-hud__moves", Root, "Moves");
             Ui.Text("Hamle", "et-tag et-outlined", _movesPanel);
             _moves = Ui.Text("0", "et-ink et-hud__moves-count", _movesPanel, "Count");
@@ -75,7 +69,6 @@ namespace EmberThrone.Game
             return s;
         }
 
-        /// <summary>The same picture the board draws, so the player can match goal and piece at a glance.</summary>
         static Sprite GoalSprite(Goal goal)
         {
             switch (goal.Type)
@@ -93,7 +86,6 @@ namespace EmberThrone.Game
             string text = moves.ToString();
             bool changed = _moves.text != text;
             _moves.text = text;
-            // UX-001 §5.2
             _moves.EnableInClassList(Warn, moves < 10 && moves >= 5);
             _moves.EnableInClassList(Danger, moves < 5);
             if (!animate || !changed) return;

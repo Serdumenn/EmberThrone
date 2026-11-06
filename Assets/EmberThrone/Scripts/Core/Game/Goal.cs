@@ -19,7 +19,6 @@ namespace EmberThrone.Core
 
         public bool IsComplete => Remaining <= 0;
 
-        /// <summary>0..1 progress.</summary>
         public double Progress => Target <= 0 ? 1.0 : (Target - System.Math.Max(0, Remaining)) / (double)Target;
 
         public Goal Clone()
@@ -33,7 +32,6 @@ namespace EmberThrone.Core
             return name + " " + (Target - Remaining) + "/" + Target;
         }
 
-        /// <summary>Resolves "-1 = all" counts against the freshly built board.</summary>
         public static List<Goal> CreateAll(LevelDefinition level, Board board)
         {
             var goals = new List<Goal>();

@@ -1,10 +1,3 @@
-"""Render the UI chrome (9-slice backgrounds) from chrome.html into transparent PNGs for UI Toolkit.
-
-    python tools/ui_chrome/render.py [--theme kor|gece|zumrut] [--out DIR] [names...]
-
-Needs Google Chrome (or Edge). Each component is a separate headless screenshot with a transparent
-background, sized exactly to the component in reference pixels (1080x1920 canvas).
-"""
 import argparse, json, os, shutil, subprocess, sys, tempfile, pathlib
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -13,7 +6,6 @@ DEFAULT_OUT = REPO / 'Assets' / 'EmberThrone' / 'Resources' / 'UI' / 'Chrome'
 BROWSERS = [r'C:\Program Files\Google\Chrome\Application\chrome.exe', r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
             '/usr/bin/google-chrome', '/usr/bin/chromium', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome']
 
-# Component sizes, kept in sync with chrome.html (checked at start).
 SIZES = {
     'panel': (360, 360), 'panel_band': (400, 540), 'btn_green': (400, 200), 'btn_orange': (400, 200), 'btn_primary': (400, 200),
     'btn_close': (150, 160), 'pill': (300, 100), 'chip': (300, 70), 'badge': (84, 84), 'plus': (80, 80), 'check': (80, 80), 'tag': (260, 76),

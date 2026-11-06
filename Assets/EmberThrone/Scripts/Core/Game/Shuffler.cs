@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 namespace EmberThrone.Core
 {
-    /// <summary>Rearranges free gems so the board has no match and at least one valid move.</summary>
     public static class Shuffler
     {
         public static bool Shuffle(Board board, Pcg32 rng, GameRules rules, int colorCount, ShuffleEvent ev)
@@ -32,7 +31,6 @@ namespace EmberThrone.Core
             }
 
             bool success = false;
-            // 1) move pieces around (keeps the color mix)
             for (int attempt = 0; attempt < rules.MaxShuffleAttempts && !success; attempt++)
             {
                 rng.Shuffle(pieces);
@@ -40,7 +38,6 @@ namespace EmberThrone.Core
                 success = !MatchFinder.HasAnyMatch(board) && MoveFinder.HasAnyMove(board);
             }
 
-            // 2) fallback: re-roll colors
             for (int attempt = 0; attempt < rules.MaxShuffleAttempts && !success; attempt++)
             {
                 for (int i = 0; i < pieces.Count; i++)

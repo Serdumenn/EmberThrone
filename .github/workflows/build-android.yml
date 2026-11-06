@@ -23,9 +23,6 @@ env:
   APP_VERSION: 0.1.${{ github.run_number }}
 
 jobs:
-  # Repository secrets (Settings > Secrets and variables > Actions), the same ones PongMobilePrototype uses:
-  #   UNITY_EMAIL + UNITY_PASSWORD + UNITY_SERIAL (or UNITY_LICENSE: contents of C:\ProgramData\Unity\Unity_lic.ulf)
-  # Without them the jobs below are skipped with a notice, so main stays green.
   check-license:
     name: Check Unity secrets
     runs-on: ubuntu-24.04
