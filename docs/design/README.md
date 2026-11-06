@@ -79,3 +79,33 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 | 2026-11-06 | Seviye sonunda kalan hamleler havai fişeğe dönüşür; yalnız gösteri, oyunun durumunu değiştirmez | Kutlama hissi; skor sistemi yok, coin ödülü Faz 3'teki ekonomiyle gelecek |
 | 2026-11-06 | Sarsıntı ve titreşim gücü tek tablodan (`Feel.cs`), olayın büyüklüğüne göre | Küçük olaylar yalnız hafifçe titrer; büyük anlar büyür (brief kararı 5) |
 | 2026-11-06 | Güdümlü özel taş "kor kuşu", toplanan obje "kor feneri", zemin katmanı "için için yanan kül" | Kendi kimliğimiz ve kül krallık teması; türde yaygın uçak ve taç imgelerinden uzak durur |
+| 2026-11-06 | Teknik şartname `CLAUDE.md`'de durur; Pong'daki `docs/design/tech-spec.md`'nin karşılığı | Ajanlar onu her oturumda okur; iki ayrı kopya zamanla birbirinden kopar. Görsel kurallar `design-system.md`'de |
+
+## Asset takibi
+
+Durumlar: `Brief → WIP → Review → Approved → Integrated`
+
+| Asset | Tür | Durum | Not |
+|---|---|---|---|
+| Style frame v3 | Mockup (Blender render) | Approved | Ara seviye olarak kabul edildi; v1 ve v2 reddedildi. `style-frames/` |
+| `piece_R/G/B/Y/P/O` | 3B render | Integrated | Altı renkli taş. Kaynak `ArtSource/blender/et_assets.py` |
+| `sp_rocket`, `sp_rocket_v`, `sp_bomb`, `sp_orb`, `sp_homing` | 3B render | Integrated | Özel taşlar; güdümlü taş "kor kuşu" |
+| `ob_box1/2/3`, `ob_ice`, `ob_floor1/2`, `ob_lantern` | 3B render | Integrated | Kutu (3. seviye kilitli), buz, kül zemin, kor feneri |
+| `bg_game`, `bg_map` | 3B render | Integrated | Oyun arkası (kale ve köy), seviye listesi haritası |
+| `mascot`, `mascot_joy` | 3B render | Review | Kor ruhu; maskot henüz kesinleşmedi (Kapı 2) |
+| `ui_star`, `ui_star_empty`, `ic_castle` | 3B ikon | Integrated | Kazandın yıldızları, seviye kartı |
+| `panel`, `btn_green`, `btn_orange`, `ring`, `chip`, `tag`, `check`, `ribbon`, `fx_glow`, `fx_rays` | 9-slice PNG | Integrated | `tools/ui_chrome/` üretir. Panel rengi Kor, henüz kesinleşmedi |
+| Baloo 2 Bold, ExtraBold | Font | Integrated | `tools/fonts/make_baloo2.py` üretir; Türkçe harfleri `ThemeTests` denetler |
+| Efekt şekilleri (kıymık, ışıltı, halka, kıvılcım…) | Koddan üretilen sprite | Integrated | `Scripts/Game/Art/Art.cs`; beyaz çizilir, olayın rengine boyanır |
+| Uygulama ikonu | Adaptive + round + eski boy + mağaza | Brief | Henüz yok |
+| Açılış ekranı | Ocean Forge logosu | Brief | Şimdilik Unity'nin varsayılan açılışı |
+| Ses ve müzik | SFX + müzik | Brief | Palet `design-system.md`'de |
+
+## Lisans kaydı
+
+| Varlık | Lisans | Kaynak | Not |
+|---|---|---|---|
+| Baloo 2 (değiştirilmiş) | SIL OFL 1.1 | fonts.google.com | Değişken fonttan sabit 700/800 ağırlık, yalnız Latin harfleri. Lisans metni `Assets/EmberThrone/Resources/UI/Fonts/OFL.txt` |
+| MCP for Unity | MIT | github.com/CoplayDev/unity-mcp | Editörü ajanlarla yönetmek için |
+| Blender 5.1 | GPL (araç) | blender.org | Render edilen görseller bizimdir; modeller ve scriptler `ArtSource/blender/` |
+| `GDD/Referances` ekran görüntüleri | Başkasına ait | — | Yalnız yerelde, git'e girmez; yalnız kalite kıyası için |

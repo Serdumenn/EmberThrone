@@ -10,13 +10,21 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Same job settings as the Android workflows (and PongMobilePrototype's).
+permissions:
+  contents: read
+
+concurrency:
+  group: core-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   core:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout (with LFS)
+        uses: actions/checkout@v7
         with:
           lfs: true # ThemeTests reads the UI images and fonts, which live in Git LFS
 

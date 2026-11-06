@@ -10,15 +10,17 @@ A match-3 puzzle game for Android by **Ocean Forge**.
 - **Match-3:** rockets, bombs, homing pieces and color bombs, with a combo for every pair of specials
 - **Obstacles:** boxes, floor tiles, ice covers, collectibles and shaped boards
 - **Levels:** goals, move counter, stars, win and lose flow; every level is tuned by a bot simulator
-- **Status:** playable prototype (Phase 1). Plan: [ROADMAP.md](ROADMAP.md)
+- **Look and feel:** 3D-rendered pieces and board, particles, screen shake, haptics, praise words and an end-of-level fireworks show
+- **Status:** playable prototype, Phase 2 (look and feel) in progress. Plan: [ROADMAP.md](ROADMAP.md)
 
 ## Technology
 
 | Area | Stack |
 |---|---|
-| Engine | Unity 6000.3.25f1, URP 2D, uGUI built from code |
+| Engine | Unity 6000.3.25f1, URP 2D, UI Toolkit built from code |
 | Gameplay | Deterministic pure C# engine (`EmberThrone.Core`), testable without Unity |
 | Input | Input System (touch and mouse) |
+| Art | Blender 5.1 renders from scripts (`ArtSource/blender`) |
 | Quality | EditMode and PlayMode tests, bot level simulator, GitHub Actions CI |
 
 ## Repository

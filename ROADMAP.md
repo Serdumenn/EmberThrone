@@ -54,6 +54,7 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [ ] Ses ve müzik (paleti design-system.md'de), Ayarlar'da ses, titreşim ve "hareketi azalt" seçenekleri
 - [ ] Telefonda his ayarı: titreşim gücü, sarsıntı miktarı ve efekt yoğunluğu gerçek cihazda denenip ayarlanacak
 - [ ] Oyun içi booster çubuğu, ipucu (motorda hazır, ekranda yok), "+5 hamle" teklifi
+- [ ] Uygulama ikonu (3B render; adaptive, round, eski boy ve mağaza boyları) ve Ocean Forge logolu açılış ekranı, Unity logosu kapalı (Pong'daki gibi)
 
 ## Faz 3 — Meta ve ekonomi
 - [ ] Harita / ilerleme, bölge inşa-dekor meta oyunu (yıldızlarla görevler)
