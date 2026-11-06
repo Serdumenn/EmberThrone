@@ -26,4 +26,7 @@ ArtSource/**/*.psd filter=lfs diff=lfs merge=lfs -text
 ArtSource/**/*.wav filter=lfs diff=lfs merge=lfs -text
 ArtSource/**/*.ttf filter=lfs diff=lfs merge=lfs -text
 ArtSource/**/*.otf filter=lfs diff=lfs merge=lfs -text
+ArtSource/**/*.blend filter=lfs diff=lfs merge=lfs -text
+ArtSource/**/*.exr filter=lfs diff=lfs merge=lfs -text
 docs/**/*.png filter=lfs diff=lfs merge=lfs -text
+docs/**/*.jpg filter=lfs diff=lfs merge=lfs -text

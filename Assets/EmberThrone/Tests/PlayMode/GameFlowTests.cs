@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.TestTools;
-using UnityEngine.UI;
+using VisualElement = UnityEngine.UIElements.VisualElement;
 
 namespace EmberThrone.Game.Tests
 {
@@ -116,6 +116,33 @@ namespace EmberThrone.Game.Tests
             yield return null;
         }
 
+        /// <summary>Taps a UI element with the virtual mouse, through the real event system.</summary>
+        IEnumerator TapUi(VisualElement e)
+        {
+            yield return null; // layout
+            Assert.IsNotNull(e.panel, "element is on screen");
+            var screen = UiRoot.PanelToScreen(e.worldBound.center);
+            SetMouse(screen, false);
+            yield return null;
+            SetMouse(screen, true);
+            yield return null;
+            yield return null;
+            SetMouse(screen, false);
+            yield return null;
+            yield return null;
+        }
+
+        /// <summary>Waits for the win or lose window (a win first plays its fireworks).</summary>
+        IEnumerator WaitForPopup(string why = null)
+        {
+            float limit = Time.time + 10f;
+            while (Game.Popup == null)
+            {
+                Assert.Less(Time.time, limit, "no window " + why);
+                yield return null;
+            }
+        }
+
         IEnumerator WaitIdle()
         {
             yield return null;
@@ -135,6 +162,23 @@ namespace EmberThrone.Game.Tests
             Assert.GreaterOrEqual(_app.Levels.Count, 10);
             Assert.AreEqual(_app.Levels.Count, _app.LevelSelect.ButtonCount);
             CollectionAssert.IsOrdered(_app.Levels.Select(l => l.Id));
+        }
+
+        [UnityTest]
+        public IEnumerator LevelSelect_TappingACard_StartsThatLevel()
+        {
+            yield return TapUi(_app.LevelSelect.Buttons[1]);
+            Assert.IsNotNull(_app.Game, "the tap reached the card");
+            Assert.AreEqual(_app.Levels[1].Moves.ToString(), Game.Hud.MovesText);
+        }
+
+        [UnityTest]
+        public IEnumerator HomeButton_GoesBackToTheList()
+        {
+            _app.StartLevel(_app.Levels[0], 0, Seed);
+            yield return TapUi(Game.Hud.HomeButton);
+            Assert.IsNull(_app.Game);
+            Assert.AreEqual(_app.Levels.Count, _app.LevelSelect.ButtonCount);
         }
 
         [UnityTest]
@@ -290,7 +334,7 @@ namespace EmberThrone.Game.Tests
             Assert.Greater(LevelProgress.GetStars(4242), 0, "saved before the animations, in case the player leaves");
             yield return WaitIdle();
             Assert.AreEqual(GameState.Won, Game.Session.State);
-            yield return new WaitForSeconds(Timing.WinDelay + 0.1f);
+            yield return WaitForPopup();
             Assert.AreEqual("Kazandın!", Game.Popup.Title);
             Assert.AreEqual(Game.Session.Rules.StarsFor(Game.Session.MovesLeft), LevelProgress.GetStars(4242));
             Assert.IsTrue(Game.Hud.GoalChecked(0));
@@ -302,7 +346,7 @@ namespace EmberThrone.Game.Tests
             // A box goal on a board without boxes has nothing left to do.
             yield return Begin(Level(10, new GoalDefinition(GoalType.Box), Even, Odd, Even, Odd, Even));
             Assert.AreEqual(GameState.Won, Game.Session.State);
-            yield return new WaitForSeconds(Timing.WinDelay + 0.1f);
+            yield return WaitForPopup();
             Assert.AreEqual("Kazandın!", Game.Popup.Title);
         }
 
@@ -341,10 +385,9 @@ namespace EmberThrone.Game.Tests
             yield return new WaitForSeconds(Timing.LoseDelay + 0.1f);
             Assert.AreEqual("Kaybettin", Game.Popup.Title);
 
-            var buttons = Game.Popup.GetComponentsInChildren<Button>();
-            Assert.AreEqual(2, buttons.Length);
-            buttons[0].onClick.Invoke();
-            yield return null;
+            Assert.AreEqual(2, Game.Popup.Buttons.Count);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(Game.Popup.Buttons[0]);
             Assert.AreNotSame(game, _app.Game, "retry starts a new game");
             Assert.AreEqual(GameState.Playing, _app.Game.Session.State);
         }
@@ -370,9 +413,53 @@ namespace EmberThrone.Game.Tests
                     yield return WaitIdle();
                 }
                 Assert.IsNull(Game.LastMismatch, "level index " + i);
-                yield return new WaitForSeconds(Timing.LoseDelay + 0.2f);
-                Assert.IsNotNull(Game.Popup, "level index " + i);
+                yield return WaitForPopup("level index " + i);
             }
+        }
+
+        // ---------------------------------------------------------------- feel
+
+        [UnityTest]
+        public IEnumerator Win_TurnsMovesLeftIntoFireworks_ThenShowsTheWindow()
+        {
+            yield return Begin(Level(6, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even));
+            int buzzes = Haptics.Count;
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            Assert.AreEqual(GameState.Won, Game.Session.State);
+            Assert.AreEqual("5", Game.Hud.MovesText);
+            Assert.IsNull(Game.Popup, "the fireworks come first");
+
+            yield return WaitForPopup();
+            Assert.AreEqual("0", Game.Hud.MovesText, "every move left became a firework");
+            Assert.AreEqual(5, Game.Session.MovesLeft, "the celebration is only a show");
+            Assert.AreEqual(HapticLevel.Strong, Haptics.LastLevel, "the win window comes with a strong buzz");
+            Assert.Greater(Haptics.Count, buzzes);
+            Assert.IsNull(Game.LastMismatch);
+        }
+
+        [UnityTest]
+        public IEnumerator Combo_ShowsPraise_AndTheShakeSettles()
+        {
+            yield return Begin(Level(20, null, "YPOGYO", "OGYPOG", "YP-*YO", "OGYPOG", "YPOGYO"));
+            Assert.IsNull(Game.Praise.Text);
+            Game.RequestSwap(new GridPos(2, 2), new GridPos(3, 2));
+
+            float limit = Time.time + 3f;
+            while (Game.Praise.Text == null)
+            {
+                Assert.Less(Time.time, limit, "no praise for a rocket + bomb combo");
+                yield return null;
+            }
+            Assert.AreEqual("Muhteşem!", Game.Praise.Text);
+            Assert.Greater(_app.Shake.Trauma, 0f, "a combo shakes the camera");
+
+            yield return WaitIdle();
+            yield return new WaitForSeconds(1f);
+            Assert.AreEqual(0f, _app.Shake.Trauma);
+            Assert.AreEqual(_app.Shake.Rest, _app.Camera.transform.position, "the camera is back at rest");
+            Assert.AreEqual(Quaternion.identity, _app.Camera.transform.rotation);
+            Assert.IsNull(Game.LastMismatch);
         }
 
         // ---------------------------------------------------------------- layout
@@ -396,6 +483,30 @@ namespace EmberThrone.Game.Tests
             Assert.LessOrEqual(high.x + half, safe.xMax + 0.5f);
             Assert.GreaterOrEqual(low.y - half, safe.yMin - 0.5f);
             Assert.LessOrEqual(high.y + half, hudBottom + 0.5f, "the board must not run under the HUD");
+        }
+
+        [UnityTest]
+        public IEnumerator Hud_StaysInItsBand_AboveTheBoard()
+        {
+            int w = UiRoot.ScreenWidth, h = UiRoot.ScreenHeight;
+            UiRoot.SafeAreaOverride = new Rect(0f, h * 0.03f, w, h * 0.92f);
+            _app.StartLevel(_app.Levels[8], 8, Seed); // three goals: the widest HUD
+            yield return null;
+            yield return null;
+            yield return null;
+
+            var hud = Game.Hud.Root;
+            float bandBottom = hud.worldBound.yMin + HudView.Height;
+            float safeTop = (h - UiRoot.SafeArea.yMax) / UiRoot.Scale;
+            Assert.AreEqual(safeTop, hud.worldBound.yMin, 0.5f, "the HUD starts at the safe area");
+            float panelWidth = w / UiRoot.Scale;
+            foreach (var e in UnityEngine.UIElements.UQueryExtensions.Query<VisualElement>(hud).ToList())
+            {
+                if (e.resolvedStyle.display == UnityEngine.UIElements.DisplayStyle.None) continue;
+                Assert.LessOrEqual(e.worldBound.yMax, bandBottom + 0.5f, e.name + " runs below the HUD band");
+                Assert.GreaterOrEqual(e.worldBound.xMin, -0.5f, e.name + " leaves the screen");
+                Assert.LessOrEqual(e.worldBound.xMax, panelWidth + 0.5f, e.name + " leaves the screen");
+            }
         }
     }
 }

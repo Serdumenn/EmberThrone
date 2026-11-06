@@ -120,5 +120,12 @@ namespace EmberThrone.Game
         public const float StarFill = 0.2f;          // ANI-009
         public const float WinDelay = 0.5f;
         public const float LoseDelay = 1.5f;         // SYS-CORE-001 §4.3: fail screen waits at least 1.5 s
+        public const float WinSparkInterval = 0.09f; // end of level: one firework per move left
+        public const float WinSparkFlight = 0.32f;
+        public const int WinSparksMax = 10;
+        public const float WinWindowPause = 0.25f;   // after the last firework, before the window
+        public const float PraisePop = 0.32f;        // "Harika!": pop in (design-system --dur-pop)
+        public const float PraiseHold = 0.55f;
+        public const float PraiseOut = 0.25f;
     }
 }

@@ -14,7 +14,8 @@ namespace EmberThrone.Game
     /// </summary>
     public sealed class BoardView : MonoBehaviour
     {
-        const int SortFrame = -2;
+        const int SortGlow = -3;
+        const int SortBack = -2;
         const int SortTile = -1;
         const int SortFloor = 1;
         const int SortExit = 2;
@@ -36,9 +37,12 @@ namespace EmberThrone.Game
 
         /// <summary>Raised when a goal counter should change on screen, in sync with the animation.</summary>
         public event Action<GoalProgressEvent> GoalProgressed;
-
-        // Unlit and always included in builds, so it needs no asset and no lights in the 2D renderer.
-        static Material _material;
+        /// <summary>Raised when something on the board should be felt (shake, vibration), at the moment it shows.</summary>
+        public event Action<Impact> Impacted;
+        /// <summary>Raised as each clear wave of a move starts playing: 1 is the move itself, 2+ are cascades.</summary>
+        public event Action<int> WaveStarted;
+        /// <summary>Raised when two specials are swapped into a combo.</summary>
+        public event Action<ComboKind> ComboFired;
 
         BoardFx _fx;
         int _w, _h;
@@ -63,7 +67,6 @@ namespace EmberThrone.Game
         public void Build(GameSession session)
         {
             var board = session.Board;
-            if (_material == null) _material = new Material(Shader.Find("Sprites/Default"));
             _w = board.Width;
             _h = board.Height;
             int n = _w * _h;
@@ -78,11 +81,7 @@ namespace EmberThrone.Game
             _pieceRoot.SetParent(transform, false);
             var fxRoot = new GameObject("Fx").transform;
             fxRoot.SetParent(transform, false);
-            _fx = new BoardFx(fxRoot, _material);
-
-            var frame = NewSprite("Frame", Art.RoundedPanel(), Palette.BoardFrame, Vector3.zero, SortFrame);
-            frame.drawMode = SpriteDrawMode.Sliced;
-            frame.size = new Vector2(_w + 0.36f, _h + 0.36f);
+            _fx = new BoardFx(fxRoot, Art.SpriteMaterial);
 
             bool hasCollectibleGoal = false;
             foreach (var g in session.Goals)
@@ -97,7 +96,10 @@ namespace EmberThrone.Game
                     var pos = new GridPos(x, y);
                     int i = Index(pos);
                     _exists[i] = true;
-                    NewSprite("Tile", Art.Tile(), (x + y) % 2 == 0 ? Palette.CellLight : Palette.CellDark, World(pos), SortTile);
+                    // Every cell brings its own back and light, so boards with holes keep their shape (style frame v3).
+                    NewSprite("Glow", Art.Glow(), Palette.BoardGlow, World(pos), SortGlow).transform.localScale = Vector3.one * 1.42f;
+                    NewSprite("Back", Art.CellBack(), Palette.BoardBack, World(pos), SortBack).transform.localScale = Vector3.one * 1.2f;
+                    NewSprite("Tile", Art.Tile(), (x + y) % 2 == 0 ? Palette.TileLight : Palette.TileDark, World(pos), SortTile);
                     SetFloor(pos, cell.Floor);
                     SetCover(pos, cell.Cover);
                     if (cell.Piece != null) CreatePiece(cell.Piece.Id, cell.Piece.Kind, cell.Piece.Color, cell.Piece.Hp, pos);
@@ -109,7 +111,7 @@ namespace EmberThrone.Game
                 }
             }
 
-            _selection = NewSprite("Selection", Art.Selection(), Palette.Gold, Vector3.zero, SortSelection);
+            _selection = NewSprite("Selection", Art.Selection(), Palette.Select, Vector3.zero, SortSelection);
             _selection.gameObject.SetActive(false);
         }
 
@@ -119,7 +121,7 @@ namespace EmberThrone.Game
             go.transform.SetParent(transform, false);
             go.transform.localPosition = pos;
             var r = go.AddComponent<SpriteRenderer>();
-            r.sharedMaterial = _material;
+            r.sharedMaterial = Art.SpriteMaterial;
             r.sprite = sprite;
             r.color = color;
             r.sortingOrder = order;
@@ -139,7 +141,7 @@ namespace EmberThrone.Game
                 var go = new GameObject("Piece");
                 go.transform.SetParent(_pieceRoot, false);
                 v = new PieceView { T = go.transform, R = go.AddComponent<SpriteRenderer>() };
-                v.R.sharedMaterial = _material;
+                v.R.sharedMaterial = Art.SpriteMaterial;
             }
             v.Id = id;
             v.Kind = kind;
@@ -184,7 +186,7 @@ namespace EmberThrone.Game
             _coverHp[i] = hp;
             if (hp > 0)
             {
-                if (_covers[i] == null) _covers[i] = NewSprite("Cover", Art.Cover(hp), Color.white, World(p), SortCover);
+                if (_covers[i] == null) _covers[i] = NewSprite("Cover", Art.Cover(hp), new Color(1f, 1f, 1f, Palette.CoverAlpha), World(p), SortCover);
                 _covers[i].sprite = Art.Cover(hp);
             }
             else if (_covers[i] != null)
@@ -273,6 +275,7 @@ namespace EmberThrone.Game
 
         public IEnumerator Play(MoveOutcome outcome)
         {
+            int wave = 0;
             foreach (var step in outcome.Steps)
             {
                 switch (step.Kind)
@@ -286,10 +289,18 @@ namespace EmberThrone.Game
                     case StepKind.End:
                         break;
                     default:
+                        WaveStarted?.Invoke(++wave);
                         yield return PlayEffects(step);
                         break;
                 }
             }
+        }
+
+        void Signal(Impact impact, float delay)
+        {
+            if (Impacted == null) return;
+            if (delay <= 0f) Impacted(impact);
+            else Tweens.After(delay, () => Impacted?.Invoke(impact));
         }
 
         IEnumerator PlaySwap(BoardStep step)
@@ -360,6 +371,15 @@ namespace EmberThrone.Game
             }
 
             float DelayAt(GridPos p) => _delays.TryGetValue(p, out var d) ? d : strikeDelay;
+
+            foreach (var ev in step.Events)
+            {
+                if (ev is PieceClearedEvent c && c.Reason == ClearReason.Match)
+                {
+                    Signal(Impact.Match, 0f);
+                    break;
+                }
+            }
 
             // Second pass: update the record immediately and schedule the visuals.
             float end = 0f;
@@ -454,7 +474,7 @@ namespace EmberThrone.Game
 
             if (e.Kind == PieceKind.Box)
             {
-                _fx.Burst(World(e.Pos), Palette.Hex("C48A4E"), delay, 6);
+                _fx.Splinters(World(e.Pos), delay);
                 Tweens.Run(Timing.ObstacleBreak, t => v.T.localScale = Vector3.one * (1f - t), delay, () => Recycle(v));
                 return delay + Timing.ObstacleBreak + 0.06f;
             }
@@ -482,6 +502,9 @@ namespace EmberThrone.Game
             v.T.localScale = Vector3.zero;
             float delay = Timing.MergeFlight * 0.7f;
             _fx.Flash(World(e.Pos), new Color(1f, 0.93f, 0.7f, 0.9f), 1.5f, delay, Timing.SpecialForm);
+            _fx.Ring(World(e.Pos), new Color(1f, 0.9f, 0.55f, 0.9f), 0.3f, 1.1f, delay, 0.3f);
+            _fx.Sparkles(World(e.Pos), 4, delay, 0.6f, 0.6f);
+            Signal(Impact.SpecialMade, delay);
             Tweens.Run(Timing.SpecialForm, t => v.T.localScale = Vector3.one * Ease.OutBack(t), delay);
             return delay + Timing.SpecialForm;
         }
@@ -513,6 +536,17 @@ namespace EmberThrone.Game
             float sweep = reach * perCell;
             var warm = new Color(1f, 0.85f, 0.55f, 0.95f);
             float end = sweep + 0.1f;
+
+            if (e.Combo != ComboKind.None)
+            {
+                ComboFired?.Invoke(e.Combo);
+                bool big = e.Combo == ComboKind.BombBomb || e.Combo == ComboKind.ColorColor || e.Combo == ComboKind.ColorBomb;
+                Signal(big ? Impact.BigCombo : Impact.Combo, 0f);
+                _fx.Sparkles(center, 6, 0f, 1.2f, 0.8f);
+            }
+            else if (e.Kind == PieceKind.Bomb) Signal(Impact.Bomb, 0f);
+            else if (e.Kind == PieceKind.ColorBomb) Signal(Impact.ColorBomb, 0f);
+            else Signal(Impact.Rocket, 0f);
 
             switch (e.Combo)
             {
@@ -591,6 +625,7 @@ namespace EmberThrone.Game
             v.Hp = e.HpLeft;
             int hp = e.HpLeft;
             Tweens.After(delay, () => v.R.sprite = Art.Box(hp));
+            _fx.Splinters(World(v.Pos), delay, 3);
             ShakePiece(v, delay);
             return delay + Timing.ObstacleBreak;
         }
@@ -610,7 +645,7 @@ namespace EmberThrone.Game
             int hp = e.HpLeft;
             var p = e.Pos;
             _coverHp[Index(p)] = hp; // keep the record exact even while the visual change waits
-            _fx.Burst(World(p), new Color(0.75f, 0.93f, 1f, 1f), delay, 6);
+            _fx.IceShards(World(p), delay);
             Tweens.After(delay, () => SetCover(p, hp));
             return delay + Timing.ObstacleBreak;
         }
@@ -620,6 +655,7 @@ namespace EmberThrone.Game
             int hp = e.HpLeft;
             var p = e.Pos;
             _floorHp[Index(p)] = hp;
+            _fx.AshPuff(World(p), delay);
             Tweens.After(delay, () => SetFloor(p, hp));
             return delay + Timing.ObstacleBreak;
         }
@@ -632,6 +668,8 @@ namespace EmberThrone.Game
             var to = from + Vector3.down * 0.9f;
             v.R.sortingOrder = SortLifted;
             _fx.Flash(from, new Color(1f, 0.85f, 0.3f, 0.9f), 1.4f, 0f, Timing.Collect);
+            _fx.Sparkles(from, 5, 0f, 0.6f, 0.7f);
+            Signal(Impact.SpecialMade, 0f);
             Tweens.Run(Timing.Collect, t =>
             {
                 v.T.localPosition = Vector3.LerpUnclamped(from, to, Ease.InQuad(t));
@@ -668,6 +706,39 @@ namespace EmberThrone.Game
                 });
             }
             return Timing.Shuffle;
+        }
+
+        // ---------------------------------------------------------------- end of level
+
+        /// <summary>
+        /// The win celebration: one spark per move left flies from <paramref name="from"/> to a cell and bursts into a
+        /// firework. Cosmetic only, the board does not change. <paramref name="launched"/> gets the spark's index as it
+        /// leaves, so the move counter can count down with it. Returns the time until the last firework fades.
+        /// </summary>
+        public float Celebrate(Vector3 from, int sparks, Action<int> launched)
+        {
+            var cells = new List<GridPos>();
+            for (int y = 0; y < _h; y++)
+                for (int x = 0; x < _w; x++)
+                    if (_exists[y * _w + x]) cells.Add(new GridPos(x, y));
+            if (cells.Count == 0) return 0f;
+
+            float end = 0f;
+            for (int i = 0; i < sparks; i++)
+            {
+                // Golden-ratio steps spread the targets over the board without repeating soon.
+                var cell = cells[(int)(Mathf.Repeat(i * 0.618034f + 0.31f, 1f) * cells.Count)];
+                var color = Palette.Gem(i % GemColor.Count);
+                float delay = i * Timing.WinSparkInterval;
+                int index = i;
+                Tweens.After(delay, () => launched?.Invoke(index));
+                _fx.Spark(from, World(cell), color, delay, Timing.WinSparkFlight);
+                float boom = delay + Timing.WinSparkFlight;
+                _fx.Firework(World(cell), color, boom);
+                Signal(Impact.Firework, boom);
+                end = Mathf.Max(end, boom + 0.4f);
+            }
+            return end;
         }
 
         // ---------------------------------------------------------------- gravity

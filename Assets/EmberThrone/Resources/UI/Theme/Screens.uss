@@ -1,0 +1,237 @@
+/* Screen layouts, in reference pixels (1080x1920 canvas that only grows). */
+
+/* ---------------------------------------------------------------- backdrop */
+
+.et-backdrop--map {
+    background-image: url("../Art/bg_map.jpg");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+/* ---------------------------------------------------------------- in-level HUD (height set from HudView.Height) */
+
+.et-hud {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 26px var(--space-3) 0 var(--space-3);
+}
+
+.et-hud__left {
+    width: 210px;
+    align-items: center;
+}
+
+.et-hud__home-icon {
+    width: 150px;
+    height: 150px;
+    background-image: url("../Art/ic_castle.png");
+}
+
+.et-hud__level {
+    margin-top: -34px;
+}
+
+.et-hud__goals {
+    flex-grow: 1;
+    height: 196px;
+    margin: 34px 0 0 18px;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 22px var(--space-3) 34px var(--space-3);
+}
+
+.et-hud__moves {
+    width: 260px;
+    height: 196px;
+    margin: 34px 0 0 18px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0 22px 0;
+}
+
+.et-hud__moves-count {
+    font-size: var(--font-size-number);
+    text-shadow: 0 5px 0 var(--color-highlight);
+}
+
+.et-hud__moves-count--warn {
+    color: var(--color-primary);
+}
+
+.et-hud__moves-count--danger {
+    color: var(--color-alert);
+}
+
+.et-goal {
+    width: 132px;
+    height: 132px;
+}
+
+.et-goal__count {
+    position: absolute;
+    right: -18px;
+    bottom: -20px;
+    font-size: var(--font-size-label);
+}
+
+.et-goal__check {
+    position: absolute;
+    right: -12px;
+    bottom: -12px;
+}
+
+/* ---------------------------------------------------------------- praise over the board ("Harika!") */
+
+.et-praise {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 36%;
+    font-size: 140px;
+    -unity-text-outline-width: 9px;
+    text-shadow: 0 7px 0 var(--color-outline);
+    rotate: -6deg;
+}
+
+/* ---------------------------------------------------------------- win and lose windows */
+
+.et-result {
+    align-items: center;
+    justify-content: center;
+}
+
+.et-result__body {
+    width: 900px;
+    align-items: center;
+}
+
+.et-result__glow {
+    left: 30px;
+    top: -200px;
+    width: 840px;
+    height: 760px;
+}
+
+.et-result__rays {
+    left: -310px;
+    top: -580px;
+    width: 1520px;
+    height: 1520px;
+}
+
+.et-result__stars {
+    flex-direction: row;
+    height: 360px;
+    align-items: flex-start;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.et-result__star {
+    width: 270px;
+    height: 270px;
+    margin: 70px -10px 0 -10px;
+}
+
+.et-result__star--left {
+    rotate: -16deg;
+}
+
+.et-result__star--middle {
+    width: 340px;
+    height: 340px;
+    margin-top: 0;
+}
+
+.et-result__star--right {
+    rotate: 16deg;
+}
+
+.et-result__panel {
+    align-self: stretch;
+    padding: 118px var(--space-6) 40px var(--space-6);
+}
+
+.et-result__message {
+    font-size: var(--font-size-label);
+    white-space: normal;
+    margin-bottom: 40px;
+}
+
+.et-result__button {
+    margin-bottom: var(--space-3);
+}
+
+.et-result__mascot {
+    position: absolute;
+    left: -90px;
+    bottom: -120px;
+    width: 300px;
+    height: 300px;
+    rotate: -10deg;
+    background-image: url("../Art/mascot_joy.png");
+}
+
+/* ---------------------------------------------------------------- level list (until the map screen) */
+
+.et-levels {
+    flex-grow: 1;
+    padding: 0 var(--space-6);
+}
+
+.et-levels__header {
+    height: 360px;
+    align-items: center;
+    justify-content: center;
+}
+
+.et-levels__subtitle {
+    margin-top: var(--space-1);
+    font-size: var(--font-size-body);
+}
+
+.et-levels__scroll {
+    flex-grow: 1;
+}
+
+.et-levels__grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-bottom: var(--space-6);
+}
+
+.et-level-card {
+    width: 300px;
+    height: 340px;
+    margin: 14px;
+    align-items: center;
+    padding: 18px var(--space-2) 0 var(--space-2);
+}
+
+.et-level-card__number {
+    font-size: var(--font-size-title);
+    height: 124px;
+}
+
+.et-level-card__name {
+    white-space: normal;
+    height: 96px;
+    -unity-text-align: upper-center;
+}
+
+.et-level-card__stars {
+    position: absolute;
+    bottom: 44px;
+    flex-direction: row;
+}
+
+.et-level-card__star {
+    width: 72px;
+    height: 72px;
+    margin: 0 2px;
+}

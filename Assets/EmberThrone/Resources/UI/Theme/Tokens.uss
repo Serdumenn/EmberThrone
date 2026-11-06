@@ -1,0 +1,51 @@
+/* Design tokens, theme "Kor". The only file allowed to contain colors (ThemeTests checks it).
+   Every token is explained in docs/design/design-system.md. */
+:root {
+    --color-primary-light: #FF9440;
+    --color-primary: #E2541A;
+    --color-primary-deep: #A3330C;
+    --color-outline: #4A1604;
+    --color-nav-top: #B4400F;
+    --color-nav-bottom: #6A1F06;
+    --color-face: #FFF8E9;
+    --color-face-deep: #FFE5BB;
+    --color-ink: #6A2A0A;
+    --color-ink-muted: #86532A;
+    --color-gold-light: #FFF7C4;
+    --color-gold: #FFD447;
+    --color-gold-deep: #B96A05;
+    --color-cta: #44AD1C;
+    --color-cta-edge: #18480A;
+    --color-accent: #F2780E;
+    --color-accent-edge: #6A2A04;
+    --color-alert: #E8102A;
+    --color-alert-edge: #5A0610;
+    --color-chip: rgba(30, 16, 48, 0.9);
+    --color-white: #FFFFFF;
+    --color-highlight: rgba(255, 255, 255, 0.9);
+    --color-scrim: rgba(10, 5, 25, 0.78);
+    --color-board-back: rgba(26, 16, 58, 0.72);
+    --color-tile: rgba(236, 244, 255, 0.93);
+    --color-tile-alt: rgba(208, 224, 255, 0.93);
+    --color-select: #7AD83A;
+    --color-pressed: #EBEBEB;
+    --color-confetti-blue: #2F8CFF;
+    --color-confetti-purple: #B44AF6;
+    --color-none: rgba(0, 0, 0, 0);
+
+    --font-size-display: 120px;
+    --font-size-number: 124px;
+    --font-size-title: 104px;
+    --font-size-button: 76px;
+    --font-size-label: 56px;
+    --font-size-body: 48px;
+    --font-size-caption: 36px;
+
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --space-6: 48px;
+    --space-8: 64px;
+    --space-12: 96px;
+}

@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EmberThrone · Style Frame v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --p0: #ff9440; --p1: #e2541a; --p2: #a3330c; --dark: #4a1604; --nav0: #b4400f; --nav1: #6a1f06;
+    --face0: #fff8e9; --face1: #ffe5bb; --ink: #6a2a0a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #16131c; color: #ece8f2; font: 15px/1.55 "Nunito", system-ui, sans-serif; }
+  .wrap { max-width: 1260px; margin: 0 auto; padding: 0 16px 60px; }
+  header { padding: 34px 0 6px; }
+  .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #a49cb4; font-weight: 800; }
+  h1 { font: 800 40px/1.1 "Baloo 2", sans-serif; margin: 8px 0 10px; }
+  h2 { font: 800 26px/1.1 "Baloo 2", sans-serif; margin: 44px 0 16px; }
+  p.lead { color: #cfc8db; max-width: 860px; margin: 0 0 10px; }
+  .bar { position: sticky; top: 0; z-index: 50; background: rgba(22,19,28,.92); backdrop-filter: blur(8px); padding: 12px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid #2a2533; }
+  .bar span { color: #a49cb4; font-size: 13px; margin-right: 4px; }
+  .bar button { font: 800 13px "Nunito", sans-serif; padding: 7px 14px 7px 9px; border-radius: 999px; border: 1px solid #3a3446; background: #211d29; color: #ece8f2; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+  .bar button.on { background: #ece8f2; color: #16131c; }
+  .bar i { width: 18px; height: 18px; border-radius: 50%; }
+  .row { display: flex; flex-wrap: wrap; gap: 26px 22px; align-items: flex-end; }
+  figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  figcaption { font-weight: 800; color: #cfc8db; font-size: 14px; text-align: center; }
+  figcaption small { display: block; color: #8d849c; font-weight: 700; font-size: 12px; }
+  .phone { position: relative; padding: 9px; border-radius: 44px; background: #0b0a0e; box-shadow: 0 30px 60px rgba(0,0,0,.5), inset 0 0 0 1px #2c2733; }
+  .phone.tab { border-radius: 30px; }
+  .notch { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); width: 86px; height: 24px; background: #000; border-radius: 14px; z-index: 99; }
+  .homebar { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; background: rgba(255,255,255,.85); border-radius: 3px; z-index: 99; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+  .card { background: #1d1925; border: 1px solid #2c2734; border-radius: 16px; padding: 16px 18px; }
+  .card h3 { margin: 0 0 8px; font: 900 13px "Nunito"; letter-spacing: .08em; text-transform: uppercase; color: #ffd25a; }
+  .card ul { margin: 0; padding-left: 18px; color: #cfc8db; }
+  .card li { margin: 4px 0; }
+  .kit { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+  .kit div { background: radial-gradient(circle at 50% 40%, #3a3150, #221d2c); border: 1px solid #2f2939; border-radius: 16px; padding: 10px; text-align: center; font-size: 12px; font-weight: 800; color: #b8b0c6; }
+  .kit img { width: 92px; height: 92px; object-fit: contain; display: block; margin: 0 auto 4px; filter: drop-shadow(0 6px 6px rgba(0,0,0,.35)); }
+  .kit img.wide { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; }
+
+  /* ---------- game UI: 1em = 100 design units of a 1080-wide screen ---------- */
+  .scr { position: absolute; inset: 9px; overflow: hidden; border-radius: 35px; font-family: "Baloo 2", sans-serif; font-weight: 800; line-height: 1; color: #fff; background: #000; }
+  .phone.tab .scr { border-radius: 22px; }
+  .a { position: absolute; }
+  .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .sp { position: absolute; object-fit: contain; pointer-events: none; }
+  .cc { display: flex; align-items: center; justify-content: center; }
+  .t { white-space: nowrap; position: relative; }
+  .frm { position: absolute; border-radius: .46em; background: linear-gradient(180deg, #fff7c4 0%, #ffd447 26%, #ec9a10 60%, #ffd65e 84%, #b96a05 100%);
+         box-shadow: 0 0 0 .03em var(--dark), 0 .09em 0 .03em var(--dark), 0 .2em .32em rgba(0,0,0,.38); }
+  .frm > .face { position: absolute; inset: .075em; border-radius: .38em; background: linear-gradient(180deg, var(--face0), var(--face1));
+         box-shadow: inset 0 0 0 .028em rgba(140,70,0,.55), inset 0 .09em 0 rgba(0,0,0,.07), inset 0 -.05em 0 rgba(255,255,255,.6); overflow: hidden; }
+  .frm > .face::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 .05em, transparent .05em .28em); pointer-events: none; }
+  .frm > .band { position: absolute; left: .075em; right: .075em; top: .075em; border-radius: .38em .38em .14em .14em;
+         background: linear-gradient(180deg, var(--p0), var(--p1) 55%, var(--p2)); box-shadow: inset 0 .045em 0 rgba(255,255,255,.5), inset 0 -.06em 0 rgba(0,0,0,.28), 0 .03em 0 rgba(0,0,0,.25); }
+  .frm > .band::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(ellipse at 50% -20%, rgba(255,255,255,.45), transparent 60%); }
+  .btn { position: absolute; border-radius: .36em; display: flex; align-items: center; justify-content: center;
+         box-shadow: 0 0 0 .032em var(--bo), 0 .1em 0 .032em var(--bo), 0 .22em .26em rgba(0,0,0,.38), inset 0 .035em 0 rgba(255,255,255,.75), inset 0 -.07em 0 rgba(0,0,0,.2); }
+  .btn::before { content: ''; position: absolute; left: 5%; right: 5%; top: 7%; height: 40%; border-radius: .28em; background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.12)); }
+  .btn.green { --bo: #18480a; background: linear-gradient(180deg, #d4ff7a 0%, #7ddb30 34%, #44ad1c 70%, #2e8a10 100%); }
+  .btn.orange { --bo: #6a2a04; background: linear-gradient(180deg, #ffe08a 0%, #ffb02e 36%, #f2780e 72%, #d0560a 100%); }
+  .btn.prim { --bo: var(--dark); background: linear-gradient(180deg, var(--p0), var(--p1) 60%, var(--p2)); }
+  .btn.red { --bo: #5a0610; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #ff9a8a, #f2262f 55%, #a00818); }
+  .pill { position: absolute; border-radius: 9em; background: linear-gradient(180deg, #fffaf0, #ffe6c2); box-shadow: 0 0 0 .03em var(--dark), 0 .07em 0 .03em var(--dark), inset 0 -.06em 0 rgba(0,0,0,.08); display: flex; align-items: center; justify-content: center; color: var(--ink); }
+  .dpill { position: absolute; border-radius: 9em; background: linear-gradient(180deg, rgba(40,20,70,.88), rgba(20,10,40,.92)); box-shadow: 0 0 0 .025em rgba(255,255,255,.6), 0 .05em .1em rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; color: #fff; }
+  .plus { position: absolute; border-radius: 50%; background: linear-gradient(180deg, #c8ff6a, #44ad1c); box-shadow: 0 0 0 .025em #fff, 0 0 0 .05em #18480a; display: flex; align-items: center; justify-content: center; }
+  .badge { position: absolute; border-radius: 9em; background: radial-gradient(circle at 40% 30%, #ff8a7a, #e8102a 60%, #a00818); box-shadow: 0 0 0 .03em #fff, 0 0 0 .055em #5a0610; display: flex; align-items: center; justify-content: center; }
+  .ring { position: absolute; border-radius: 50%; background: linear-gradient(180deg, #fff7c4, #ffd447 30%, #e8960e 65%, #ffd65e 88%, #b96a05); box-shadow: 0 0 0 .03em var(--dark), 0 .08em 0 .03em var(--dark), 0 .16em .25em rgba(0,0,0,.35); }
+  .ring > .in { position: absolute; inset: .07em; border-radius: 50%; overflow: hidden; background: radial-gradient(circle at 50% 35%, #fff6d8, #8fd2ff 60%, #2f86ff); box-shadow: inset 0 0 0 .025em rgba(120,60,0,.6), inset 0 .08em .12em rgba(0,0,0,.25); }
+  .sq { position: absolute; border-radius: .34em; background: linear-gradient(180deg, #fff7c4, #ffd447 30%, #e8960e 65%, #ffd65e 88%, #b96a05); box-shadow: 0 0 0 .03em var(--dark), 0 .08em 0 .03em var(--dark), 0 .16em .22em rgba(0,0,0,.35); }
+  .sq > .in { position: absolute; inset: .065em; border-radius: .28em; background: radial-gradient(circle at 50% 30%, var(--p0), var(--p1) 60%, var(--p2)); box-shadow: inset 0 0 0 .025em rgba(0,0,0,.35), inset 0 .05em 0 rgba(255,255,255,.45); }
+  .nav { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, var(--nav0), var(--nav1)); box-shadow: 0 -.035em 0 #ffd25a, 0 -.07em 0 var(--dark), 0 -.12em .2em rgba(0,0,0,.3); display: flex; }
+  .nav .tab { flex: 1; position: relative; border-left: .02em solid rgba(0,0,0,.3); box-shadow: inset .02em 0 0 rgba(255,255,255,.12); }
+  .nav .tab:first-child { border-left: 0; box-shadow: none; }
+  .nav .tab.on { flex: 1.4; margin-top: -.42em; border-radius: .32em .32em 0 0; background: linear-gradient(180deg, var(--p0), var(--p1) 60%, var(--p2));
+                 box-shadow: 0 0 0 .03em var(--dark), 0 -.035em 0 .035em #ffd25a, inset 0 .05em 0 rgba(255,255,255,.5); z-index: 2; }
+  .trough { position: absolute; border-radius: 9em; background: linear-gradient(180deg, #2a1206, #4a2410); box-shadow: 0 0 0 .03em #ffd25a, 0 0 0 .055em var(--dark), inset 0 .05em .06em rgba(0,0,0,.6); overflow: hidden; }
+  .trough > .fill { position: absolute; left: .03em; top: .03em; bottom: .03em; border-radius: 9em; background: linear-gradient(180deg, #d4ff7a, #6fd02a 45%, #3a9a14); box-shadow: inset 0 .03em 0 rgba(255,255,255,.7); }
+  .rays { position: absolute; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(255,236,150,.6) 0deg 8deg, rgba(255,236,150,0) 8deg 20deg);
+          -webkit-mask: radial-gradient(circle, #000 14%, transparent 68%); mask: radial-gradient(circle, #000 14%, transparent 68%); }
+  .glow { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgba(255,240,170,.95), rgba(255,190,60,.5) 35%, rgba(255,150,30,0) 70%); }
+  .dim { position: absolute; inset: 0; background: radial-gradient(circle at 50% 40%, rgba(20,10,40,.45), rgba(10,5,25,.78)); }
+  .gt { position: relative; display: inline-block; white-space: nowrap; }
+  .gt::before { content: attr(data-t); position: absolute; left: 0; top: 0; color: var(--oc, var(--dark)); -webkit-text-stroke: .14em var(--oc, var(--dark)); text-shadow: 0 .1em 0 var(--oc, var(--dark)), 0 .16em .12em rgba(0,0,0,.35); }
+  .gt > span { position: relative; background: linear-gradient(180deg, #fffdf0 8%, #ffe86a 40%, #ffb81a 68%, #ff8a00 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .wt { position: relative; display: inline-block; white-space: nowrap; color: #fff; z-index: 0; isolation: isolate; }
+  .wt::before { content: attr(data-t); position: absolute; left: 0; top: 0; color: var(--oc, var(--dark)); -webkit-text-stroke: .13em var(--oc, var(--dark)); text-shadow: 0 .08em 0 var(--oc, var(--dark)); z-index: -1; }
+  .row-card { position: absolute; border-radius: .3em; background: linear-gradient(180deg, #fffaf0, #ffe8c6); box-shadow: 0 0 0 .03em var(--dark), 0 .07em 0 .03em var(--dark); }
+  .row-card.me { background: linear-gradient(180deg, #d4ff8a, #7ad83a); box-shadow: 0 0 0 .03em #18480a, 0 .07em 0 .03em #18480a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">EmberThrone · Faz 2 · Kapı 2 · Style Frame v3 · 6 Kasım 2026</div>
+  <h1>Style Frame v3: 3B render ile parlak, tatlı ve hacimli</h1>
+  <p class="lead">Taşlar, özel taşlar, engeller, booster'lar, altın, can, sandık, kupa, maskot, ada ve kale Blender'da 3B modellenip ışıkla render edildi. Arayüz katmanlı: altın kenarlı paneller, altın başlıklar, parlak butonlar, alt menü ve para çubuğu. Hepsi EmberThrone'un kendi çizimleri.</p>
+  <p class="lead">Ana sayfadaki gri bölge oyunun ana fikri: kül olmuş mahalle. Oyuncu yıldız topladıkça orayı "yeniden yakar" ve renk geri gelir.</p>
+</header>
+<div class="bar" id="bar"><span>Panel rengi:</span></div>
+
+<h2>Ana sayfa, seviye başı, oyun</h2>
+<div class="row" id="r1"></div>
+<h2>Kazandın, mağaza, sıralama</h2>
+<div class="row" id="r2"></div>
+<h2>Oyun ekranı diğer oranlarda</h2>
+<div class="row" id="r3"></div>
+
+<h2>3B parça seti (Blender render)</h2>
+<div class="kit" id="kit"></div>
+
+<h2>Notlar</h2>
+<div class="cards">
+  <div class="card"><h3>Nasıl üretildi</h3><ul>
+    <li>Modeller ve ışık kodla kuruluyor: <code>ArtSource/blender/</code>. Aynı script her zaman aynı görseli verir, renk değişikliği tek satır.</li>
+    <li>Görseller şeffaf PNG; oyunda doğrudan sprite olarak kullanılabilir.</li>
+    <li>Işık: üstten sert ana ışık, keskin parlama ışığı, arkadan sıcak ve soğuk kenar ışıkları. Taşlarda içten parlama.</li></ul></div>
+  <div class="card"><h3>Kapı 2'de karar</h3><ul>
+    <li>Panel rengi: Kor, Gece ya da Zümrüt (üstteki düğmeler)</li>
+    <li>Maskot: kor ruhu (sevinçli hali kazandın ekranında)</li>
+    <li>Ana sayfa fikri: kül mahalleleri yıldızla yeniden yakmak</li></ul></div>
+  <div class="card"><h3>Bize ait olanlar</h3><ul>
+    <li>Kor ruhu maskotu, turuncu çatılı kale ve kül/kor teması</li>
+    <li>Taş seti, kor bombası, kor küresi, booster ve menü ikonları</li>
+    <li>Kırmızı-altın kraliyet paleti ve kral karakteri yok; türün ortak ekran düzeni var</li></ul></div>
+</div>
+</div>
+
+<script>
+const PAL = {
+  kor:    { name: 'Kor',    v: { '--p0': '#ff9440', '--p1': '#e2541a', '--p2': '#a3330c', '--dark': '#4a1604', '--nav0': '#b4400f', '--nav1': '#6a1f06', '--face0': '#fff8e9', '--face1': '#ffe5bb', '--ink': '#6a2a0a' } },
+  gece:   { name: 'Gece',   v: { '--p0': '#7d86ff', '--p1': '#4b4ee0', '--p2': '#2a2a9c', '--dark': '#120f45', '--nav0': '#3b38b8', '--nav1': '#1c186a', '--face0': '#f7f8ff', '--face1': '#dfe4ff', '--ink': '#25226e' } },
+  zumrut: { name: 'Zümrüt', v: { '--p0': '#46e6c4', '--p1': '#14a88c', '--p2': '#0b6c5a', '--dark': '#053a30', '--nav0': '#12846e', '--nav1': '#074a3e', '--face0': '#f1fffa', '--face1': '#cff5e7', '--ink': '#0b4a3e' } }
+};
+const IMG = n => `img/${n}`;
+const E = n => (n / 100).toFixed(3) + 'em';
+const box = (x, y, w, h) => `left:${E(x)};top:${E(y)};width:${E(w)};height:${E(h)}`;
+const sp = (n, x, y, w, h, extra = '') => `<img class="sp" src="${IMG(n)}" style="${box(x, y, w, h ?? w)};${extra}">`;
+const gt = (t, size, extra = '') => `<span class="gt" data-t="${t}" style="font-size:${E(size)};${extra}"><span>${t}</span></span>`;
+const wt = (t, size, oc, extra = '') => `<span class="wt" data-t="${t}" style="font-size:${E(size)};${oc ? '--oc:' + oc + ';' : ''}${extra}">${t}</span>`;
+const at = (x, y, w, h, inner, cls = 'a', extra = '') => `<div class="${cls}" style="${box(x, y, w, h)};${extra}">${inner || ''}</div>`;
+function frame(x, y, w, h, inner = '', o = {}) {
+  const band = o.band ? `<div class="band" style="height:${E(o.band)}">${o.bandHtml || ''}</div>` : '';
+  const face = `<div class="face" style="${o.band ? 'top:' + E(o.band + 4) : ''}">${inner}</div>`;
+  return `<div class="frm" style="${box(x, y, w, h)};${o.r ? 'border-radius:' + E(o.r) : ''}">${band}${face}${o.after || ''}</div>`;
+}
+function btn(x, y, w, h, label, kind = 'green', size) {
+  return `<div class="btn ${kind}" style="${box(x, y, w, h)}">${label ? wt(label, size || h * 0.46, kind === 'green' ? '#18480a' : kind === 'orange' ? '#6a2a04' : null) : ''}</div>`;
+}
+function spark(x, y, s, rot = 0, o = 1) {
+  return `<svg class="a" viewBox="0 0 100 100" style="${box(x - s / 2, y - s / 2, s, s)};transform:rotate(${rot}deg);opacity:${o};filter:drop-shadow(0 0 ${E(s * 0.12)} rgba(255,240,170,.9));overflow:visible"><path d="M50 0 L58 42 L100 50 L58 58 L50 100 L42 58 L0 50 L42 42 Z" fill="#fff"/></svg>`;
+}
+let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+// ---------- shared bits ----------
+function topBar(Wd, top) {
+  const y = top + 20;
+  let h = `<div class="ring" style="${box(22, y + 6, 184, 184)}"><div class="in">${sp('mascot.png', 16, 20, 120, 120)}</div></div>`;
+  h += at(58, y + 166, 112, 56, `<span class="t" style="font-size:${E(38)}">8</span>`, 'badge cc');
+  const pills = [['cur_coin.png', '1.250', true, 262], ['cur_heart.png', 'Dolu', false, 186], ['ui_star.png', '34', false, 150]];
+  let x = 262;
+  pills.forEach(([ic, txt, plus, w]) => {
+    h += at(x, y + 52, w, 90, `<span class="t" style="font-size:${E(ic === 'cur_heart.png' ? 44 : 50)};margin-left:${E(plus ? 36 : 50)};margin-right:${E(plus ? 40 : 0)}">${txt}</span>`, 'pill');
+    h += sp(ic, x - 50, y + 34, 122, 122);
+    if (ic === 'cur_heart.png') h += at(x - 50, y + 42, 122, 110, wt('5', 54, '#5a0610'), 'a cc');
+    if (plus) h += at(x + w - 48, y + 64, 66, 66, wt('+', 52, '#18480a'), 'plus');
+    x += w + 62;
+  });
+  h += sp('ic_gear.png', Wd - 112, y + 42, 100, 100);
+  return h;
+}
+function navBar(Wd, Hd, safeB, active) {
+  const tabs = [['ic_chest.png', 'Mağaza'], ['ic_trophy.png', 'Sıralama'], ['ic_castle.png', 'Ana Sayfa'], ['ic_scroll.png', 'Görevler']];
+  const h = 240 + safeB;
+  const inner = tabs.map(([ic, label], i) => {
+    const on = i === active, icon = on ? 190 : 150;
+    return `<div class="tab ${on ? 'on' : ''}"><img class="sp" src="${IMG(ic)}" style="left:50%;top:${E(on ? 10 : 30)};width:${E(icon)};height:${E(icon)};transform:translateX(-50%)">${on ? `<div class="a cc" style="left:0;right:0;top:${E(190)}">${wt(label, 50)}</div>` : ''}${i === 3 ? at(140, 26, 60, 60, `<span class="t" style="font-size:${E(36)}">3</span>`, 'badge cc') : ''}</div>`;
+  }).join('');
+  return `<div class="nav" style="height:${E(h)}">${inner}</div>`;
+}
+
+// ---------- screens ----------
+function home(Wd, Hd, safe) {
+  let h = `<img class="bg" src="${IMG('bg_map.jpg')}">`;
+  h += `<div class="a" style="left:0;right:0;top:0;height:${E(safe.top + 280)};background:linear-gradient(180deg,rgba(10,30,80,.55),rgba(10,30,80,0))"></div>`;
+  h += topBar(Wd, safe.top);
+  const py = safe.top + 300;
+  h += frame(Wd / 2 - 390, py, 780, 210, `<div class="a cc" style="left:0;right:0;top:${E(26)}"><span class="t" style="font-size:${E(46)};color:var(--ink)">Bölüm 2 · Kor Pazarı</span></div>`
+    + `<div class="trough" style="${box(70, 92, 560, 64)}"><div class="fill" style="width:62%"></div><div class="a cc" style="inset:0">${wt('5/8', 44)}</div></div>`, { r: 50 });
+  h += sp('ic_chest.png', Wd / 2 + 230, py + 50, 170, 170);
+  [['ic_chest.png', '2s 14d'], ['ic_trophy.png', '3g 6s']].forEach(([ic, timer], i) => {
+    const y = safe.top + 620 + i * 300;
+    h += `<div class="sq" style="${box(30, y, 190, 190)}"><div class="in"></div></div>` + sp(ic, 26, y - 10, 200, 200);
+    h += at(22, y + 168, 206, 64, `<span class="t" style="font-size:${E(36)}">⏱ ${timer}</span>`, 'dpill');
+  });
+  h += `<div class="sq" style="${box(Wd - 220, safe.top + 620, 190, 190)}"><div class="in"></div></div>` + sp('cur_heart.png', Wd - 214, safe.top + 630, 178, 178);
+  h += at(Wd - 228, safe.top + 788, 206, 64, `<span class="t" style="font-size:${E(36)}">Can iste</span>`, 'dpill');
+  const cx = Wd * 0.64, cy = Hd * 0.30;
+  h += `<div class="a" style="${box(cx - 210, cy - 40, 420, 190)};border-radius:${E(40)};background:linear-gradient(180deg,rgba(35,30,50,.92),rgba(20,16,30,.95));box-shadow:0 0 0 ${E(4)} #ffd25a,0 0 0 ${E(8)} var(--dark),0 ${E(14)} ${E(24)} rgba(0,0,0,.4)"></div>`;
+  h += `<div class="a" style="left:${E(cx - 26)};top:${E(cy + 150)};width:0;height:0;border-left:${E(26)} solid transparent;border-right:${E(26)} solid transparent;border-top:${E(34)} solid #ffd25a"></div>`;
+  h += at(cx - 210, cy - 22, 420, 60, `<span class="t" style="font-size:${E(40)};color:#d8d2e6">Kül Mahallesi</span>`, 'a cc');
+  h += btn(cx - 150, cy + 46, 300, 84, '', 'orange');
+  h += at(cx - 150, cy + 46, 300, 84, wt('Yak', 46, '#6a2a04') + `<img src="${IMG('ui_star.png')}" style="width:${E(70)};height:${E(70)};margin:0 ${E(4)} 0 ${E(14)}">` + wt('12', 46, '#6a2a04'), 'a cc');
+  h += spark(cx + 190, cy - 40, 60, 10);
+  const nav = 240 + safe.bottom, by = Hd - nav - 270;
+  h += `<div class="glow" style="${box(Wd / 2 - 420, by - 120, 840, 420)};opacity:.55"></div>`;
+  h += btn(Wd / 2 - 320, by, 640, 196, '', 'green');
+  h += at(Wd / 2 - 320, by + 6, 640, 190, gt('Seviye 8', 108, '--oc:#18480a'), 'a cc');
+  h += spark(Wd / 2 + 300, by + 10, 70, 15) + spark(Wd / 2 - 300, by + 170, 44, 0, .8);
+  h += navBar(Wd, Hd, safe.bottom, 2);
+  return h;
+}
+
+function levelStart(Wd, Hd, safe) {
+  let h = home(Wd, Hd, safe) + `<div class="dim" style="background:rgba(10,5,25,.8)"></div>`;
+  const w = 940, x = (Wd - w) / 2, y = Hd * 0.2, hh = 1240;
+  let inner = `<div class="a cc" style="left:0;right:0;top:${E(40)}"><span class="t" style="font-size:${E(52)};color:var(--ink)">Hedefler</span></div>`;
+  inner += `<div class="a" style="${box(70, 110, w - 290, 250)};border-radius:${E(36)};background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 ${E(4)} rgba(140,70,0,.25)"></div>`;
+  [['ob_box1.png', 6], ['ob_ice.png', 4], ['piece_R.png', 20]].forEach(([g, n], i) => {
+    const gx = 120 + i * 230;
+    inner += sp(g, gx, 130, 190, 190) + at(gx + 100, 270, 140, 70, wt(String(n), 64), 'a cc');
+  });
+  inner += `<div class="a cc" style="left:0;right:0;top:${E(410)}"><span class="t" style="font-size:${E(48)};color:var(--ink)">Başlangıç booster'ı seç</span></div>`;
+  [['sp_rocket.png', 3], ['sp_bomb.png', 2], ['sp_orb.png', 0]].forEach(([b, n], i) => {
+    const bx = 110 + i * 250, by = 490;
+    inner += `<div class="sq" style="${box(bx, by, 210, 210)}${i === 0 ? ';box-shadow:0 0 0 .03em var(--dark),0 .08em 0 .03em var(--dark),0 0 0 .1em #c8ff6a,0 0 .4em .1em rgba(160,255,90,.7)' : ''}"><div class="in"></div></div>` + sp(b, bx + 18, by + 14, 176, 176);
+    inner += n ? at(bx + 150, by + 150, 86, 86, `<span class="t" style="font-size:${E(50)}">${n}</span>`, 'badge cc') : at(bx + 150, by + 150, 86, 86, wt('+', 60, '#18480a'), 'plus');
+    if (i === 0) inner += at(bx - 18, by - 22, 86, 86, wt('✓', 54, '#18480a'), 'plus');
+  });
+  h += frame(x, y, w, hh, inner, { band: 190, bandHtml: `<div class="a cc" style="inset:0;padding-bottom:${E(10)}">${gt('Seviye 8', 112)}</div>` });
+  h += btn(x + w - 120, y - 50, 150, 150, '', 'red') + at(x + w - 120, y - 54, 150, 150, wt('✕', 84, '#5a0610'), 'a cc');
+  h += btn(Wd / 2 - 330, y + hh - 140, 660, 210, '', 'green');
+  h += at(Wd / 2 - 330, y + hh - 134, 660, 204, gt('Oyna', 120, '--oc:#18480a'), 'a cc');
+  h += sp('mascot.png', x - 80, y + hh - 300, 280, 280, 'transform:rotate(-8deg)');
+  return h;
+}
+
+const BOARD = ['#BGRYPO#', 'GRBYOPRG', 'YP-GRBYO', 'RGYO*PGB', 'BY1RG1PY', 'PO21YRGO', 'GRBP@OYR', 'OY|RBPGY', '#RPOYGB#'];
+const ICE = ['........', '........', '........', '........', '.i....i.', '........', '..ii....', '........', '........'];
+const PIECE = ch => ({ '1': 'ob_box1.png', '2': 'ob_box2.png', '-': 'sp_rocket.png', '|': 'sp_rocket_v.png', '*': 'sp_bomb.png', '@': 'sp_orb.png' })[ch] || `piece_${ch}.png`;
+const tagCss = `background:linear-gradient(180deg,var(--p0),var(--p1));box-shadow:0 0 0 ${E(3)} #ffd25a,0 0 0 ${E(6)} var(--dark),inset 0 ${E(4)} 0 rgba(255,255,255,.45);border-radius:${E(35)}`;
+
+function game(Wd, Hd, safe, opt = {}) {
+  let h = `<img class="bg" src="${IMG('bg_game.jpg')}" style="filter:saturate(1.08)">`;
+  const top = safe.top + 26;
+  h += `<div class="ring" style="${box(24, top, 210, 210)}"><div class="in">${sp('mascot.png', 20, 26, 140, 140)}</div></div>`;
+  const mw = 270, mx = Wd - 24 - mw, gx = 256, gw = mx - 22 - gx, gy = top + 34, gh = 196;
+  let gi = '';
+  [['ob_box1.png', 6], ['ob_ice.png', 4], ['piece_R.png', 20]].forEach(([g, n], i) => {
+    const cx = gw * (i + 0.5) / 3 - 70;
+    gi += sp(g, cx - 10, 34, 132, 132) + at(cx + 50, 104, 100, 60, wt(String(n), 54), 'a cc');
+  });
+  h += frame(gx, gy, gw, gh, gi, { r: 44 });
+  h += at(gx + gw / 2 - 130, gy - 40, 260, 70, wt('Hedefler', 46), 'a cc', tagCss);
+  h += frame(mx, gy, mw, gh, `<div class="a cc" style="inset:0;padding-top:${E(14)}"><span class="t" style="font-size:${E(124)};color:var(--ink);text-shadow:0 ${E(5)} 0 rgba(255,255,255,.9)">${opt.moves ?? 18}</span></div>`, { r: 44 });
+  h += at(mx + mw / 2 - 110, gy - 40, 220, 70, wt('Hamle', 46), 'a cc', tagCss);
+  const hudB = top + 236;
+  const bs = 176, gap = 30, items = [['bo_hammer.png', 3], ['bo_row.png', 2], ['bo_col.png', 0], ['bo_shuffle.png', 1]];
+  const total = items.length * bs + (items.length - 1) * gap + gap + 130;
+  const by = Hd - safe.bottom - 40 - bs;
+  let bx = (Wd - total) / 2;
+  items.forEach(([ic, n]) => {
+    h += `<div class="sq" style="${box(bx, by, bs, bs)}"><div class="in" style="background:radial-gradient(circle at 50% 30%,#ffffff,#d8ecff 60%,#a8c8f0)"></div></div>` + sp(ic, bx + 14, by + 10, bs - 28, bs - 28);
+    h += n ? at(bx + bs - 62, by + bs - 62, 80, 80, `<span class="t" style="font-size:${E(46)}">${n}</span>`, 'badge cc') : at(bx + bs - 62, by + bs - 62, 80, 80, wt('+', 56, '#18480a'), 'plus');
+    bx += bs + gap;
+  });
+  h += sp('ic_gear.png', bx + 6, by + 24, 130, 130);
+  const aT = hudB + 40, aB = by - 44;
+  const cell = Math.min((Wd - 50) / 8.2, (aB - aT) / 9.25);
+  const bw = cell * 8, bh = cell * 9, x0 = (Wd - bw) / 2, y0 = aT + (aB - aT - bh) / 2;
+  let back = '', tiles = '', pcs = '';
+  for (let y = 0; y < 9; y++) for (let x = 0; x < 8; x++) {
+    const ch = BOARD[y][x]; if (ch === '#') continue;
+    const px = x0 + x * cell, py = y0 + y * cell, pad = cell * 0.09;
+    back += `<div class="a" style="${box(px - pad, py - pad, cell + pad * 2, cell + pad * 2)};border-radius:${E(cell * 0.24)};background:rgba(26,16,58,.72)"></div>`;
+    tiles += `<div class="a" style="${box(px + cell * 0.035, py + cell * 0.035, cell * 0.93, cell * 0.93)};border-radius:${E(cell * 0.2)};background:${(x + y) % 2 ? 'rgba(236,244,255,.93)' : 'rgba(208,224,255,.93)'};box-shadow:inset 0 ${E(-cell * 0.06)} 0 rgba(60,80,160,.18)"></div>`;
+    pcs += sp(PIECE(ch), px - cell * 0.05, py - cell * 0.07, cell * 1.1, cell * 1.1);
+    if (ICE[y][x] === 'i') pcs += sp('ob_ice.png', px - cell * 0.02, py - cell * 0.02, cell * 1.04, cell * 1.04, 'opacity:.82');
+  }
+  h += `<div class="a" style="inset:0;filter:drop-shadow(0 0 ${E(5)} rgba(255,255,255,.9)) drop-shadow(0 ${E(10)} ${E(14)} rgba(0,0,0,.4))">${back}</div>` + tiles + pcs;
+  if (opt.combo) {
+    const ry = y0 + 2 * cell;
+    h += `<div class="a" style="${box(x0 - 30, ry + cell * 0.12, bw + 60, cell * 0.76)};border-radius:${E(cell)};background:linear-gradient(90deg,rgba(255,200,80,0),rgba(255,240,180,.95) 20%,#fff 50%,rgba(255,240,180,.95) 80%,rgba(255,200,80,0));box-shadow:0 0 ${E(40)} ${E(18)} rgba(255,190,60,.75)"></div>`;
+    h += sp('sp_rocket.png', x0 - 70, ry - cell * 0.15, cell * 1.3, cell * 1.3) + sp('sp_rocket.png', x0 + bw - cell * 1.2, ry - cell * 0.15, cell * 1.3, cell * 1.3, 'transform:scaleX(-1)');
+    seed = 9; for (let i = 0; i < 14; i++) h += spark(x0 + rnd() * bw, ry + cell * (rnd() - 0.1), 30 + rnd() * 50, rnd() * 90);
+    h += at(0, y0 + 4.4 * cell, Wd, 200, gt('Muhteşem!', 140, 'transform:rotate(-6deg)'), 'a cc');
+  }
+  return h;
+}
+
+function win(Wd, Hd, safe) {
+  let h = game(Wd, Hd, safe, { moves: 5 }) + `<div class="dim"></div>`;
+  const cy = Hd * 0.3;
+  h += `<div class="rays" style="${box(Wd / 2 - 760, cy - 760, 1520, 1520)}"></div>`;
+  h += `<div class="glow" style="${box(Wd / 2 - 420, cy - 380, 840, 760)}"></div>`;
+  [[-1, 270, 16], [0, 340, 0], [1, 270, -16]].forEach(([k, s, r]) => {
+    h += sp('ui_star.png', Wd / 2 + k * 300 - s / 2, cy - s / 2 + (k ? 70 : 0), s, s, `transform:rotate(${-r}deg);filter:drop-shadow(0 ${E(10)} ${E(10)} rgba(0,0,0,.35))`);
+  });
+  const fw = 900, fx = (Wd - fw) / 2, fy = cy + 250, fh = 640;
+  let inner = `<div class="a cc" style="left:0;right:0;top:${E(130)}"><span class="t" style="font-size:${E(52)};color:var(--ink)">Ödüllerin</span></div>`;
+  [['cur_coin.png', '+120'], ['ui_star.png', '+3'], ['bo_hammer.png', '+1']].forEach(([ic, t], i) => {
+    const rx = 70 + i * 255;
+    inner += `<div class="a" style="${box(rx, 200, 230, 230)};border-radius:${E(40)};background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 ${E(4)} rgba(140,70,0,.25)"></div>` + sp(ic, rx + 35, 205, 160, 160) + at(rx, 350, 230, 80, wt(t, 60), 'a cc');
+  });
+  h += frame(fx, fy, fw, fh, inner, { r: 60 });
+  h += `<div class="a" style="${box(Wd / 2 - 520, fy - 70, 1040, 190)}"><svg viewBox="0 0 520 95" preserveAspectRatio="none" style="width:100%;height:100%;overflow:visible">
+      <defs><linearGradient id="rbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--p0)"/><stop offset=".55" stop-color="var(--p1)"/><stop offset="1" stop-color="var(--p2)"/></linearGradient>
+      <linearGradient id="rbg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#c97a0a"/></linearGradient></defs>
+      <path d="M40 26 L0 26 L18 52 L0 78 L62 78 Z" fill="var(--p2)" stroke="var(--dark)" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M480 26 L520 26 L502 52 L520 78 L458 78 Z" fill="var(--p2)" stroke="var(--dark)" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M40 8 Q260 -6 480 8 L480 72 Q260 58 40 72 Z" fill="url(#rbg2)" stroke="var(--dark)" stroke-width="4.5" stroke-linejoin="round"/>
+      <path d="M48 14 Q260 2 472 14 L472 66 Q260 52 48 66 Z" fill="url(#rbg)"/>
+      <path d="M56 20 Q260 8 464 20" stroke="#fff" stroke-width="4" fill="none" opacity=".5" stroke-linecap="round"/></svg>
+      <div class="a cc" style="inset:0;padding-bottom:${E(26)}">${gt('Seviye 8 Tamam!', 92)}</div></div>`;
+  h += btn(Wd / 2 - 310, fy + fh - 110, 620, 196, '', 'green') + at(Wd / 2 - 310, fy + fh - 104, 620, 190, gt('Devam', 110, '--oc:#18480a'), 'a cc');
+  h += sp('mascot_joy.png', fx - 150, fy + fh - 190, 300, 300, 'transform:rotate(-10deg);filter:drop-shadow(0 0 ' + E(30) + ' rgba(255,180,60,.7))');
+  seed = 4; const cols = ['#ff3a4a', '#ffd21c', '#2ecc5a', '#2f8cff', '#b44af6', '#ff8a1c', '#ffffff'];
+  for (let i = 0; i < 44; i++) {
+    const w = 18 + rnd() * 26, x = rnd() * Wd, y = rnd() * Hd * 0.55;
+    if (Math.abs(x - Wd / 2) < 380 && y > cy - 200) continue;
+    h += `<div class="a" style="${box(x, y, w, w * (rnd() > .5 ? 1.9 : 1))};background:${cols[Math.floor(rnd() * cols.length)]};border-radius:${rnd() > .7 ? '50%' : E(4)};transform:rotate(${rnd() * 180}deg);box-shadow:inset 0 ${E(-4)} 0 rgba(0,0,0,.2)"></div>`;
+  }
+  for (let i = 0; i < 8; i++) h += spark(Wd / 2 + (rnd() - .5) * 900, cy + (rnd() - .5) * 500, 40 + rnd() * 50, rnd() * 90);
+  return h;
+}
+
+function screenHeader(Wd, safe, title) {
+  let h = `<div class="a" style="left:0;right:0;top:0;height:${E(safe.top + 220)};background:linear-gradient(180deg,var(--p0),var(--p1) 60%,var(--p2));box-shadow:0 ${E(5)} 0 #ffd25a,0 ${E(10)} 0 var(--dark),0 ${E(18)} ${E(24)} rgba(0,0,0,.35)"></div>`;
+  h += `<div class="a" style="left:0;right:0;top:0;height:${E(safe.top + 220)};background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.35),transparent 60%)"></div>`;
+  h += at(0, safe.top + 40, Wd, 150, gt(title, 120), 'a cc');
+  h += at(40, safe.top + 70, 260, 90, `<span class="t" style="font-size:${E(50)};margin-left:${E(30)}">1.250</span>`, 'pill') + sp('cur_coin.png', 0, safe.top + 50, 124, 124);
+  return h;
+}
+function patternBg() {
+  return `<div class="a" style="inset:0;background:radial-gradient(circle at 50% 30%,var(--p1),var(--p2) 55%,var(--dark))"></div><div class="a" style="inset:0;opacity:.14;background-image:radial-gradient(circle at 50% 50%,#ffe28a ${E(6)},transparent ${E(7)});background-size:${E(90)} ${E(90)}"></div>`;
+}
+function banner(Wd, y, text) {
+  return `<div class="a" style="${box(30, y, Wd - 60, 110)};border-radius:${E(30)};background:linear-gradient(180deg,#ffe46a,#f5a516 60%,#d07a08);box-shadow:0 0 0 ${E(4)} var(--dark),0 ${E(8)} 0 ${E(4)} var(--dark),inset 0 ${E(5)} 0 rgba(255,255,255,.6)"></div>` + at(30, y, Wd - 60, 110, wt(text, 62), 'a cc');
+}
+
+function shop(Wd, Hd, safe) {
+  let h = patternBg() + screenHeader(Wd, safe, 'Mağaza');
+  let y = safe.top + 290;
+  h += banner(Wd, y, 'Özel Teklif');
+  y += 150;
+  let inner = `<div class="glow" style="${box(10, 20, 440, 440)};opacity:.55"></div>` + sp('ic_chest.png', 20, 30, 420, 420);
+  inner += at(470, 50, 480, 80, `<span class="t" style="font-size:${E(56)};color:var(--ink)">Kor Sandığı</span>`, 'a');
+  [['cur_coin.png', '5.000'], ['bo_hammer.png', 'x3'], ['sp_bomb.png', 'x2'], ['cur_heart.png', '∞ 1s']].forEach(([ic, t], i) => {
+    const ix = 470 + (i % 2) * 230, iy = 130 + Math.floor(i / 2) * 170;
+    inner += `<div class="a" style="${box(ix, iy, 210, 150)};border-radius:${E(28)};background:rgba(255,255,255,.65);box-shadow:inset 0 0 0 ${E(4)} rgba(140,70,0,.22)"></div>` + sp(ic, ix + 4, iy + 6, 120, 120) + at(ix + 100, iy + 70, 120, 70, wt(t, 46), 'a cc');
+  });
+  h += frame(30, y, Wd - 60, 560, inner, { r: 50 });
+  h += `<div class="a" style="${box(Wd - 300, y - 30, 250, 90)};border-radius:${E(45)};background:linear-gradient(180deg,#ff6a7a,#e8102a);box-shadow:0 0 0 ${E(4)} #fff,0 0 0 ${E(8)} #5a0610;transform:rotate(6deg)"></div>` + at(Wd - 300, y - 30, 250, 90, wt('%60 kâr', 46, '#5a0610'), 'a cc', 'transform:rotate(6deg)');
+  h += btn(Wd / 2 - 250, y + 480, 500, 150, '', 'green') + at(Wd / 2 - 250, y + 484, 500, 146, wt('₺99,99', 76, '#18480a'), 'a cc');
+  y += 720;
+  h += banner(Wd, y, 'Altın');
+  y += 140;
+  [[1, '1.000', '₺29,99'], [2, '5.000', '₺99,99'], [3, '12.000', '₺199,99'], [4, '30.000', '₺399,99']].forEach(([n, amt, price], i) => {
+    const ry = y + i * 200;
+    if (ry + 180 > Hd - 260 - safe.bottom) return;
+    h += `<div class="row-card" style="${box(40, ry, Wd - 80, 172)}"></div>`;
+    for (let k = 0; k < n; k++) h += sp('cur_coin.png', 70 + k * 46 - (n > 2 ? 20 : 0), ry + 20 - (k % 2) * 14, 130, 130, `filter:drop-shadow(0 ${E(4)} ${E(4)} rgba(0,0,0,.3))`);
+    h += at(330, ry + 40, 300, 100, `<span class="t" style="font-size:${E(70)};color:var(--ink)">${amt}</span>`, 'a', 'display:flex;align-items:center');
+    h += btn(Wd - 420, ry + 26, 340, 120, '', 'green') + at(Wd - 420, ry + 28, 340, 116, wt(price, 58, '#18480a'), 'a cc');
+    if (i === 2) h += at(260, ry - 20, 200, 64, `<span class="t" style="font-size:${E(36)}">Popüler</span>`, 'badge cc');
+  });
+  h += navBar(Wd, Hd, safe.bottom, 0);
+  return h;
+}
+
+function ranking(Wd, Hd, safe) {
+  let h = patternBg() + screenHeader(Wd, safe, 'Sıralama');
+  let y = safe.top + 280;
+  const tw = (Wd - 80) / 3;
+  ['Haftalık', 'Arkadaşlar', 'Oyuncular'].forEach((t, i) => {
+    h += `<div class="a" style="${box(40 + i * tw, y, tw - 10, 110)};border-radius:${E(30)} ${E(30)} ${E(10)} ${E(10)};background:${i === 0 ? 'linear-gradient(180deg,#8fd0ff,#2f86ff 60%,#1a5ad8)' : 'linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.4))'};box-shadow:0 0 0 ${E(4)} ${i === 0 ? '#0a2a70' : 'rgba(0,0,0,.4)'}${i === 0 ? ',inset 0 ' + E(5) + ' 0 rgba(255,255,255,.5)' : ''}"></div>` + at(40 + i * tw, y, tw - 10, 110, wt(t, 50, i === 0 ? '#0a2a70' : '#1a0a2a'), 'a cc');
+  });
+  y += 170;
+  h += `<div class="a" style="${box(40, y, Wd - 80, 560)};border-radius:${E(40)};background:linear-gradient(180deg,#3a8cff,#1a4ec8);box-shadow:0 0 0 ${E(5)} #0a2a70,inset 0 ${E(5)} 0 rgba(255,255,255,.4)"></div>`;
+  h += at(Wd / 2 - 270, y - 30, 540, 100, wt('Haftalık Yarışma', 54, '#0a2a70'), 'a cc', `border-radius:${E(50)};background:linear-gradient(180deg,#ffe46a,#f5a516);box-shadow:0 0 0 ${E(4)} #6a3a04,0 ${E(6)} 0 ${E(4)} #6a3a04`);
+  h += at(Wd - 290, y + 500, 230, 64, `<span class="t" style="font-size:${E(34)}">⏱ 3g 14s</span>`, 'dpill', 'z-index:3');
+  const pw = (Wd - 140) / 3;
+  [[1, 'Mert_34', 26, 0, ['#ffe46a', '#f5a516'], 90], [0, 'Ayşe', 24, 1, ['#dfe9ff', '#9fb4dc'], 140], [2, 'KorUstası', 21, 2, ['#ffc28a', '#e07a2a'], 150]].forEach(([slot, name, score, rank, c, dy]) => {
+    const px = 60 + slot * (pw + 10), py = y + dy;
+    h += `<div class="a" style="${box(px, py, pw, 500 - dy)};border-radius:${E(30)};background:linear-gradient(180deg,${c[0]},${c[1]});box-shadow:0 0 0 ${E(4)} rgba(0,0,0,.45),inset 0 ${E(5)} 0 rgba(255,255,255,.6)"></div>`;
+    h += `<div class="ring" style="${box(px + pw / 2 - 80, py + 20, 160, 160)}"><div class="in">${sp('mascot.png', 14, 18, 112, 112, `filter:hue-rotate(${rank * 130}deg)`)}</div></div>`;
+    h += at(px, py + 186, pw, 60, `<span class="t" style="font-size:${E(42)};color:#3a2206">${name}</span>`, 'a cc');
+    h += sp('ic_chest.png', px + pw / 2 - 80, py + 236, 160, 160);
+    h += at(px + 20, py + 420 - dy, pw - 40, 64, `<span class="t" style="font-size:${E(36)}">Skor ${score}</span>`, 'dpill');
+    h += at(px + pw / 2 - 40, py + 460 - dy, 80, 80, `<span class="t" style="font-size:${E(48)}">${rank + 1}</span>`, 'badge cc');
+  });
+  y += 620;
+  [[4, 'Zeynep', 14], [5, 'Sen', 12, true], [6, 'Can', 9], [7, 'Elif', 5], [8, 'Deniz', 2]].forEach(([r, name, score, me], i) => {
+    const ry = y + i * 175;
+    if (ry + 160 > Hd - 260 - safe.bottom) return;
+    h += `<div class="row-card ${me ? 'me' : ''}" style="${box(40, ry, Wd - 80, 155)}"></div>`;
+    h += at(70, ry + 30, 90, 100, wt(String(r), 80, me ? '#18480a' : null), 'a cc');
+    h += `<div class="ring" style="${box(180, ry + 18, 120, 120)}"><div class="in">${sp('mascot.png', 10, 14, 84, 84, `filter:hue-rotate(${r * 55}deg)`)}</div></div>`;
+    h += at(330, ry + 40, 400, 80, `<span class="t" style="font-size:${E(56)};color:${me ? '#14400a' : 'var(--ink)'}">${name}</span>`, 'a', 'display:flex;align-items:center');
+    h += at(Wd - 260, ry + 18, 180, 40, `<span class="t" style="font-size:${E(30)};color:${me ? '#14400a' : '#9a6a3a'}">Skor</span>`, 'a cc');
+    h += at(Wd - 260, ry + 56, 180, 80, `<span class="t" style="font-size:${E(64)};color:${me ? '#14400a' : 'var(--ink)'}">${score}</span>`, 'a cc');
+  });
+  h += navBar(Wd, Hd, safe.bottom, 1);
+  return h;
+}
+
+// ---------- page ----------
+function phone(container, label, sub, W, H, kind, draw) {
+  const fig = document.createElement('figure');
+  const ph = document.createElement('div'); ph.className = 'phone' + (kind === 'tab' ? ' tab' : '');
+  ph.style.width = W + 18 + 'px'; ph.style.height = H + 18 + 'px';
+  const s = Math.min(W / 1080, H / 1920);
+  const Wd = W / s, Hd = H / s;
+  const safe = kind === 'tall' ? { top: 110, bottom: 60 } : { top: 0, bottom: 0 };
+  ph.innerHTML = `<div class="scr" style="font-size:${(s * 100).toFixed(3)}px">${draw(Wd, Hd, safe)}</div>` + (kind === 'tall' ? '<div class="notch"></div><div class="homebar"></div>' : '');
+  fig.appendChild(ph);
+  const cap = document.createElement('figcaption'); cap.innerHTML = label + (sub ? `<small>${sub}</small>` : ''); fig.appendChild(cap);
+  container.appendChild(fig);
+}
+
+function render() {
+  const r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3');
+  [r1, r2, r3].forEach(r => r.innerHTML = '');
+  phone(r1, 'Ana sayfa', 'ada, kül mahallesi, para çubuğu, alt menü', 370, 800, 'tall', home);
+  phone(r1, 'Seviye başı', 'hedefler ve başlangıç booster seçimi', 370, 800, 'tall', levelStart);
+  phone(r1, 'Oyun', 'roket kombosu anı', 370, 800, 'tall', (w, h, s) => game(w, h, s, { combo: true }));
+  phone(r2, 'Kazandın', 'yıldızlar, ödüller, sevinen maskot', 370, 800, 'tall', win);
+  phone(r2, 'Mağaza', 'özel teklif ve altın paketleri', 370, 800, 'tall', shop);
+  phone(r2, 'Sıralama', 'haftalık yarışma', 370, 800, 'tall', ranking);
+  phone(r3, 'Oyun · 9:16', '', 370, 658, 'flat', game);
+  phone(r3, 'Oyun · tablet 3:4', '', 540, 720, 'tab', game);
+}
+
+function kit() {
+  const items = [['piece_R.png', 'Kırmızı'], ['piece_O.png', 'Turuncu'], ['piece_Y.png', 'Sarı'], ['piece_G.png', 'Yeşil'], ['piece_B.png', 'Mavi'], ['piece_P.png', 'Mor'],
+    ['sp_rocket.png', 'Roket'], ['sp_rocket_v.png', 'Dikey roket'], ['sp_bomb.png', 'Kor bombası'], ['sp_orb.png', 'Kor küresi'], ['ob_box1.png', 'Kasa'], ['ob_box2.png', 'Demirli kasa'], ['ob_ice.png', 'Buz'],
+    ['bo_hammer.png', 'Çekiç'], ['bo_row.png', 'Satır'], ['bo_col.png', 'Sütun'], ['bo_shuffle.png', 'Karıştır'], ['cur_coin.png', 'Altın'], ['cur_heart.png', 'Can'], ['ui_star.png', 'Yıldız'], ['ui_star_empty.png', 'Boş yıldız'],
+    ['ic_chest.png', 'Sandık'], ['ic_trophy.png', 'Kupa'], ['ic_castle.png', 'Ana sayfa'], ['ic_scroll.png', 'Görevler'], ['ic_gear.png', 'Ayarlar'], ['mascot.png', 'Kor ruhu'], ['mascot_joy.png', 'Kor ruhu, sevinçli']];
+  document.getElementById('kit').innerHTML = items.map(([f, n]) => `<div><img src="img/${f}" alt="">${n}</div>`).join('')
+    + `<div style="grid-column:span 2"><img class="wide" src="img/bg_map.jpg">Ada (ana sayfa)</div><div style="grid-column:span 2"><img class="wide" src="img/bg_game.jpg">Kale ve köy (oyun arka planı)</div>`;
+}
+
+function setPal(k) {
+  for (const [n, v] of Object.entries(PAL[k].v)) document.documentElement.style.setProperty(n, v);
+  document.querySelectorAll('#bar button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+}
+window.addEventListener('error', e => document.body.insertAdjacentHTML('afterbegin', `<pre style="background:#c00;color:#fff;padding:8px;margin:0">${e.message} @ ${e.lineno}</pre>`));
+const bar = document.getElementById('bar');
+bar.insertAdjacentHTML('beforeend', Object.entries(PAL).map(([k, p]) => `<button data-k="${k}"><i style="background:linear-gradient(180deg,${p.v['--p0']},${p.v['--p2']})"></i>${p.name}</button>`).join(''));
+bar.querySelectorAll('button').forEach(b => b.onclick = () => setPal(b.dataset.k));
+setPal(new URLSearchParams(location.search).get('p') || 'kor');
+kit();
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(render);
+</script>
+</body>
+</html>

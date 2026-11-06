@@ -2,18 +2,20 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
 {
     /// <summary>
-    /// The canvas, the event system and the safe area. Canvas units are a virtual 1080x1920 screen that
+    /// The UI Toolkit panel, the event system and the safe area. Panel units are a virtual 1080x1920 screen that
     /// only ever grows (Expand), so a layout that fits 1080x1920 fits every phone and tablet.
+    /// The panel settings are built here, not stored in an asset: the scene stays empty.
     /// </summary>
     public sealed class UiRoot : MonoBehaviour
     {
         public const float ReferenceWidth = 1080f;
         public const float ReferenceHeight = 1920f;
+        public const string ThemePath = "UI/Theme/EmberThrone";
 
         /// <summary>Test hook: lay out for this screen size, so tests can try any phone shape.</summary>
         public static Vector2Int? ScreenSizeOverride;
@@ -33,17 +35,23 @@ namespace EmberThrone.Game
             }
         }
 
-        public event Action LayoutChanged;
-
-        /// <summary>Parent of the current screen (level select, HUD).</summary>
-        public RectTransform Content { get; private set; }
-        /// <summary>Parent of modal windows; drawn over the content.</summary>
-        public RectTransform Popups { get; private set; }
-
-        /// <summary>Screen pixels per canvas unit. Computed here because CanvasScaler updates a frame late.</summary>
+        /// <summary>Screen pixels per panel unit, the same formula PanelSettings uses for Expand.</summary>
         public static float Scale => Mathf.Min(ScreenWidth / ReferenceWidth, ScreenHeight / ReferenceHeight);
 
-        RectTransform _safe;
+        /// <summary>A panel point (y down) in screen pixels (y up), e.g. to tap a button from a test.</summary>
+        public static Vector2 PanelToScreen(Vector2 panel) => new Vector2(panel.x * Scale, ScreenHeight - panel.y * Scale);
+
+        public event Action LayoutChanged;
+
+        public PanelSettings Settings { get; private set; }
+        /// <summary>Full-screen picture behind the current screen (also under the notch).</summary>
+        public VisualElement Backdrop { get; private set; }
+        /// <summary>Parent of the current screen (level select, HUD); inside the safe area.</summary>
+        public VisualElement Content { get; private set; }
+        /// <summary>Parent of modal windows; drawn over the content and over the notch.</summary>
+        public VisualElement Popups { get; private set; }
+
+        VisualElement _safe;
         int _width;
         int _height;
         Rect _lastSafe;
@@ -57,24 +65,42 @@ namespace EmberThrone.Game
 
         void Awake()
         {
-            var canvas = gameObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            var scaler = gameObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(ReferenceWidth, ReferenceHeight);
-            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-            gameObject.AddComponent<GraphicRaycaster>();
-
-            _safe = Ui.Stretch(Ui.Rect("SafeArea", transform));
-            Content = Ui.Stretch(Ui.Rect("Content", _safe));
-            // Dim layers must also cover the notch, so popups sit outside the safe area.
-            Popups = Ui.Stretch(Ui.Rect("Popups", transform));
-
+            // UI Toolkit reads the Input System through the event system, like the old canvas did.
             var events = new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
             events.transform.SetParent(transform, false);
             events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
 
+            Settings = ScriptableObject.CreateInstance<PanelSettings>();
+            Settings.name = "EmberThrone UI";
+            Settings.themeStyleSheet = Resources.Load<ThemeStyleSheet>(ThemePath);
+            if (Settings.themeStyleSheet == null) Debug.LogError("[EmberThrone] UI theme missing: Resources/" + ThemePath);
+            Settings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+            Settings.referenceResolution = new Vector2Int((int)ReferenceWidth, (int)ReferenceHeight);
+            Settings.screenMatchMode = PanelScreenMatchMode.Expand;
+            Settings.clearColor = false;
+
+            // Inactive until the settings are in, so the document never starts without a panel.
+            var docObject = new GameObject("UIDocument");
+            docObject.SetActive(false);
+            docObject.transform.SetParent(transform, false);
+            var document = docObject.AddComponent<UIDocument>();
+            document.panelSettings = Settings;
+            docObject.SetActive(true);
+
+            var root = document.rootVisualElement;
+            root.AddToClassList("et-root");
+            root.pickingMode = PickingMode.Ignore;
+            Backdrop = Ui.El("et-fill", root, "Backdrop");
+            _safe = Ui.El("et-safe", root, "SafeArea");
+            Content = Ui.El("et-fill", _safe, "Content");
+            Popups = Ui.El("et-fill", root, "Popups");
+
             ApplyLayout();
+        }
+
+        void OnDestroy()
+        {
+            if (Settings != null) Destroy(Settings);
         }
 
         void LateUpdate()
@@ -87,14 +113,21 @@ namespace EmberThrone.Game
             _width = ScreenWidth;
             _height = ScreenHeight;
             _lastSafe = SafeArea;
-            _safe.anchorMin = new Vector2(_lastSafe.xMin / _width, _lastSafe.yMin / _height);
-            _safe.anchorMax = new Vector2(_lastSafe.xMax / _width, _lastSafe.yMax / _height);
+            // The safe area is runtime data, so it is the one layout value set from code.
+            float s = Scale;
+            _safe.style.left = _lastSafe.xMin / s;
+            _safe.style.right = (_width - _lastSafe.xMax) / s;
+            _safe.style.top = (_height - _lastSafe.yMax) / s;
+            _safe.style.bottom = _lastSafe.yMin / s;
             LayoutChanged?.Invoke();
         }
 
+        /// <summary>Removes the current screen and its backdrop.</summary>
         public void ClearContent()
         {
-            for (int i = Content.childCount - 1; i >= 0; i--) Destroy(Content.GetChild(i).gameObject);
+            Content.Clear();
+            Backdrop.ClearClassList();
+            Backdrop.AddToClassList("et-fill");
         }
     }
 }

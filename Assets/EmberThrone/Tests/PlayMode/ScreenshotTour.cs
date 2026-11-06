@@ -11,8 +11,11 @@ namespace EmberThrone.Game.Tests
     /// <summary>
     /// Plays through every screen and animation in slow motion and saves PNGs to TestResults/screens,
     /// so a person can check how the game looks without playing it. The game draws into its own
-    /// render texture, so any phone shape can be shot in one run, whatever the Game view's size.
-    /// Run by name: test_names = EmberThrone.Game.Tests.ScreenshotTour.TakeAll
+    /// render texture and the UI panel into another, so any phone shape can be shot in one run, whatever
+    /// the Game view's size.
+    /// Run by name: test_names = EmberThrone.Game.Tests.ScreenshotTour.TakeAll (bridge), or with the editor closed:
+    /// Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter EmberThrone.Game.Tests.ScreenshotTour.TakeAll
+    /// (no -nographics: the shots need a graphics device).
     /// </summary>
     [Explicit("Takes screenshots; run on demand.")]
     public class ScreenshotTour
@@ -24,6 +27,7 @@ namespace EmberThrone.Game.Tests
 
         GameApp _app;
         RenderTexture _target;
+        RenderTexture _uiTarget;
         System.Collections.Generic.Dictionary<int, int> _savedStars;
         GameController Game => _app.Game;
 
@@ -49,6 +53,7 @@ namespace EmberThrone.Game.Tests
             UiRoot.ScreenSizeOverride = null;
             Object.Destroy(_app.gameObject);
             Object.Destroy(_target);
+            Object.Destroy(_uiTarget);
             StarsBackup.Restore(_savedStars);
             yield return null;
         }
@@ -57,28 +62,70 @@ namespace EmberThrone.Game.Tests
         {
             UiRoot.ScreenSizeOverride = new Vector2Int(width, height);
             UiRoot.SafeAreaOverride = safeArea;
-            var old = _target;
+            var oldBoard = _target;
+            var oldUi = _uiTarget;
             _target = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
             _app.Camera.targetTexture = _target;
-            if (old != null) Object.Destroy(old);
 
-            // An overlay canvas draws straight to the screen, so here the camera has to draw it.
-            var canvas = _app.Ui.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = _app.Camera;
-            canvas.planeDistance = 1f;
-            canvas.sortingOrder = 1000;
+            // The UI panel draws into its own transparent texture (it would otherwise go straight to the
+            // screen); Shot lays it over the board. Its size also sets the panel's scale, as a screen would.
+            _uiTarget = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            var settings = _app.Ui.Settings;
+            settings.targetTexture = _uiTarget;
+            settings.clearColor = true;
+            settings.colorClearValue = Color.clear;
+
+            if (oldBoard != null) Object.Destroy(oldBoard);
+            if (oldUi != null) Object.Destroy(oldUi);
+        }
+
+        static readonly float[] Linear = BuildLinear();
+
+        static float[] BuildLinear()
+        {
+            var table = new float[256];
+            for (int i = 0; i < 256; i++) table[i] = Mathf.GammaToLinearSpace(i / 255f);
+            return table;
+        }
+
+        static byte Over(byte ui, byte board, float k)
+        {
+            float linear = Mathf.Min(1f, Linear[ui] + Linear[board] * k);
+            return (byte)Mathf.RoundToInt(Mathf.LinearToGammaSpace(linear) * 255f);
+        }
+
+        static Color32[] Read(RenderTexture rt)
+        {
+            var previous = RenderTexture.active;
+            RenderTexture.active = rt;
+            var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
+            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            tex.Apply();
+            RenderTexture.active = previous;
+            var pixels = tex.GetPixels32();
+            Object.Destroy(tex);
+            return pixels;
         }
 
         IEnumerator Shot(string name)
         {
-            yield return new WaitForEndOfFrame();
-            var previous = RenderTexture.active;
-            RenderTexture.active = _target;
-            var tex = new Texture2D(_target.width, _target.height, TextureFormat.RGB24, false);
-            tex.ReadPixels(new Rect(0, 0, _target.width, _target.height), 0, 0);
-            tex.Apply();
-            RenderTexture.active = previous;
+            // Not WaitForEndOfFrame: batch mode has no Game view, so it never comes. The panel repaints its
+            // texture every frame by itself; the board camera is drawn here, so this also runs headless.
+            yield return null;
+            _app.Camera.Render();
+            var board = Read(_target);
+            var ui = Read(_uiTarget);
+            // The panel's texture holds premultiplied color, blended in linear space and stored as sRGB, so the
+            // UI goes over the board the same way: ui + board * (1 - ui alpha), in linear space.
+            for (int i = 0; i < board.Length; i++)
+            {
+                var u = ui[i];
+                var b = board[i];
+                float k = 1f - u.a / 255f;
+                board[i] = new Color32(Over(u.r, b.r, k), Over(u.g, b.g, k), Over(u.b, b.b, k), 255);
+            }
+            var tex = new Texture2D(_target.width, _target.height, TextureFormat.RGBA32, false);
+            tex.SetPixels32(board);
             File.WriteAllBytes(Path.Combine(Folder, name + ".png"), tex.EncodeToPNG());
             Object.Destroy(tex);
         }
@@ -162,6 +209,8 @@ namespace EmberThrone.Game.Tests
             Game.RequestSwap(new GridPos(2, 4), new GridPos(3, 4));
             yield return GameTime(Timing.Swap + 0.1f);
             yield return Shot("13_combo_roket_bomba");
+            yield return GameTime(Timing.PraisePop);
+            yield return Shot("13b_ovgu_muhtesem");
             Time.timeScale = 1f;
             yield return WaitIdle();
 
@@ -178,7 +227,7 @@ namespace EmberThrone.Game.Tests
             yield return Shot("18_toplanan_obje_seviyesi");
 
             // Win and lose windows.
-            yield return Win("19_kazandin");
+            yield return Win("19_kazandin", "19a_kutlama_havai_fisek");
             yield return Lose("20_kaybettin");
 
             // Other screen shapes. The tall ones get a notch and a gesture bar through the safe area.
@@ -204,12 +253,18 @@ namespace EmberThrone.Game.Tests
             Assert.IsNull(Game.LastMismatch);
         }
 
-        IEnumerator Win(string shot)
+        IEnumerator Win(string shot, string celebrationShot = null)
         {
             yield return Begin(Level(9, new GoalDefinition(GoalType.Color, 3, GemColor.Red), "YPOGY", "OGYPO", "RRBRY", "OGRPO", "YPOGY"));
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
-            yield return GameTime(Timing.WinDelay + Timing.ModalIn + Timing.StarFill * 3f + 0.3f);
+            if (celebrationShot != null)
+            {
+                yield return GameTime(Timing.WinDelay + Timing.WinSparkFlight + Timing.WinSparkInterval * 3f);
+                yield return Shot(celebrationShot);
+            }
+            while (Game.Popup == null) yield return null;
+            yield return GameTime(Timing.ModalIn + Timing.StarFill * 3f + 0.3f);
             yield return Shot(shot);
         }
 

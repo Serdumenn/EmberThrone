@@ -2,93 +2,80 @@ using System;
 using System.Collections.Generic;
 using EmberThrone.Core;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
 {
-    /// <summary>In-level HUD (UX-001 §5): back button, level name, move counter, goal panel. Display only.</summary>
-    public sealed class HudView : MonoBehaviour
+    /// <summary>In-level HUD (UX-001 §5): home button, level chip, goal panel, move counter. Display only.</summary>
+    public sealed class HudView
     {
-        /// <summary>Canvas units reserved at the top of the safe area (UX-001 HUD-RULE-01: at most 18% of the screen).</summary>
+        /// <summary>Panel units reserved at the top of the safe area (UX-001 HUD-RULE-01: at most 18% of the screen).</summary>
         public const float Height = 280f;
+
+        const string Warn = "et-hud__moves-count--warn";
+        const string Danger = "et-hud__moves-count--danger";
 
         sealed class GoalSlot
         {
-            public Image Icon;
-            public Text Count;
-            public Image Check;
+            public VisualElement Root;
+            public Label Count;
+            public VisualElement Check;
         }
 
         readonly List<GoalSlot> _slots = new List<GoalSlot>();
-        Text _moves;
-        RectTransform _movesPanel;
+        Label _moves;
+        VisualElement _movesPanel;
 
+        public VisualElement Root { get; private set; }
+        public Button HomeButton { get; private set; }
+        /// <summary>The move counter's panel (the end-of-level sparks fly out of it).</summary>
+        public VisualElement MovesPanel => _movesPanel;
         public string MovesText => _moves.text;
         public string GoalText(int index) => _slots[index].Count.text;
-        public bool GoalChecked(int index) => _slots[index].Check.enabled;
+        public bool GoalChecked(int index) => !_slots[index].Check.ClassListContains(Ui.Hidden);
 
-        public static HudView Create(Transform parent, GameSession session, string levelLabel, Action onBack)
+        public static HudView Create(VisualElement parent, GameSession session, string levelLabel, Action onBack)
         {
-            var rt = Ui.Rect("Hud", parent);
-            Ui.Place(rt, new Vector2(0.5f, 1f), Vector2.zero, Vector2.zero);
-            rt.anchorMin = new Vector2(0f, 1f);
-            rt.anchorMax = new Vector2(1f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.sizeDelta = new Vector2(0f, Height);
-            var hud = rt.gameObject.AddComponent<HudView>();
-            hud.Build(session, levelLabel, onBack);
+            var hud = new HudView();
+            hud.Build(parent, session, levelLabel, onBack);
             return hud;
         }
 
-        void Build(GameSession session, string levelLabel, Action onBack)
+        void Build(VisualElement parent, GameSession session, string levelLabel, Action onBack)
         {
-            // Left: back button and level name.
-            var back = Ui.Button("Back", transform, "‹", Palette.PanelLight, onBack, 96);
-            Ui.Place((RectTransform)back.transform, new Vector2(0f, 1f), new Vector2(28f, -28f), new Vector2(132f, 132f));
+            Root = Ui.El("et-hud", parent, "Hud");
+            // The board fits below this band (GameController.FitCamera), so its height has one source.
+            Root.style.height = Height;
 
-            var level = Ui.Label("Level", transform, levelLabel, 40, Palette.TextDim, TextAnchor.UpperLeft);
-            Ui.Place(level.rectTransform, new Vector2(0f, 1f), new Vector2(28f, -172f), new Vector2(300f, 90f));
+            var left = Ui.El("et-hud__left", Root);
+            HomeButton = Ui.Button(null, "et-ring et-pressable", onBack, left, "Home");
+            Ui.El("et-icon et-hud__home-icon", HomeButton);
+            Ui.Text(levelLabel, "et-chip et-caption et-hud__level", left, "Level");
 
-            // Center: moves, always the biggest text on screen (HUD-RULE-03).
-            var panel = Ui.Panel("Moves", transform, Palette.Panel);
-            _movesPanel = panel.rectTransform;
-            Ui.Place(_movesPanel, new Vector2(0.5f, 1f), new Vector2(0f, -24f), new Vector2(240f, 232f));
-            var caption = Ui.Label("Caption", panel.transform, "HAMLE", 36, Palette.TextDim);
-            Ui.Place(caption.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -16f), new Vector2(240f, 50f));
-            _moves = Ui.Label("Count", panel.transform, "0", 124, Palette.Text);
-            _moves.fontStyle = FontStyle.Bold;
-            Ui.Place(_moves.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(240f, 150f));
+            // Goals: one slot per goal, an icon with the count on its corner.
+            var goals = Ui.El("et-panel et-hud__goals", Root, "Goals");
+            Ui.Text("Hedefler", "et-tag et-outlined", goals);
+            foreach (var goal in session.Goals) _slots.Add(BuildSlot(goals, goal));
 
-            // Right: one slot per goal.
-            var goals = session.Goals;
-            const float slot = 112f;
-            var box = Ui.Panel("Goals", transform, Palette.Panel);
-            float boxWidth = Mathf.Max(2, goals.Count) * slot + 28f;
-            Ui.Place(box.rectTransform, new Vector2(1f, 1f), new Vector2(-28f, -24f), new Vector2(boxWidth, 170f));
-            for (int i = 0; i < goals.Count; i++)
-            {
-                float x = (i - (goals.Count - 1) * 0.5f) * slot;
-                _slots.Add(BuildSlot(box.transform, goals[i], x));
-            }
+            // Moves: always the biggest number on screen (HUD-RULE-03).
+            _movesPanel = Ui.El("et-panel et-hud__moves", Root, "Moves");
+            Ui.Text("Hamle", "et-tag et-outlined", _movesPanel);
+            _moves = Ui.Text("0", "et-ink et-hud__moves-count", _movesPanel, "Count");
 
             SetMoves(session.MovesLeft, false);
-            for (int i = 0; i < goals.Count; i++) SetGoal(i, goals[i].Remaining, false);
+            for (int i = 0; i < session.Goals.Count; i++) SetGoal(i, session.Goals[i].Remaining, false);
         }
 
-        GoalSlot BuildSlot(Transform parent, Goal goal, float x)
+        static GoalSlot BuildSlot(VisualElement parent, Goal goal)
         {
-            var s = new GoalSlot();
-            s.Icon = Ui.Icon("Icon", parent, GoalSprite(goal));
-            Ui.Place(s.Icon.rectTransform, new Vector2(0.5f, 1f), new Vector2(x, -12f), new Vector2(96f, 96f));
-            s.Count = Ui.Label("Count", parent, "", 46, Palette.Text);
-            s.Count.fontStyle = FontStyle.Bold;
-            Ui.Place(s.Count.rectTransform, new Vector2(0.5f, 0f), new Vector2(x, 6f), new Vector2(112f, 58f));
-            s.Check = Ui.Icon("Check", parent, Art.Check(), Palette.Good);
-            Ui.Place(s.Check.rectTransform, new Vector2(0.5f, 0f), new Vector2(x, 6f), new Vector2(60f, 60f));
-            s.Check.enabled = false;
+            var s = new GoalSlot { Root = Ui.El("et-goal", parent, "Goal") };
+            Ui.Image(GoalSprite(goal), "et-fill", s.Root);
+            s.Count = Ui.Text("", "et-outlined et-goal__count", s.Root, "Count");
+            s.Check = Ui.El("et-check et-goal__check", s.Root, "Check");
             return s;
         }
 
+        /// <summary>The same picture the board draws, so the player can match goal and piece at a glance.</summary>
         static Sprite GoalSprite(Goal goal)
         {
             switch (goal.Type)
@@ -97,34 +84,30 @@ namespace EmberThrone.Game
                 case GoalType.Box: return Art.Box(1);
                 case GoalType.Floor: return Art.Floor(1);
                 case GoalType.Cover: return Art.Cover(2);
-                default: return Art.Crown();
+                default: return Art.Collectible();
             }
         }
 
         public void SetMoves(int moves, bool animate = true)
         {
-            bool changed = _moves.text != moves.ToString();
-            _moves.text = moves.ToString();
+            string text = moves.ToString();
+            bool changed = _moves.text != text;
+            _moves.text = text;
             // UX-001 §5.2
-            _moves.color = moves >= 10 ? Palette.Text : moves >= 5 ? Palette.Warning : Palette.Danger;
+            _moves.EnableInClassList(Warn, moves < 10 && moves >= 5);
+            _moves.EnableInClassList(Danger, moves < 5);
             if (!animate || !changed) return;
 
-            var rt = _moves.rectTransform;
-            Tweens.Run(Timing.CounterBounce, t =>
-            {
-                if (rt != null) rt.localScale = Vector3.one * (1f + 0.22f * Mathf.Sin(t * Mathf.PI));
-            });
+            Bump(_moves, 0.22f, Timing.CounterBounce);
             if (moves > 0 && moves < 5)
             {
                 var panel = _movesPanel;
-                var home = panel.anchoredPosition;
                 Tweens.Run(Timing.CounterBounce, t =>
                 {
-                    if (panel == null) return;
-                    panel.anchoredPosition = home + Vector2.right * (Mathf.Sin(t * Mathf.PI * 4f) * 4f * (1f - t));
+                    if (Ui.Alive(panel)) panel.style.translate = new Translate(Mathf.Sin(t * Mathf.PI * 4f) * 4f * (1f - t), 0f);
                 }, 0f, () =>
                 {
-                    if (panel != null) panel.anchoredPosition = home;
+                    if (Ui.Alive(panel)) panel.style.translate = StyleKeyword.Null;
                 });
             }
         }
@@ -134,14 +117,22 @@ namespace EmberThrone.Game
             var s = _slots[index];
             bool done = remaining <= 0;
             s.Count.text = Mathf.Max(0, remaining).ToString();
-            s.Count.enabled = !done;
-            s.Check.enabled = done;
-            if (!animate) return;
-            var rt = s.Icon.rectTransform;
-            Tweens.Run(0.14f, t =>
+            s.Count.EnableInClassList(Ui.Hidden, done);
+            s.Check.EnableInClassList(Ui.Hidden, !done);
+            if (animate) Bump(s.Root, 0.25f, 0.14f);
+        }
+
+        static void Bump(VisualElement e, float amount, float duration)
+        {
+            Tweens.Run(duration, t =>
             {
-                if (rt != null) rt.localScale = Vector3.one * (1f + 0.25f * Mathf.Sin(t * Mathf.PI));
+                if (Ui.Alive(e)) e.style.scale = new Scale(Vector2.one * (1f + amount * Mathf.Sin(t * Mathf.PI)));
+            }, 0f, () =>
+            {
+                if (Ui.Alive(e)) e.style.scale = StyleKeyword.Null;
             });
         }
+
+        public void Remove() => Root.RemoveFromHierarchy();
     }
 }

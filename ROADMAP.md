@@ -30,13 +30,29 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] Kod denetimi ve 10 düzeltme ([docs/qa/audit-2026-11-05.md](docs/qa/audit-2026-11-05.md))
 - [ ] Unity secret'larını bu repoya ekle (sahibi yapacak), ilk bulut APK'sını al
 - [ ] Gerçek telefonda dene: his, dokunma, performans (henüz hiç cihazda çalışmadı)
-- [ ] Bulutta test edilecek: `Sprites/Default` ve yazı tipi Android build'inde sorunsuz mu
+- [ ] Bulutta test edilecek: `Sprites/Default`, UI Toolkit paneli ve Baloo 2 yazı tipi Android build'inde sorunsuz mu
 
 ## Faz 2 — Profesyonel görünüm ve his
+- [x] Creative Brief taslağı ([docs/design/brief.md](docs/design/brief.md)): his, ilkeler, 3 görsel yön, GDD ile farklar için öneriler
+- [x] Brief onayı ve 11 açık sorunun kararı (2026-11-06, kararlar brief'te)
+- [x] Style frame v1 (3 yön): sahibi reddetti, hedef türün liderinin parlak ve hacimli görünümü
+- [x] Style frame v2 (kodla çizim): sahibi basit buldu
+- [x] Style frame v3: bütün görseller Blender'da 3B render. 6 ekran (ana sayfa, seviye başı, oyun, kazandın, mağaza, sıralama), 3 ekran oranı, 28 parçalık set ([docs/design/style-frames/index.html](docs/design/style-frames/index.html))
+- [x] 3B görsel hattı: Blender scriptleri, şeffaf PNG sprite ve arka plan ([ArtSource/blender/](ArtSource/blender/README.md))
+- [x] Kapı 2: v3 ara seviye olarak kabul edildi (2026-11-06). Panel rengi şimdilik Kor, maskot kor ruhu; ikisi de kesinleşmedi
+- [x] 3B sprite'ları oyuna bağla (2026-11-06): taşlar, özel taşlar, kutular, buz, zemin ve toplanan obje Blender render'ı; arkada kale ve köy; v3'teki açık dama kareler ve koyu çerçeve. Yeni modeller: kor kuşu (güdümlü), kilitli kutu, kül zemin, kor feneri. Oyun içi hedef ikonları da 3B oldu
+- [ ] Görsel kaliteyi referans seviyesine çıkar: daha detaylı modeller, dolu sandık ve ödül çizimleri, ayrıntılı harita mahalleleri, maskot pozları (sahibi: v3 hedefin altında)
+- [x] Design system belgesi: renk ve yazı token'ları, bileşenler, hareket, ses ve titreşim paleti, erişilebilirlik ([docs/design/design-system.md](docs/design/design-system.md))
+- [x] Arayüz parçalarını (panel, buton, hap, rozet, sekme…) 9-slice PNG olarak üreten araç ([tools/ui_chrome/](tools/ui_chrome/render.py))
+- [x] Arayüzün UI Toolkit'e geçişi (2026-11-06): token, bileşen ve ekran USS'leri; Baloo 2 (Latin, 69 KB); HUD, kazandın/kaybettin penceresi ve seviye seçimi yeni görünümde; `ThemeTests` (token dışı renk, kontrast, 9-slice, Türkçe harf); testler butonlara sanal fareyle gerçekten dokunuyor
+  - öğrenilen: Unity değişken fontun yalnız varsayılan ağırlığını okur, bu yüzden sabit 700/800 dosyaları üretildi (`tools/fonts/`)
+  - öğrenilen: ekran turu artık editör kapalıyken batch modunda da çalışır (köprü gerekmez); 8080 portunu Docker Desktop tutarsa Unity köprüsü açılmaz
 - [ ] Sanat yönü: EmberThrone teması (ateş/kor krallığı), renk paleti, karakter
-- [ ] AI ile sprite üretim hattı + tutarlı stil
-- [ ] Parçacık efektleri, ekran sarsıntısı, squash/stretch, combo kutlamaları, ses ve müzik, titreşim
-- [ ] Seviye sonu kutlaması (kalan hamleler → roketler → coin)
+- [ ] Sprite hattını genişlet: patlama ve parçacık kareleri, harita mahalleleri, yeni engeller
+- [x] Efektler ve his (2026-11-06): eşleşmede savrulan renkli kırıntılar ve ışıltılar; kutuda kıymık, buzda kristal, külde duman ve kor; roket, bomba ve kombolarda ekran sarsıntısı; "Harika!", "Muhteşem!", "İnanılmaz!" yazıları; Android titreşimi (3 seviye); kazanma penceresinde konfeti
+- [x] Seviye sonu kutlaması: kalan her hamle tahtada havai fişeğe dönüşür, sayaç sıfıra iner (yalnız gösteri; coin ödülü Faz 3'te ekonomiyle gelecek)
+- [ ] Ses ve müzik (paleti design-system.md'de), Ayarlar'da ses, titreşim ve "hareketi azalt" seçenekleri
+- [ ] Telefonda his ayarı: titreşim gücü, sarsıntı miktarı ve efekt yoğunluğu gerçek cihazda denenip ayarlanacak
 - [ ] Oyun içi booster çubuğu, ipucu (motorda hazır, ekranda yok), "+5 hamle" teklifi
 
 ## Faz 3 — Meta ve ekonomi
@@ -44,13 +60,15 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [ ] Canlar (5 can, 30 dk yenilenme, sunucu saati), coin, booster envanteri
 - [ ] Günlük ödül, seri bonusları, kumbara
 - [ ] Seviye üretimi: prosedürel üretici + bot ile ayar → 100, sonra 500+ seviye
+- [ ] Yeni engeller (önce ateş kutusu: yayılan engel), renk fırçası booster'ı
 
 ## Faz 4 — Backend ve sosyal
 - [ ] Hesap + bulut kayıt
-- [ ] Takımlar/klanlar: kur, katıl, ara; takım sohbeti; can isteme/gönderme
+- [ ] Haftalık sıralama (v1)
+- [ ] Takımlar/klanlar: kur, katıl, ara; takım sohbeti; can isteme/gönderme (lansmandan sonra)
 - [ ] Liderlik tabloları, takım etkinlikleri (ortak hedefe birlikte oynama), turnuvalar
 - [ ] Sunucu doğrulama: deterministik motorla hamle tekrarı (hile koruması)
-- Öneri: Nakama (açık kaynak; takım, sohbet, turnuva, liderlik tablosu hazır geliyor), kendi sunucunda
+- Sunucu: Unity Gaming Services, Pong'daki gibi (2026-11-06 kararı)
 
 ## Faz 5 — LiveOps
 - [ ] Etkinlik altyapısı (başlangıç/bitiş sunucudan), sezon kartı, sınırlı süreli etkinlikler
@@ -60,6 +78,7 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] İmzalı AAB akışı (`release-android.yml`, etiketle çalışır)
 - [ ] Yükleme anahtarı + imza secret'ları (sahibi yapacak, [docs/release/README.md](docs/release/README.md))
 - [ ] Google Play Billing (IAP), Play Console
+- [ ] Diller: İngilizce + Türkçe (yapı çok dile hazır)
 - [ ] Soft launch (tek ülke), KPI: D1 ≥ %40, D7 ≥ %15, seviye bazlı kayıp analizi
 - [ ] Gerçek oyuncu verisiyle bot kalibrasyonu ve seviye ayarı
 
@@ -67,9 +86,4 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 1. GitHub secret'ları (PongMobilePrototype'takilerin aynısı) → APK derlemesi için ([docs/CI-ANDROID.md](docs/CI-ANDROID.md))
 2. Tema ve sanat yönü onayı
 3. ~~Paket adı / şirket adı~~ Karar verildi (2026-11-06): `com.oceanforge.emberthrone`, şirket adı SERDUMEN (Pong ile aynı düzen)
-4. GDD/ belgeleri ile bu yol haritası ayrışıyor, hangisi geçerli?
-   - Özel taşlar: GDD'de TNT ve 3x3 bomba var, güdümlü yok; motorda güdümlü var, TNT yok, bomba 5x5
-   - Booster'lar: GDD çekiç, bomba, renk fırçası; motor çekiç, satır, sütun, karıştır
-   - Engeller: GDD 7 tip (ateş, zincir, tel kafes...); motor kutu, zemin, buz, toplanan obje
-   - Tahta: GDD 9x9; seviyeler 8x9
-   - Sosyal ve sunucu: GDD klan sistemini kapsam dışı sayar ve Firebase der; bu yol haritası klan + Nakama der
+4. ~~GDD ile yol haritasının ayrıştığı noktalar~~ Karar verildi (2026-11-06): [docs/design/brief.md](docs/design/brief.md) "Kararlar" tablosu

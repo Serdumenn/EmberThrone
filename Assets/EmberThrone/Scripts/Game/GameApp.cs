@@ -18,6 +18,7 @@ namespace EmberThrone.Game
         public static GameApp Instance { get; private set; }
 
         public Camera Camera { get; private set; }
+        public CameraShake Shake { get; private set; }
         public UiRoot Ui { get; private set; }
         public GameController Game { get; private set; }
         public LevelSelectScreen LevelSelect { get; private set; }
@@ -45,6 +46,8 @@ namespace EmberThrone.Game
             Art.Preload();
             gameObject.AddComponent<Tweens>();
             Camera = BuildCamera();
+            Shake = Camera.gameObject.AddComponent<CameraShake>();
+            Shake.SetRest(Camera.transform.position);
             Ui = UiRoot.Create(transform);
             _levels = LevelProgress.LoadLevels();
             ShowLevelSelect();
@@ -85,7 +88,7 @@ namespace EmberThrone.Game
         public void ShowLevelSelect()
         {
             CloseCurrent();
-            LevelSelect = LevelSelectScreen.Create(Ui.Content, _levels, l => LevelProgress.GetStars(l.Id), StartLevel);
+            LevelSelect = LevelSelectScreen.Create(Ui, _levels, l => LevelProgress.GetStars(l.Id), StartLevel);
         }
 
         public void StartLevel(int index) => StartLevel(_levels[index], index, Environment.TickCount);
@@ -109,7 +112,8 @@ namespace EmberThrone.Game
             }
             LevelSelect = null;
             Ui.ClearContent();
-            Camera.transform.position = new Vector3(0f, 0f, -10f);
+            Shake.SetRest(new Vector3(0f, 0f, -10f));
+            Shake.Stop();
         }
     }
 

@@ -4,25 +4,25 @@ using UnityEngine;
 
 namespace EmberThrone.Game
 {
+    /// <summary>Board colors. The UI's colors live in Resources/UI/Theme/Tokens.uss; the board ones mirror them.</summary>
     public static class Palette
     {
+        /// <summary>Camera clear color, only seen if the backdrop picture fails to load.</summary>
         public static readonly Color Background = Hex("1A1220");
-        public static readonly Color BoardFrame = Hex("120C17");
-        public static readonly Color CellLight = Hex("3B2C42");
-        public static readonly Color CellDark = Hex("322539");
-        public static readonly Color Panel = Hex("2B2033");
-        public static readonly Color PanelLight = Hex("443350");
-        public static readonly Color Accent = Hex("F2842B");
-        public static readonly Color Good = Hex("4CC96A");
-        public static readonly Color Text = Hex("FFF6EA");
-        public static readonly Color TextDim = Hex("BBA9C4");
-        public static readonly Color Warning = Hex("FFB347");
-        public static readonly Color Danger = Hex("FF5A4D");
-        public static readonly Color Dim = new Color(0.05f, 0.03f, 0.07f, 0.72f);
+        /// <summary>Token --color-board-back, opaque so overlapping cell backs leave no seams.</summary>
+        public static readonly Color BoardBack = Hex("221650");
+        /// <summary>Soft white light around the board (style frame v3).</summary>
+        public static readonly Color BoardGlow = new Color(1f, 1f, 1f, 0.85f);
+        /// <summary>Tokens --color-tile and --color-tile-alt: the light checker cells.</summary>
+        public static readonly Color TileLight = new Color(236f / 255f, 244f / 255f, 1f, 0.93f);
+        public static readonly Color TileDark = new Color(208f / 255f, 224f / 255f, 1f, 0.93f);
         public static readonly Color Gold = Hex("FFD24A");
-        public static readonly Color StarEmpty = Hex("4A3B52");
+        /// <summary>Token --color-select: the selected piece's frame.</summary>
+        public static readonly Color Select = Hex("7AD83A");
+        /// <summary>Ice drawn over a piece stays a little see-through, so the piece under it is readable.</summary>
+        public const float CoverAlpha = 0.82f;
 
-        // Index = GemColor. Every color also has its own shape (UX-001 ACC-004: never color alone).
+        // Index = GemColor, for effects. The pieces themselves are rendered art (Resources/Board).
         static readonly Color[] Gems =
         {
             Hex("E8463A"), Hex("45C05A"), Hex("3B8EF0"), Hex("F7C531"), Hex("A45CE6"), Hex("F2842B"),
@@ -38,23 +38,34 @@ namespace EmberThrone.Game
     }
 
     /// <summary>
-    /// Placeholder art generated at runtime from signed distance functions: no image files needed,
-    /// and the project stays diffable until the real art arrives in Phase 2.
-    /// Sprites are one world unit wide, i.e. exactly one board cell.
+    /// Board art. Pieces, specials and obstacles are 3D renders made in Blender (ArtSource/blender, copied to
+    /// Resources/Board); every piece has its own shape as well as its color (UX-001 ACC-004). Small helper
+    /// shapes (tiles, selection frame, effect discs) are generated here. One world unit is one board cell.
     /// </summary>
     public static class Art
     {
-        const int PieceSize = 128;
+        const int HelperSize = 128;
+        const string BoardFolder = "Board/";
+
+        // How many cells wide each render is drawn. Renders have empty space around the object:
+        // at 1.1 a gem fills about 80% of its cell (style frame v3).
+        const float PieceCells = 1.1f;
+        const float FloorCells = 1.08f;
+        const float CoverCells = 1.12f;
+        const float BackdropPixelsPerUnit = 100f;
+
+        static readonly string[] GemFiles = { "piece_R", "piece_G", "piece_B", "piece_Y", "piece_P", "piece_O" };
 
         delegate float Sdf(Vector2 p);
         delegate Color PixelFn(Vector2 p);
 
         static readonly Dictionary<string, Sprite> Cache = new Dictionary<string, Sprite>();
-        static readonly Vector2 LightDir = new Vector2(-0.5f, 0.85f).normalized;
+        static Material _material;
 
-        // ---------------------------------------------------------------- public sprites
+        /// <summary>Unlit and always included in builds, so sprites need no asset and no lights in the 2D renderer.</summary>
+        public static Material SpriteMaterial => _material != null ? _material : (_material = new Material(Shader.Find("Sprites/Default")));
 
-        /// <summary>Bakes every sprite at startup, so the first special or effect never stalls a move.</summary>
+        /// <summary>Loads every sprite at startup, so the first special or effect never stalls a move.</summary>
         public static void Preload()
         {
             for (int color = 0; color < GemColor.Count; color++) Gem(color);
@@ -63,29 +74,29 @@ namespace EmberThrone.Game
             Bomb();
             Homing();
             ColorBomb();
-            Crown();
-            for (int hp = 1; hp <= 9; hp++) Box(hp);
+            Collectible();
             for (int hp = 1; hp <= 3; hp++)
             {
+                Box(hp);
                 Cover(hp);
                 Floor(hp);
             }
+            Backdrop();
             Tile();
+            CellBack();
+            Glow();
             Selection();
             Ring();
             Disc();
             Chevron();
+            Sparkle();
+            Shard();
+            Splinter();
         }
 
-        public static Sprite Gem(int color)
-        {
-            return Get("gem" + color, () =>
-            {
-                var sdf = GemShape(color);
-                var c = Palette.Gem(color);
-                return Bake("gem" + color, p => Shade(sdf, c, p));
-            });
-        }
+        // ---------------------------------------------------------------- rendered art
+
+        public static Sprite Gem(int color) => Render(GemFiles[Mathf.Clamp(color, 0, GemFiles.Length - 1)]);
 
         public static Sprite Piece(PieceKind kind, int color, int hp)
         {
@@ -98,192 +109,86 @@ namespace EmberThrone.Game
                 case PieceKind.Homing: return Homing();
                 case PieceKind.ColorBomb: return ColorBomb();
                 case PieceKind.Box: return Box(hp);
-                case PieceKind.Collectible: return Crown();
+                case PieceKind.Collectible: return Collectible();
                 default: return Disc();
             }
         }
 
-        public static Sprite Rocket(bool horizontal)
+        public static Sprite Rocket(bool horizontal) => Render(horizontal ? "sp_rocket" : "sp_rocket_v");
+        public static Sprite Bomb() => Render("sp_bomb");
+        public static Sprite Homing() => Render("sp_homing");
+        public static Sprite ColorBomb() => Render("sp_orb");
+
+        /// <summary>Wooden crate; 2 hits adds steel straps, 3 or more is charred and padlocked.</summary>
+        public static Sprite Box(int hp) => Render("ob_box" + Mathf.Clamp(hp, 1, 3));
+
+        /// <summary>The ember lantern the player brings down to the bottom of the board.</summary>
+        public static Sprite Collectible() => Render("ob_lantern");
+
+        public static Sprite Cover(int hp) => Render("ob_ice", CoverCells);
+
+        /// <summary>Smoldering ash on the cell; 2 hits or more is darker and more cracked.</summary>
+        public static Sprite Floor(int hp) => Render(hp >= 2 ? "ob_floor2" : "ob_floor1", FloorCells);
+
+        /// <summary>The castle and village behind the board, 1080x1920; the game scales it to cover the view.</summary>
+        public static Sprite Backdrop()
         {
-            string key = horizontal ? "rocketH" : "rocketV";
-            return Get(key, () =>
+            return Get("bg_game", () =>
             {
-                var leftHead = new[] { new Vector2(-0.8f, 0f), new Vector2(-0.38f, 0.42f), new Vector2(-0.38f, -0.42f) };
-                var rightHead = new[] { new Vector2(0.8f, 0f), new Vector2(0.38f, -0.42f), new Vector2(0.38f, 0.42f) };
-                Sdf body = p =>
-                {
-                    float shaft = SdSegment(p, new Vector2(-0.34f, 0f), new Vector2(0.34f, 0f), 0.2f);
-                    float left = SdPolygon(p, leftHead) - 0.03f;
-                    float right = SdPolygon(p, rightHead) - 0.03f;
-                    return Mathf.Min(shaft, Mathf.Min(left, right));
-                };
-                var cream = Palette.Hex("FFE2B0");
-                var band = Palette.Hex("E8463A");
-                return Bake(key, raw =>
-                {
-                    var p = horizontal ? raw : new Vector2(raw.y, raw.x);
-                    var c = Shade(body, cream, p);
-                    float dot = SdCircle(p, 0.15f);
-                    return c.a > 0f ? Over(c, band, Coverage(dot)) : c;
-                });
+                var tex = Load("bg_game");
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), BackdropPixelsPerUnit, 0, SpriteMeshType.FullRect);
             });
         }
 
-        public static Sprite Bomb()
+        static Sprite Render(string file, float cells = PieceCells)
         {
-            return Get("bomb", () =>
+            return Get(file, () =>
             {
-                Sdf ball = p => SdCircle(p - new Vector2(-0.05f, -0.1f), 0.64f);
-                Sdf fuse = p => SdSegment(p, new Vector2(0.28f, 0.42f), new Vector2(0.48f, 0.62f), 0.08f);
-                var sparkStar = Star(4, 0.26f, 0.08f, 0f);
-                Sdf spark = p => SdPolygon(p - new Vector2(0.56f, 0.72f), sparkStar);
-                var iron = Palette.Hex("3A3F52");
-                var rope = Palette.Hex("B08A5A");
-                var flame = Palette.Hex("FFD24A");
-                return Bake("bomb", p =>
-                {
-                    var c = Shade(fuse, rope, p);
-                    c = Over(c, Shade(ball, iron, p));
-                    return Over(c, flame, Coverage(spark(p)));
-                });
+                var tex = Load(file);
+                return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), tex.width / cells, 0, SpriteMeshType.FullRect);
             });
         }
 
-        public static Sprite Homing()
+        static Texture2D Load(string file)
         {
-            return Get("homing", () =>
-            {
-                var plane = new[]
-                {
-                    new Vector2(0.76f, 0.76f), new Vector2(-0.72f, 0.2f), new Vector2(-0.14f, 0.02f),
-                    new Vector2(-0.02f, -0.14f), new Vector2(0.2f, -0.72f),
-                };
-                Sdf sdf = p => SdPolygon(p, plane) - 0.04f;
-                var c = Palette.Hex("6FE3F2");
-                return Bake("homing", p => Shade(sdf, c, p));
-            });
+            var tex = Resources.Load<Texture2D>(BoardFolder + file);
+            if (tex == null) throw new MissingReferenceException("[EmberThrone] Missing board art: Resources/" + BoardFolder + file);
+            return tex;
         }
 
-        public static Sprite ColorBomb()
-        {
-            return Get("colorbomb", () =>
-            {
-                Sdf sdf = p => SdCircle(p, 0.74f);
-                return Bake("colorbomb", p =>
-                {
-                    float angle = Mathf.Atan2(p.y, p.x) / (2f * Mathf.PI) + 0.5f;
-                    var hue = Color.HSVToRGB(Mathf.Repeat(angle + p.magnitude * 0.25f, 1f), 0.85f, 1f);
-                    var c = Shade(sdf, hue, p);
-                    if (c.a <= 0f) return c;
-                    float core = 1f - Smooth(0.05f, 0.34f, p.magnitude);
-                    return Over(c, Color.white, core);
-                });
-            });
-        }
+        // ---------------------------------------------------------------- generated helpers
 
-        public static Sprite Box(int hp)
-        {
-            hp = Mathf.Clamp(hp, 1, 9);
-            string key = "box" + hp;
-            return Get(key, () =>
-            {
-                Sdf sdf = p => SdRoundBox(p, 0.82f, 0.82f, 0.12f);
-                var wood = Color.Lerp(Palette.Hex("C48A4E"), Palette.Hex("6E4A32"), (hp - 1) / 3f);
-                var dark = wood * 0.55f;
-                dark.a = 1f;
-                return Bake(key, p =>
-                {
-                    var c = Shade(sdf, wood, p);
-                    if (c.a <= 0f) return c;
-                    float plank = Mathf.Min(Mathf.Abs(p.y - 0.27f), Mathf.Abs(p.y + 0.27f));
-                    c = Over(c, dark, 1f - Smooth(0.015f, 0.04f, plank));
-                    float frame = Mathf.Abs(SdRoundBox(p, 0.66f, 0.66f, 0.06f));
-                    c = Over(c, dark, (1f - Smooth(0.02f, 0.05f, frame)) * 0.8f);
-                    // pips show the hits left (ACC-004: readable without relying on color)
-                    if (hp >= 2)
-                    {
-                        float pip = 1f;
-                        for (int i = 0; i < hp; i++)
-                        {
-                            float x = (i - (hp - 1) * 0.5f) * 0.26f;
-                            pip = Mathf.Min(pip, SdCircle(p - new Vector2(x, 0f), 0.1f));
-                        }
-                        c = Over(c, Palette.Text, Coverage(pip));
-                    }
-                    return c;
-                });
-            });
-        }
-
-        public static Sprite Crown()
-        {
-            return Get("crown", () =>
-            {
-                var crown = new[]
-                {
-                    new Vector2(-0.68f, -0.52f), new Vector2(-0.76f, 0.34f), new Vector2(-0.34f, -0.02f),
-                    new Vector2(0f, 0.62f), new Vector2(0.34f, -0.02f), new Vector2(0.76f, 0.34f), new Vector2(0.68f, -0.52f),
-                };
-                Sdf sdf = p => SdPolygon(p, crown) - 0.04f;
-                var gold = Palette.Gold;
-                var jewel = Palette.Hex("E8463A");
-                return Bake("crown", p =>
-                {
-                    var c = Shade(sdf, gold, p);
-                    if (c.a <= 0f) return c;
-                    return Over(c, jewel, Coverage(SdCircle(p - new Vector2(0f, -0.26f), 0.13f)));
-                });
-            });
-        }
-
-        public static Sprite Cover(int hp)
-        {
-            hp = Mathf.Clamp(hp, 1, 3);
-            string key = "cover" + hp;
-            return Get(key, () =>
-            {
-                var ice = Palette.Hex("A6E4FF");
-                float baseAlpha = 0.34f + 0.18f * (hp - 1);
-                return Bake(key, p =>
-                {
-                    float d = SdRoundBox(p, 0.94f, 0.94f, 0.14f);
-                    float a = Coverage(d);
-                    if (a <= 0f) return Color.clear;
-                    float edge = Smooth(-0.14f, -0.02f, d);
-                    float streak = Mathf.PingPong((p.x + p.y) * 1.6f + 10f, 1f);
-                    float gloss = (1f - Smooth(0.0f, 0.1f, Mathf.Abs(streak - 0.5f))) * 0.3f;
-                    var c = Color.Lerp(ice, Color.white, Mathf.Max(edge * 0.7f, gloss));
-                    c.a = a * Mathf.Clamp01(baseAlpha + edge * 0.45f + gloss);
-                    return c;
-                });
-            });
-        }
-
-        public static Sprite Floor(int hp)
-        {
-            hp = Mathf.Clamp(hp, 1, 3);
-            string key = "floor" + hp;
-            return Get(key, () =>
-            {
-                var tint = hp == 1 ? Palette.Hex("3F8F6B") : Palette.Hex("7A5BD0");
-                return Bake(key, p =>
-                {
-                    float a = Coverage(SdRoundBox(p, 0.97f, 0.97f, 0.14f));
-                    if (a <= 0f) return Color.clear;
-                    float speck = Mathf.Sin(p.x * 13f) * Mathf.Sin(p.y * 11f);
-                    var c = Color.Lerp(tint, tint * 1.25f, speck * 0.5f + 0.5f);
-                    c.a = a;
-                    return c;
-                });
-            });
-        }
-
+        /// <summary>A light cell: 93% of the cell, rounded, a little darker along its lower edge.</summary>
         public static Sprite Tile()
         {
             return Get("tile", () => Bake("tile", p =>
             {
+                float d = SdRoundBox(p, 0.93f, 0.93f, 0.37f);
+                float lowerEdge = Smooth(-0.78f, -0.84f, p.y);
+                var c = Color.Lerp(Color.white, new Color(0.24f, 0.31f, 0.63f), 0.18f * lowerEdge);
+                c.a = Coverage(d);
+                return c;
+            }));
+        }
+
+        /// <summary>The dark back of one cell; the backs of neighboring cells overlap into one board shape.</summary>
+        public static Sprite CellBack()
+        {
+            return Get("back", () => Bake("back", p =>
+            {
                 var c = Color.white;
-                c.a = Coverage(SdRoundBox(p, 0.97f, 0.97f, 0.14f));
+                c.a = Coverage(SdRoundBox(p, 0.98f, 0.98f, 0.42f));
+                return c;
+            }));
+        }
+
+        /// <summary>Soft-edged square for the light around the board.</summary>
+        public static Sprite Glow()
+        {
+            return Get("glow", () => Bake("glow", p =>
+            {
+                var c = Color.white;
+                c.a = 1f - Smooth(-0.12f, 0f, SdRoundBox(p, 0.92f, 0.92f, 0.4f));
                 return c;
             }));
         }
@@ -336,115 +241,57 @@ namespace EmberThrone.Game
             });
         }
 
-        public static Sprite Check()
+        /// <summary>Four-pointed twinkle with a soft halo, for sparkles.</summary>
+        public static Sprite Sparkle()
         {
-            return Get("check", () => Bake("check", p =>
+            return Get("sparkle", () =>
             {
-                float d = Mathf.Min(
-                    SdSegment(p, new Vector2(-0.56f, -0.04f), new Vector2(-0.14f, -0.46f), 0.13f),
-                    SdSegment(p, new Vector2(-0.14f, -0.46f), new Vector2(0.62f, 0.44f), 0.13f));
-                var c = Color.white;
-                c.a = Coverage(d, 64);
+                var star = Star(4, 0.95f, 0.16f);
+                return Bake("sparkle", p =>
+                {
+                    float core = Coverage(SdPolygon(p, star), 64);
+                    float halo = Mathf.Exp(-p.sqrMagnitude * 9f) * 0.55f;
+                    var c = Color.white;
+                    c.a = Mathf.Clamp01(core + halo);
+                    return c;
+                }, 64);
+            });
+        }
+
+        /// <summary>A rounded triangle chip: gem and ice shards.</summary>
+        public static Sprite Shard()
+        {
+            return Get("shard", () =>
+            {
+                var tri = new[] { new Vector2(0f, 0.8f), new Vector2(0.62f, -0.5f), new Vector2(-0.62f, -0.5f) };
+                return Bake("shard", p =>
+                {
+                    float d = SdPolygon(p, tri) - 0.08f;
+                    // lighter upper half reads as a lit facet
+                    var c = Color.Lerp(Color.white, new Color(0.78f, 0.78f, 0.78f), Smooth(0.1f, -0.3f, p.y - p.x * 0.4f) * 0.6f);
+                    c.a = Coverage(d, 64);
+                    return c;
+                }, 64);
+            });
+        }
+
+        /// <summary>A long thin wood splinter.</summary>
+        public static Sprite Splinter()
+        {
+            return Get("splinter", () => Bake("splinter", p =>
+            {
+                var c = Color.Lerp(Color.white, new Color(0.7f, 0.7f, 0.7f), Smooth(0f, -0.2f, p.y));
+                c.a = Coverage(SdRoundBox(p, 0.9f, 0.24f, 0.2f), 64);
                 return c;
             }, 64));
         }
 
-        public static Sprite StarIcon()
-        {
-            return Get("star", () =>
-            {
-                var v = Star(5, 0.92f, 0.42f, 90f);
-                return Bake("star", p =>
-                {
-                    var c = Color.white;
-                    c.a = Coverage(SdPolygon(p, v) - 0.04f);
-                    return c;
-                });
-            });
-        }
-
-        /// <summary>White rounded rectangle for 9-sliced UI panels (radius in canvas units).</summary>
-        public static Sprite RoundedPanel()
-        {
-            return Get("panel", () =>
-            {
-                const int size = 96;
-                const float radius = 0.5f;
-                var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
-                {
-                    filterMode = FilterMode.Bilinear,
-                    wrapMode = TextureWrapMode.Clamp,
-                    name = "panel",
-                };
-                var px = new Color32[size * size];
-                for (int y = 0; y < size; y++)
-                    for (int x = 0; x < size; x++)
-                    {
-                        var p = new Vector2((x + 0.5f) / size * 2f - 1f, (y + 0.5f) / size * 2f - 1f);
-                        var c = Color.white;
-                        c.a = Coverage(SdRoundBox(p, 0.98f, 0.98f, radius), size);
-                        px[y * size + x] = c;
-                    }
-                tex.SetPixels32(px);
-                tex.Apply(false, true);
-                var border = new Vector4(30, 30, 30, 30);
-                return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
-            });
-        }
-
-        // ---------------------------------------------------------------- shapes
-
-        static Sdf GemShape(int color)
-        {
-            switch (color)
-            {
-                case GemColor.Red:
-                    return p => SdCircle(p, 0.74f);
-                case GemColor.Green:
-                {
-                    var hex = Ngon(6, 0.72f, 90f);
-                    return p => SdPolygon(p, hex) - 0.06f;
-                }
-                case GemColor.Blue:
-                {
-                    var diamond = new[]
-                    {
-                        new Vector2(0f, 0.78f), new Vector2(0.66f, 0f), new Vector2(0f, -0.78f), new Vector2(-0.66f, 0f),
-                    };
-                    return p => SdPolygon(p, diamond) - 0.06f;
-                }
-                case GemColor.Yellow:
-                {
-                    var star = Star(5, 0.82f, 0.44f, 90f);
-                    return p => SdPolygon(p, star) - 0.05f;
-                }
-                case GemColor.Purple:
-                    return p => SdRoundBox(p, 0.68f, 0.68f, 0.2f);
-                default:
-                {
-                    var tri = Ngon(3, 0.74f, 90f);
-                    return p => SdPolygon(p - new Vector2(0f, -0.14f), tri) - 0.1f;
-                }
-            }
-        }
-
-        static Vector2[] Ngon(int n, float r, float rotationDeg)
-        {
-            var v = new Vector2[n];
-            for (int i = 0; i < n; i++)
-            {
-                float a = (rotationDeg + i * 360f / n) * Mathf.Deg2Rad;
-                v[i] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
-            }
-            return v;
-        }
-
-        static Vector2[] Star(int points, float outer, float inner, float rotationDeg)
+        static Vector2[] Star(int points, float outer, float inner)
         {
             var v = new Vector2[points * 2];
             for (int i = 0; i < v.Length; i++)
             {
-                float a = (rotationDeg + i * 180f / points) * Mathf.Deg2Rad;
+                float a = (90f + i * 180f / points) * Mathf.Deg2Rad;
                 v[i] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * (i % 2 == 0 ? outer : inner);
             }
             return v;
@@ -452,22 +299,12 @@ namespace EmberThrone.Game
 
         // ---------------------------------------------------------------- distance functions
 
-        static float SdCircle(Vector2 p, float r) => p.magnitude - r;
-
         static float SdRoundBox(Vector2 p, float hx, float hy, float r)
         {
             float qx = Mathf.Abs(p.x) - hx + r;
             float qy = Mathf.Abs(p.y) - hy + r;
             float ox = Mathf.Max(qx, 0f), oy = Mathf.Max(qy, 0f);
             return Mathf.Sqrt(ox * ox + oy * oy) + Mathf.Min(Mathf.Max(qx, qy), 0f) - r;
-        }
-
-        static float SdSegment(Vector2 p, Vector2 a, Vector2 b, float r)
-        {
-            var pa = p - a;
-            var ba = b - a;
-            float h = Mathf.Clamp01(Vector2.Dot(pa, ba) / Vector2.Dot(ba, ba));
-            return (pa - ba * h).magnitude - r;
         }
 
         static float SdPolygon(Vector2 p, Vector2[] v)
@@ -487,56 +324,16 @@ namespace EmberThrone.Game
             return s * Mathf.Sqrt(d);
         }
 
-        // ---------------------------------------------------------------- shading
-
         static float Smooth(float a, float b, float x)
         {
             float t = Mathf.Clamp01((x - a) / (b - a));
             return t * t * (3f - 2f * t);
         }
 
-        static float Coverage(float d, int size = PieceSize)
+        static float Coverage(float d, int size = HelperSize)
         {
             float aa = 2.4f / size;
             return 1f - Smooth(-aa, aa, d);
-        }
-
-        static Color Over(Color under, Color over, float amount = -1f)
-        {
-            float a = amount >= 0f ? amount : over.a;
-            var c = Color.Lerp(under, over, a);
-            c.a = Mathf.Max(under.a, a);
-            return c;
-        }
-
-        /// <summary>Candy look: outline, bevel lit from the upper left, and a soft gloss spot.</summary>
-        static Color Shade(Sdf sdf, Color baseColor, Vector2 p)
-        {
-            float d = sdf(p);
-            float a = Coverage(d);
-            var outline = baseColor * 0.42f;
-            // Transparent pixels keep the outline color so filtering does not add a black fringe.
-            if (a <= 0f) return new Color(outline.r, outline.g, outline.b, 0f);
-
-            const float e = 0.02f;
-            var g = new Vector2(sdf(p + new Vector2(e, 0f)) - sdf(p - new Vector2(e, 0f)),
-                sdf(p + new Vector2(0f, e)) - sdf(p - new Vector2(0f, e)));
-            float light = g.sqrMagnitude > 1e-8f ? Vector2.Dot(g.normalized, LightDir) : 0f;
-            float bevel = Mathf.Clamp01(1f + d / 0.24f);
-            bevel *= bevel;
-
-            var c = baseColor * (1f + 0.14f * p.y);
-            c = light > 0f
-                ? Color.Lerp(c, Color.white, bevel * light * 0.55f)
-                : Color.Lerp(c, Color.black, bevel * -light * 0.38f);
-
-            c = Color.Lerp(c, outline, Smooth(-0.075f, -0.04f, d));
-
-            float gx = p.x + 0.24f, gy = p.y - 0.38f;
-            float gloss = Mathf.Exp(-(gx * gx * 10f + gy * gy * 24f));
-            c = Color.Lerp(c, Color.white, gloss * 0.5f * (d < -0.08f ? 1f : 0f));
-            c.a = a;
-            return c;
         }
 
         // ---------------------------------------------------------------- baking
@@ -549,7 +346,7 @@ namespace EmberThrone.Game
             return s;
         }
 
-        static Sprite Bake(string name, PixelFn fn, int size = PieceSize)
+        static Sprite Bake(string name, PixelFn fn, int size = HelperSize)
         {
             var tex = new Texture2D(size, size, TextureFormat.RGBA32, true)
             {

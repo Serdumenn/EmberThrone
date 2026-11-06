@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true # ThemeTests reads the UI images and fonts, which live in Git LFS
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
