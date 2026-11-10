@@ -21,6 +21,8 @@ BY_EXT = {
     ".json": TEXT, ".txt": TEXT, ".md": TEXT, ".csv": TEXT, ".xml": TEXT, ".bytes": TEXT, ".yaml": TEXT,
 }
 
+IMPORTED = {".png", ".jpg", ".jpeg", ".tga", ".psd", ".exr", ".wav", ".ogg", ".mp3", ".ttf", ".otf", ".fbx", ".mp4"}
+
 def skip(name):
     return name.startswith(".") or name.endswith("~") or name.endswith(".meta")
 
@@ -47,6 +49,9 @@ def main():
     for path in missing:
         if os.path.isdir(path):
             template = FOLDER
+        elif os.path.splitext(path)[1].lower() in IMPORTED:
+            print("left for Unity:", os.path.relpath(path, os.path.join(ROOT, "..")))
+            continue
         else:
             template = BY_EXT.get(os.path.splitext(path)[1].lower(), DEFAULT)
         with open(path + ".meta", "w", newline="\n") as f:

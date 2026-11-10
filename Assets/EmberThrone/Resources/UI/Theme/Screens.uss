@@ -21,7 +21,7 @@
 .et-hud__home-icon {
     width: 150px;
     height: 150px;
-    background-image: url("../Art/ic_castle.png");
+    background-image: url("../Art/ic_home.png");
 }
 
 .et-hud__level {
@@ -118,7 +118,7 @@
     height: 360px;
     align-items: flex-start;
     justify-content: center;
-    margin-bottom: 40px;
+    margin-bottom: 70px;
 }
 
 .et-result__star {
@@ -166,60 +166,226 @@
     background-image: url("../Art/mascot_joy.png");
 }
 
-.et-levels {
+.et-map {
     flex-grow: 1;
-    padding: 0 var(--space-6);
 }
 
-.et-levels__header {
-    height: 360px;
-    align-items: center;
-    justify-content: center;
+.et-map__scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
 }
 
-.et-levels__subtitle {
-    margin-top: var(--space-1);
+.et-map__chapter {
+    width: 100%;
+    flex-shrink: 0;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.et-map__chapter--1 {
+    padding-top: 93.57%;
+    background-image: url("../Art/map_1.jpg");
+}
+
+.et-map__chapter--2 {
+    padding-top: 86.72%;
+    background-image: url("../Art/map_2.jpg");
+}
+
+.et-map__chapter--3 {
+    padding-top: 179.17%;
+    background-image: url("../Art/map_3.jpg");
+}
+
+.et-map__banner {
+    position: absolute;
+    left: 20px;
+    top: -39px;
+    height: 78px;
+    padding: 0 var(--space-6) 6px var(--space-6);
     font-size: var(--font-size-body);
 }
 
-.et-levels__scroll {
-    flex-grow: 1;
+.et-map__banner--right {
+    left: auto;
+    right: 20px;
 }
 
-.et-levels__grid {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding-bottom: var(--space-6);
+.et-map__banner--first {
+    top: auto;
+    bottom: 20px;
 }
 
-.et-level-card {
-    width: 300px;
-    height: 340px;
-    margin: 14px;
-    align-items: center;
-    padding: 18px var(--space-2) 0 var(--space-2);
-}
-
-.et-level-card__number {
-    font-size: var(--font-size-title);
-    height: 124px;
-}
-
-.et-level-card__name {
-    white-space: normal;
-    height: 96px;
-    -unity-text-align: upper-center;
-}
-
-.et-level-card__stars {
+.et-map__settings {
     position: absolute;
-    bottom: 44px;
-    flex-direction: row;
+    right: var(--space-4);
+    bottom: var(--space-4);
 }
 
-.et-level-card__star {
-    width: 72px;
-    height: 72px;
-    margin: 0 2px;
+.et-map__settings-icon {
+    width: 140px;
+    height: 140px;
+    background-image: url("../Art/ic_gear.png");
+}
+
+.et-map-node {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    translate: -50% -50%;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-none);
+    border-width: 0;
+}
+
+.et-map-node__ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("../Chrome/ring.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.et-map-node__number {
+    font-size: 60px;
+    color: var(--color-white);
+    -unity-text-align: middle-center;
+    -unity-font-definition: url("../Fonts/Baloo2-ExtraBold.ttf");
+    margin-bottom: 6px;
+}
+
+.et-map-node__stars {
+    position: absolute;
+    bottom: -26px;
+    flex-direction: row;
+    display: none;
+}
+
+.et-map-node__star {
+    width: 50px;
+    height: 50px;
+    margin: 0 -3px;
+}
+
+.et-map-node__mascot {
+    position: absolute;
+    top: -128px;
+    width: 150px;
+    height: 150px;
+    background-image: url("../Art/mascot.png");
+}
+
+.et-map-node--done .et-map-node__stars {
+    display: flex;
+}
+
+.et-map-node--locked .et-map-node__ring {
+    background-image: url("../Chrome/ring_locked.png");
+}
+
+.et-map-node--locked .et-map-node__number {
+    opacity: 0.6;
+}
+
+.et-map-node--current {
+    scale: 1.16 1.16;
+}
+
+.et-level-start__hard {
+    align-self: center;
+    margin-bottom: var(--space-2);
+}
+
+.et-level-start__name {
+    font-size: var(--font-size-label);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--space-3);
+}
+
+.et-level-start__goals {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: var(--space-3);
+}
+
+.et-level-start__goal {
+    width: 150px;
+    height: 150px;
+    margin: 0 var(--space-2);
+}
+
+.et-level-start__mascot {
+    position: absolute;
+    right: -70px;
+    top: -210px;
+    width: 280px;
+    height: 280px;
+    rotate: 8deg;
+    background-image: url("../Art/mascot.png");
+}
+
+.et-result__mascot--sad {
+    background-image: url("../Art/mascot_sad.png");
+}
+
+.et-boosters {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 236px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 0 var(--space-3) 30px var(--space-3);
+}
+
+.et-booster {
+    width: 180px;
+    height: 186px;
+    margin: 0 var(--space-2);
+}
+
+.et-booster__icon {
+    width: 132px;
+    height: 132px;
+}
+
+.et-booster__icon--hammer {
+    background-image: url("../Art/bo_hammer.png");
+}
+
+.et-booster__icon--row {
+    background-image: url("../Art/bo_row.png");
+}
+
+.et-booster__icon--column {
+    background-image: url("../Art/bo_col.png");
+}
+
+.et-booster__icon--shuffle {
+    background-image: url("../Art/bo_shuffle.png");
+}
+
+.et-booster__count {
+    position: absolute;
+    right: -14px;
+    bottom: -10px;
+    height: 78px;
+    min-width: 78px;
+    padding: 0 var(--space-2) 6px var(--space-2);
+    font-size: var(--font-size-body);
+    -unity-text-align: middle-center;
+}
+
+.et-booster--active {
+    scale: 1.14 1.14;
+    -unity-background-image-tint-color: var(--color-gold-light);
+}
+
+.et-booster--empty {
+    opacity: 0.55;
 }

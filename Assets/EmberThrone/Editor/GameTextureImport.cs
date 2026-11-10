@@ -7,9 +7,15 @@ namespace EmberThrone.EditorTools
     {
         const string Ui = "Assets/EmberThrone/Resources/UI/";
         const string Board = "Assets/EmberThrone/Resources/Board/";
+        const string Brand = "Assets/EmberThrone/Art/Brand/";
+        const string AppIcon = "Assets/EmberThrone/Art/AppIcon/";
+        const float SplashLogoPixelsPerUnit = 384f;
 
         void OnPreprocessTexture()
         {
+            if (assetPath.StartsWith(Brand)) { ImportSplashLogo(); return; }
+            if (assetPath.StartsWith(AppIcon)) { ImportAppIcon(); return; }
+
             bool board = assetPath.StartsWith(Board);
             if (!board && !assetPath.StartsWith(Ui)) return;
 
@@ -33,6 +39,32 @@ namespace EmberThrone.EditorTools
                 format = TextureImporterFormat.ASTC_4x4,
                 compressionQuality = 100,
             });
+        }
+
+        void ImportSplashLogo()
+        {
+            var importer = (TextureImporter)assetImporter;
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = SplashLogoPixelsPerUnit;
+            importer.mipmapEnabled = false;
+            importer.alphaIsTransparency = true;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.maxTextureSize = 1024;
+        }
+
+        void ImportAppIcon()
+        {
+            var importer = (TextureImporter)assetImporter;
+            importer.textureType = TextureImporterType.Default;
+            importer.npotScale = TextureImporterNPOTScale.None;
+            importer.mipmapEnabled = false;
+            importer.alphaIsTransparency = true;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.maxTextureSize = 1024;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
         }
     }
 }

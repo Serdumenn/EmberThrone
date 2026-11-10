@@ -121,5 +121,10 @@ namespace EmberThrone.Game
         public const float PraisePop = 0.32f;
         public const float PraiseHold = 0.55f;
         public const float PraiseOut = 0.25f;
+        public const float HintDelay = 10f;
+        public const float EarlyHintDelay = 3f;
+        public const int EarlyHintLevels = 3;
+        public const float HintPulse = 0.9f;
+        public const float HintScale = 0.1f;
     }
 }

@@ -50,7 +50,7 @@ namespace EmberThrone.Game
             foreach (var c in choices)
                 _buttons.Add(Ui.Button(c.Label, Ui.ClassOf(c.Kind) + " et-result__button", c.Run, panel));
 
-            if (win) Ui.El("et-icon et-result__mascot", body, "Mascot");
+            Ui.El(win ? "et-icon et-result__mascot" : "et-icon et-result__mascot et-result__mascot--sad", body, "Mascot");
 
             const float from = 1600f;
             body.style.translate = new Translate(0f, from);
@@ -78,6 +78,8 @@ namespace EmberThrone.Game
                 var slot = Ui.El("et-star et-result__star " + sides[i], row, "Star");
                 if (i >= stars) continue;
                 var fill = Ui.El("et-fill et-star et-star--on", slot, "Fill");
+                float pitch = i * 2f;
+                Tweens.After(Timing.ModalIn + i * Timing.StarFill, () => Sound.Play(Sfx.Star, pitch));
                 fill.style.scale = new Scale(Vector2.zero);
                 Tweens.Run(Timing.StarFill, t =>
                 {

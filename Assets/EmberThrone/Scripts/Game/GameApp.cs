@@ -18,6 +18,7 @@ namespace EmberThrone.Game
         public UiRoot Ui { get; private set; }
         public GameController Game { get; private set; }
         public LevelSelectScreen LevelSelect { get; private set; }
+        public LevelStartPopup LevelStart { get; private set; }
         public IReadOnlyList<LevelDefinition> Levels => _levels;
 
         List<LevelDefinition> _levels;
@@ -41,6 +42,7 @@ namespace EmberThrone.Game
 
             Art.Preload();
             gameObject.AddComponent<Tweens>();
+            Sound.Init(gameObject);
             Camera = BuildCamera();
             Shake = Camera.gameObject.AddComponent<CameraShake>();
             Shake.SetRest(Camera.transform.position);
@@ -67,6 +69,7 @@ namespace EmberThrone.Game
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 50f;
             go.tag = "MainCamera";
+            go.AddComponent<AudioListener>();
             return cam;
         }
 
@@ -74,6 +77,16 @@ namespace EmberThrone.Game
         {
             var keyboard = Keyboard.current;
             if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+            if (LevelStart != null)
+            {
+                LevelStart.Close();
+                return;
+            }
+            if (LevelSelect != null && LevelSelect.Settings != null)
+            {
+                LevelSelect.Settings.Close();
+                return;
+            }
             if (Game != null) ShowLevelSelect();
             else Application.Quit();
         }
@@ -83,7 +96,13 @@ namespace EmberThrone.Game
         public void ShowLevelSelect()
         {
             CloseCurrent();
-            LevelSelect = LevelSelectScreen.Create(Ui, _levels, l => LevelProgress.GetStars(l.Id), StartLevel);
+            LevelSelect = LevelSelectScreen.Create(Ui, _levels, l => LevelProgress.GetStars(l.Id), ShowLevelStart);
+        }
+
+        public void ShowLevelStart(int index)
+        {
+            if (LevelStart != null || !HasLevel(index)) return;
+            LevelStart = LevelStartPopup.Show(Ui.Popups, _levels[index], () => StartLevel(index), () => LevelStart = null);
         }
 
         public void StartLevel(int index) => StartLevel(_levels[index], index, Environment.TickCount);
@@ -104,6 +123,8 @@ namespace EmberThrone.Game
                 Destroy(Game.gameObject);
                 Game = null;
             }
+            LevelStart?.Close();
+            LevelSelect?.Settings?.Close();
             LevelSelect = null;
             Ui.ClearContent();
             Shake.SetRest(new Vector3(0f, 0f, -10f));

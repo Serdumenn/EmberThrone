@@ -89,24 +89,24 @@ USS karşılığı: `-unity-text-outline-width`, `-unity-text-outline-color`, `t
 
 ## Bileşenler
 
-Her bileşenin görseli `tools/ui_chrome/` ile üretilir ve `Resources/UI/Chrome/` altına konur. "Dilim" sütunu, köşelerin esnetilmeyen kısmıdır (`-unity-slice-*`).
+Pencere, butonlar, halka, hap, etiket ve kurdele `ArtSource/sheets/ui_kit.png` çiziminden (`tools/sprites/cut_sheets.py`), onay işareti ve ışıltılar `tools/ui_chrome/`'dan üretilir; hepsi `Resources/UI/Chrome/` altındadır. "Dilim" sütunu, köşelerin esnetilmeyen kısmıdır (`-unity-slice-*`).
 
 | Bileşen | Görsel | Dilim | İçerik |
 |---|---|---|---|
-| `Panel` | altın kenar + krem yüz + çizgili doku | 60 | Mürekkep metin, 3B ikonlar |
+| `Panel` | ahşap çerçeve, köşelerde altın çivi, krem yüz | 60 | Mürekkep metin, ikonlar |
 | `Panel` bantlı | üstte `primary` bant | 60 / bant 190 | Altın başlık |
-| `Button` yeşil / turuncu / birincil | parlak üst bant, alt dudak, dış çizgi | 70 | Beyaz dış çizgili etiket |
+| `Button` yeşil / turuncu | parlak hap, üstte ışık, altta koyu dudak | yan 100, üst-alt 70 | Beyaz dış çizgili etiket |
 | `CloseButton` | kırmızı daire, beyaz X | — (sabit 150) | — |
 | `Pill` (para) | krem hap, solda taşan 3B ikon, sağda yeşil + | 45 | Sayı, mürekkep |
-| `ChipPill` | koyu hap, ince beyaz çizgi | 32 | Süre, kısa bilgi |
+| `ChipPill` | lacivert hap, ince altın çizgi | yan 34, üst-alt 32 | Seviye adı, bölge adı, sayaç |
 | `Badge` | kırmızı daire, beyaz halka | — (80) | Sayı |
-| `Tag` | `primary` hap, altın + koyu çizgi | 35 | "Hedefler", "Hamle" |
+| `Tag` | turuncu hap, koyu çizgi | yan 38, üst-alt 35 | "Hedefler", "Hamle", "Zor seviye" |
 | `Check` | yeşil daire, beyaz onay işareti | — (80) | Tamamlanan hedef |
-| `Ring` | altın halka, gök mavisi iç | — | Maskot ya da avatar |
+| `Ring` | altın halka, gök mavisi iç; kilitli seviyede gri (`ring_locked`) | — | Ev, dişli, booster, harita düğümü |
 | `Slot` | altın kare, açık mavi iç | 40 | Booster ikonu + rozet |
 | `NavBar` / `NavTab` | `nav` zemin, altın üst çizgi; aktif sekme yükselir | 40 | 3B ikon; etiket yalnız aktifte |
 | `Progress` | koyu oluk, altın halka, yeşil parlak dolgu | 32 | Beyaz dış çizgili oran ("5/8") |
-| `Ribbon` | altın + `primary` kurdele, uçları katlı | 120 | Altın başlık |
+| `Ribbon` | kırmızı-turuncu kurdele, altın kenar, kıvrık kırlangıç uçlar | yan 250 | Altın başlık |
 | `Scrim` | `scrim` | — | Pencere arkası |
 | `Board` | `board-back` zemin, beyaz ışıltı, dama kareler (koddan, `Art.cs`); arkada `bg_game` | — | Taşlar ve kutular karenin %110'u, zemin %108, buz %112 ve %82 opak |
 
@@ -117,11 +117,14 @@ USS sınıfları `et-` ile başlar: `.et-panel`, `.et-tag`, `.et-chip`, `.et-rin
 - **basılı:** %94 ölçek, %8 koyulaşma, 90 ms
 - **pasif:** %45 opaklık, renk doygunluğu düşük, dokunma yok
 - **seçili:** yeşil ışıltılı çerçeve, köşede ✓
+- **kilitli seviye kartı:** `locked` griye boyanır, sayı ve yıldızlar soluk; dokununca kart sallanır
+- **sıradaki seviye kartı:** altına boyanır, %106 ölçek; liste açılınca ona kayar
+- **seçili booster:** altına boyanır, %114 ölçek; hakkı bitmiş booster %55 opak, dokununca sallanır
 
 Dokunma hedefi en az 144 px (yaklaşık 48dp).
 
-## 3B görseller
-Blender'da üretilir (`ArtSource/blender/`, kurallar ve çalıştırma: README). Hepsi 512×512, şeffaf.
+## Oyun görselleri
+Çizim sayfalarından kesilir (`ArtSource/sheets/`, kurallar ve çalıştırma: README). Tarz: yumuşak gölgeli, parlak, koyu renkli dış çizgili çizim; karakter sayfalarıyla aynı. Sprite'lar 512×512, şeffaf.
 
 | Grup | Dosyalar |
 |---|---|
@@ -130,9 +133,10 @@ Blender'da üretilir (`ArtSource/blender/`, kurallar ve çalıştırma: README).
 | Engeller | `ob_box1`, `ob_box2`, `ob_box3` (kilitli), `ob_ice`, `ob_floor1`, `ob_floor2` (kül zemin), `ob_lantern` (toplanan kor feneri) |
 | Booster | `bo_hammer`, `bo_row`, `bo_col`, `bo_shuffle` |
 | Para ve ödül | `cur_coin`, `cur_heart`, `ui_star`, `ui_star_empty`, `ic_chest`, `ic_trophy` |
-| Menü | `ic_castle`, `ic_scroll`, `ic_gear` |
-| Maskot | `mascot`, `mascot_joy` |
-| Arka plan | `bg_map` (ada), `bg_game` (kale ve köy), 1080×1920 |
+| Menü | `ic_home`, `ic_gear` |
+| Maskot | `mascot` (el sallayan), `mascot_joy`, `mascot_sad` |
+| Arka plan | `bg_game` (çayırlar, tepede Kor Tahtı), `bg_map` (bulanığı) |
+| Harita | `map_1` Kıvılcım Köyü, `map_2` Fırın Sokağı, `map_3` Demirci Çarşısı ve Kor Tahtı |
 
 Kural: 3B ikonlar kutularından %10–20 taşabilir (para hapı, sekme, hedef). Bu, referanstaki "dolu, hacimli" görünümü verir.
 
@@ -159,20 +163,31 @@ Uygulama (2026-11-06):
 - Övgü: bir hamlede 3 dalga "Harika!", 4 dalga ya da kombo "Muhteşem!", 6 dalga ya da iki renk bombası "İnanılmaz!". Hamle başına en büyüğü bir kez gösterilir.
 - Seviye sonu: kalan her hamle (en fazla 10) sayaçtan çıkan bir kıvılcım olur, tahtada havai fişek gibi patlar; sonra konfetili pencere açılır. Yalnız gösteridir, oyunun durumu değişmez.
 
-## Ses ve titreşim paleti (Faz 2'de üretilecek)
+## Ses ve titreşim paleti
 
-| Olay | Ses karakteri | Titreşim |
-|---|---|---|
-| Eşleşme | kısa, tatlı cam tıkırtısı; zincirde perde yükselir | hafif |
-| Özel taş oluşur | parlak "şıng" | hafif |
-| Roket | "vuuş" süpürme | orta |
-| Kor bombası | yumuşak, boğuk patlama + çıtırtı | güçlü |
-| Kor küresi | yükselen çan dizisi | orta |
-| Kazandın | kısa fanfar + konfeti | güçlü |
-| Buton | yumuşak tık | çok hafif |
-| Altın kazanma | jeton şıngırtısı | hafif |
+| Olay | Ses karakteri | Dosya | Titreşim |
+|---|---|---|---|
+| Kaydırma | kısa, yükselen "vıt" | `sfx_swap` | — |
+| Eşleşmeyen kaydırma | inen iki nota | `sfx_swap_back` | — |
+| Eşleşme | marimba + cam tınısı; zincirde perde majör dizide yükselir | `sfx_match` | hafif |
+| Özel taş oluşur | parlak üçlü arpej ve çan | `sfx_special_made` | hafif |
+| Roket | "vuuş" süpürme | `sfx_rocket` | orta |
+| Kor bombası | boğuk patlama + çıtırtı | `sfx_bomb` | orta |
+| Kor küresi | yükselen çan dizisi | `sfx_color_bomb` | orta |
+| Kombo | patlama ve çan dizisi birlikte | `sfx_combo` | güçlü |
+| Kor kuşu | yükselen ıslık + küçük patlama | `sfx_firework` | hafif |
+| Hedef toplandı | iki çan | `sfx_collect` | — |
+| Çekiç | tok vuruş | `sfx_hammer` | — |
+| Satır ve sütun booster'ı | çift süpürme | `sfx_line_blast` | — |
+| Karıştırma | marimba tıkırtı dizisi | `sfx_shuffle` | — |
+| Buton | yumuşak tık | `sfx_ui_tap` | — |
+| Kazandın | kısa fanfar | `sfx_win` | güçlü |
+| Yıldız | çan; her yıldızda bir ton yukarı | `sfx_star` | — |
+| Kaybettin | inen üç nota | `sfx_lose` | orta |
+| "+5 hamle" | yükselen güç sesi | `sfx_moves_added` | — |
+| Altın kazanma | jeton şıngırtısı | Faz 3 | hafif |
 
-Ses ve titreşim Ayarlar'dan ayrı ayrı kapatılabilir.
+Sesler `tools/audio/generate_sfx.py` ile koddan üretilir (44,1 kHz, mono WAV, −3 dB tepe). Hangi olayın hangi sesi ve titreşimi çaldığını `Feel` tablosu tutar; ses düzeyleri `Sound.VolumeOf`'ta. Ses, titreşim ve ekran sarsıntısı Ayarlar'dan ayrı ayrı kapatılır. Müzik henüz yok.
 
 ## Erişilebilirlik
 - Metin kontrastı ≥ 4,5:1. Büyük yazı (≥ 72 px, 800) ve dış çizgili yazı ≥ 3:1

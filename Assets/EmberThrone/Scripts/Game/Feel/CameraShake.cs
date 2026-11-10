@@ -4,6 +4,7 @@ namespace EmberThrone.Game
 {
     public sealed class CameraShake : MonoBehaviour
     {
+        public const string EnabledKey = "et.shake";
         const float Decay = 1.7f;
         const float MaxOffset = 0.22f;
         const float MaxRoll = 1.2f;
@@ -13,12 +14,18 @@ namespace EmberThrone.Game
         float _trauma;
         float _time;
 
+        public static bool Enabled
+        {
+            get => PlayerPrefs.GetInt(EnabledKey, 1) == 1;
+            set => PlayerPrefs.SetInt(EnabledKey, value ? 1 : 0);
+        }
+
         public float Trauma => _trauma;
         public Vector3 Rest => _rest;
 
         public void Add(float amount)
         {
-            if (amount <= 0f) return;
+            if (amount <= 0f || !Enabled) return;
             _trauma = Mathf.Clamp01(_trauma + amount);
         }
 

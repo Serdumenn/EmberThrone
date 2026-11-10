@@ -16,8 +16,9 @@
 
 | Konu | Standart |
 |---|---|
-| Oyun görselleri | Blender 5.1'de scriptle modellenip render edilir (`ArtSource/blender/`). Elle çizim yok; her görsel scriptten yeniden üretilebilir |
-| Arayüz parçaları | 9-slice PNG, `tools/ui_chrome/` (headless Chrome) üretir; USS `-unity-slice-*` ile gerer |
+| Oyun görselleri | Çizim sayfalarından kesilir: kaynak `ArtSource/sheets/`, araç `tools/sprites/cut_sheets.py`, tarif `sheets.json` ([README](../../ArtSource/sheets/README.md)). Her sprite tek komutla yeniden üretilir |
+| Arayüz parçaları | 9-slice PNG. Pencere, butonlar, halka, hap, etiket ve kurdele `ui_kit.png` sayfasından; onay işareti ve ışıltılar `tools/ui_chrome/`'dan. USS `-unity-slice-*` ile gerer |
+| Harita | Bölge başına bir görsel (`map_N.jpg`), USS'te en-boy oranıyla (`padding-top` yüzdesi). Düğüm yerleri `LevelMap.cs`'teki yol noktalarından, eşit aralıkla hesaplanır |
 | Renkler | Yalnız `Resources/UI/Theme/Tokens.uss`. Başka dosyada renk yazılmaz (`ThemeTests` denetler) |
 | İçe aktarma | `Editor/GameTextureImport.cs`: mipmap + trilinear, clamp, Android'de ASTC 4x4. Tahta parçaları en fazla 256 px, `bg_*` 2048 px |
 | Tasarım dili | [design-system.md](design-system.md): token'lar, bileşenler, hareket, ses ve titreşim paleti, erişilebilirlik |
@@ -29,7 +30,19 @@
 
 ## Ses
 
-Henüz yok. Palet `design-system.md`'de; Ayarlar'da ses ve titreşim ayrı ayrı kapatılabilecek.
+- Efektler `tools/audio/generate_sfx.py` ile üretilir: `python3 tools/audio/generate_sfx.py` (ya da tek ses: `... sfx_bomb`). Çıktı `Assets/EmberThrone/Resources/Audio/sfx_<ad>.wav`, 44,1 kHz mono.
+- `Feel/Sound.cs`: `Sfx` adı dosya adına çevrilir (`LineBlast` → `sfx_line_blast`); kamerada tek `AudioListener` var. Zincirleme eşleşmede perde her dalgada majör dizide bir basamak yükselir.
+- Palet ve olay tablosu: [design-system.md](design-system.md). Müzik henüz yok.
+
+## Cihazda saklananlar (PlayerPrefs)
+
+| Anahtar | İçerik |
+|---|---|
+| `et.stars.<id>` | Seviyenin en iyi yıldızı |
+| `et.booster.<Hammer\|RowBlast\|ColumnBlast\|Shuffle>` | Booster hakkı; yoksa `GameRules.StartingBoosters` |
+| `et.sound`, `et.haptics`, `et.shake` | Ayarlar (ses, titreşim, ekran sarsıntısı): 1 açık, 0 kapalı |
+
+PlayMode testleri bu anahtarları başta kaydeder, sonda geri yazar (`StarsBackup`); sahibinin kendi oyunu bozulmaz.
 
 ## Adlandırma
 
@@ -39,7 +52,9 @@ Henüz yok. Palet `design-system.md`'de; Ayarlar'da ses ve titreşim ayrı ayrı
 | Özel taş | `sp_<ad>` | `sp_rocket_v` |
 | Engel | `ob_<ad><hp>` | `ob_box2` |
 | Arka plan | `bg_<yer>` | `bg_game.jpg` |
-| Arayüz ikonu | `ui_<ad>`, `ic_<ad>` | `ui_star` |
+| Arayüz ikonu | `ui_<ad>`, `ic_<ad>`, `bo_<ad>` | `ui_star`, `ic_home`, `bo_hammer` |
+| Bölge haritası | `map_<sıra>` | `map_2.jpg` |
+| Maskot | `mascot`, `mascot_<duygu>` | `mascot_sad` |
 | Arayüz parçası | bileşen adı | `btn_green` |
 | USS sınıfı | `et-` önekli, BEM | `et-btn--cta` |
 | Seviye | `level_NNNN.json` | `level_0007.json` |
@@ -56,12 +71,15 @@ Henüz yok. Palet `design-system.md`'de; Ayarlar'da ses ve titreşim ayrı ayrı
 | `Assets/EmberThrone/Resources/Levels/` | Seviye dosyaları |
 | `Assets/EmberThrone/Resources/Board/` | Tahta render'ları |
 | `Assets/EmberThrone/Resources/UI/` | `Theme/` (USS, TSS), `Chrome/` (9-slice), `Art/` (3B ikonlar), `Fonts/` |
+| `Assets/EmberThrone/Resources/Audio/` | Ses efektleri (`sfx_*.wav`) |
 | `Assets/_Game/` | Eski Faz 0 altyapısı (servis bulucu, kayıt, havuz, Firebase taslakları). Oyun kullanmaz; Faz 3 için saklanır |
-| `ArtSource/blender/` | Görselleri üreten Blender scriptleri |
+| `ArtSource/sheets/` | Çizim sayfaları ve kesim tarifi; oyundaki görsellerin kaynağı |
+| `ArtSource/blender/` | v3 dönemindeki Blender scriptleri; oyunda artık kullanılmıyor |
 | `tools/CoreLib`, `tools/CoreTests` | Unity kaynaklarını derleyen dotnet projeleri (netstandard2.1, C# 9) |
 | `tools/LevelSim` | Bot simülatörü: kazanma oranı, değişmez denetimi, hamle ayarı, oyun dökümü |
 | `tools/gen_meta.py` | Eksik `.meta` dosyalarını üretir |
-| `tools/ui_chrome/`, `tools/fonts/` | Arayüz parçası ve font üreticileri |
+| `tools/sprites/` | Çizim sayfalarından sprite, arka plan, harita ve arayüz dokusu üretir (Pillow + numpy) |
+| `tools/ui_chrome/`, `tools/fonts/`, `tools/audio/`, `tools/icon/` | Arayüz parçası, font, ses ve uygulama ikonu üreticileri. Pillow gerektirenler (`tools/icon/`) Pillow kurulu Python ile çalışır |
 
 ## Kod kuralları
 
@@ -69,11 +87,11 @@ Henüz yok. Palet `design-system.md`'de; Ayarlar'da ses ve titreşim ayrı ayrı
 2. **Determinizm.** Core'da rastgelelik yalnız `Pcg32`'den gelir; `System.Random`, saat ya da hash sırasına bağlı mantık yok. Aynı seviye + tohum + hamleler ⇒ aynı oyun (tekrar, sunucu doğrulaması ve bot buna dayanır).
 3. **Sunum yalnız izler.** Unity kodu `GameSession`'ı çağırır ve dönen `MoveOutcome.Steps` adımlarını canlandırır; `Board`'u hiç değiştirmez.
 4. **Denge veride.** `GameRules` ve seviye JSON'u; kodda sihirli sayı yok.
-5. **`.meta` dosyaları.** Editör açık değilken `Assets/` altına dosya eklenince `python3 tools/gen_meta.py`. Var olan GUID değişmez.
+5. **`.meta` dosyaları.** Editör açık değilken `Assets/` altına kod, JSON ya da klasör eklenince `python3 tools/gen_meta.py`. PNG, WAV, font gibi içe aktarılan dosyaların `.meta`'sını Unity yazar (editörü ya da batch testlerini bir kez açmak yeter); araç onları atlar. Var olan GUID değişmez.
 6. **Testler.** Yalnız NUnit 3 klasik assert'leri (`Assert.AreEqual/IsTrue/Throws`, `CollectionAssert`); Unity'nin NUnit 3.5 sürümü yüzünden `Assert.Multiple` ve NUnit 4 API'leri yok. Tahta yardımcıları `TestUtil.cs`'de (satırlar üstten, y=0 altta).
 7. **Özgün kimlik.** İsimler, karakterler, görseller, müzik, seviyeler ve arayüz EmberThrone'a aittir; başka oyunlarla yalnız türün genel mekanikleri ortaktır.
 8. **Yorum satırı yok.** Kod, USS, Python ve workflow dosyaları yorumsuzdur; açıklama gereken bilgi bu belgeye ya da `docs/` altına yazılır.
-9. **Arayüz.** C# yalnız `et-` sınıfları ekler ve çıkarır. İstisnalar: güvenli alan boşlukları, `HudView.Height`, animasyon stilleri (Tween ve zamanlayıcı) ve çalışma anında atanan sprite'lar.
+9. **Arayüz.** C# yalnız `et-` sınıfları ekler ve çıkarır. İstisnalar: güvenli alan boşlukları, `HudView.Height`, animasyon stilleri (Tween ve zamanlayıcı), çalışma anında atanan sprite'lar ve harita düğümlerinin yüzde konumu.
 
 ## Seviye biçimi
 

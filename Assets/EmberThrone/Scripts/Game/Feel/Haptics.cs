@@ -12,7 +12,7 @@ namespace EmberThrone.Game
 
     public static class Haptics
     {
-        const string EnabledKey = "et.haptics";
+        public const string EnabledKey = "et.haptics";
         const float MinGap = 0.06f;
 
         static AndroidJavaObject _vibrator;

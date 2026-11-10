@@ -8,6 +8,7 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 |---|---|
 | `GDD/` (yalnız yerelde, git'e girmiyor) | 16 Word belgesi: MASTER-GDD-001 özeti, PTH-001 vizyon, SYS-CORE-001 çekirdek döngü, UX-001 ekran ve animasyon, TECH-001 teknik şartname, LVL-DESIGN-001, META-001, MONETIZATION-001, LIVEOPS-001, DATA-001 ve yamaları |
 | [brief.md](brief.md) | Creative Brief: kime, neden, hangi hisle; görsel yön seçenekleri ve GDD ile farkların kararları (onaylandı). GDD ile çeliştiği yerde geçerli olan budur |
+| [story.md](story.md) | Hikâye "Ayaz'a Karşı": öncül, ton, karakter kadrosu, bölge sahne kalıbı, oyunla bağı |
 | [style-frames/index.html](style-frames/index.html) | Style frame v3, Blender'da 3B render. 6 ekran var: ana sayfa (ada), seviye başı, oyun, kazandın, mağaza, sıralama. Ayrıca oyun ekranı 3 oranda, 3B parça seti ve 3 panel rengi seçeneği. Tarayıcıda açılır |
 | [../../ArtSource/blender/](../../ArtSource/blender/README.md) | 3B görselleri üreten Blender scriptleri (taşlar, ikonlar, maskot, ada) |
 | [design-system.md](design-system.md) | Design system "Kor": renk ve yazı token'ları, bileşenler, hareket, ses ve titreşim, erişilebilirlik, UI Toolkit uygulaması |
@@ -81,6 +82,22 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 | 2026-11-06 | Teknik şartname [tech-spec.md](tech-spec.md)'de, Pong'daki gibi | Klasör yapısı, kurallar, seviye biçimi, testler ve araç komutları tek yerde |
 | 2026-11-06 | Unity testleri ve ekran turu batch modunda çalışır; editör köprüsü kaldırıldı | Köprü 8080 portunda Docker Desktop ile çakışıyordu; batch modu editörü açmadan aynı işi yapar |
 | 2026-11-06 | Kodda yorum satırı yok, belgeler nötr dilde, kişisel çalışma dosyaları git'e girmez; commit geçmişi tek yazarlı olarak yeniden yazıldı | Pong ile aynı kural; public repo profesyonel görünür |
+| 2026-11-07 | Açılış ekranı Pong ile aynı stüdyo açılışı; ayarlar ve ikon bağlantısı koddan (`EmberThrone > Apply Branding`, Setup Project da çağırır) | Stüdyonun bütün oyunlarında aynı açılış; ayar elle kaybolmaz |
+| 2026-11-07 | Model kalitesi çıtası: alt bölümlemeli (subdivision) modelleme, abartılı siluet, büyük/orta/küçük detay; her model önce gri kil render ve tel kafesle kontrol edilir | Ürün sahibinin gösterdiği sandık örneği; ilk modeller ilkel şekillerin üst üste konmasıydı |
+| 2026-11-10 | Oyuna hikâye ve karakter kadrosu eklendi: kor ruhu, 3–5 karakter ve bir kötü karakter; her bölge açılışında oyunun içinde 20–40 saniyelik sahne (brief kararı 12) | Türün lideri karakter animasyonu ve bölüm sahneleriyle ilerliyor; GDD'deki "hikâyesiz restorasyon" kararı bununla değişti |
+| 2026-11-10 | Bölge açılış sahneleri video dosyası değil, oyun içinde aynı karakter modelleriyle kurgulanır | İndirme boyutu küçük kalır, görüntü keskin olur, yazılar dile göre değişir |
+| 2026-11-10 | Hikâye yönü "Ayaz'a Karşı": Emby, Lina, Odo, Mira; kötü karakter buz büyücüsü Ayaz ([story.md](story.md)) | Üç yön arasından seçildi; brief'teki "soğuktan sıcağa dönüş" ve tahtadaki buz ile kül engelleriyle birebir uyuyor |
+| 2026-11-11 | Oyun içi booster çubuğu: çekiç, satır, sütun, karıştır. Ekonomi gelene kadar her birinden 3 hak (`GameRules.StartingBoosters`), cihazda saklanır | Booster'lar motorda hazırdı; coin ve mağaza Faz 3'te. Haklar o zaman envantere bağlanır |
+| 2026-11-11 | Kaybedince seviye başına bir kez ücretsiz "+5 hamle" (`GameRules.ContinueMoves`) | Türün standart kurtarma anı; Faz 3'te coin ya da reklam karşılığı olur |
+| 2026-11-11 | 10 sn hamle yapılmazsa ipucu: geçerli bir hamlenin taşları nabız gibi büyüyüp küçülür. İlk 3 seviyede 3 sn | Takılan oyuncu bırakmasın, yeni oyuncu ne yapacağını hemen görsün; süreler `Timing`'de |
+| 2026-11-11 | Seviyeler sırayla açılır (öncekinden en az 1 yıldız); karta dokununca önce hedefleri gösteren "Seviye başı" penceresi | Türün standart akışı; oyuncu neyi toplayacağını oynamadan görür. Oyun öncesi booster seçimi Faz 3'te bu pencereye eklenir |
+| 2026-11-11 | Bütün oyun görselleri karakter sayfalarının tarzına geçti: yumuşak gölgeli, parlak, koyu renkli dış çizgili çizim. Taşlar, özel taşlar, engeller, ikonlar, Emby, arka planlar ve arayüz parçaları yeniden üretildi | Ürün sahibi v3 render'larını ve arayüzü beğenmedi; karakter sayfalarındaki görünümü istedi |
+| 2026-11-11 | Görseller çizim sayfası olarak üretilir, sprite'ları `tools/sprites/cut_sheets.py` keser. Kaynak sayfalar ve kesim tarifi `ArtSource/sheets/` altında | Her sprite tek komutla yeniden üretilir; boy, doluluk ve renk ayarı tarifte durur |
+| 2026-11-11 | Seviye listesi yerine kıvrılan yollu harita: her bölgenin kendi harita görseli, 10 seviye düğümü yolun üstünde, bölge adı bantta; sıradaki düğümün üstünde Emby | Türün standart ilerleme ekranı; kart ızgarası beğenilmedi |
+| 2026-11-11 | Yeni görünüm onaylandı: çizim tarzı, harita ve yeni arayüz parçaları oyunun görünümü olarak kalır | Ürün sahibi önce/sonra karşılaştırmasını görüp onayladı. Telefonda görülünce ince ayar yapılabilir |
+| 2026-11-11 | Geçici uygulama ikonu: mevcut maskot render'ı kor ışınlı arka planda | Test APK'ları Unity'nin varsayılan ikonuyla gelmesin; kalıcı ikon maskot yenilenince |
+| 2026-11-11 | Ses efektleri koddan sentezlenir (`tools/audio/generate_sfx.py`, Pong'daki yöntem). Müzik sonra | Lisans derdi yok, her ses yeniden üretilebilir; müzik için ayrı karar gerekir |
+| 2026-11-11 | Seviye 11–30: Fırın Sokağı (11–20) ve Demirci Çarşısı (21–30). Her 5. seviye zor, ardından kolay bir nefes seviyesi; hamle sayıları botla ayarlı | Dalgalı zorluk eğrisi türün standardı; her bölüm yeni bir engel karışımı öğretir |
 
 ## Asset takibi
 
@@ -89,23 +106,34 @@ Durumlar: `Brief → WIP → Review → Approved → Integrated`
 | Asset | Tür | Durum | Not |
 |---|---|---|---|
 | Style frame v3 | Mockup (Blender render) | Approved | Ara seviye olarak kabul edildi; v1 ve v2 reddedildi. `style-frames/` |
-| `piece_R/G/B/Y/P/O` | 3B render | Integrated | Altı renkli taş. Kaynak `ArtSource/blender/et_assets.py` |
-| `sp_rocket`, `sp_rocket_v`, `sp_bomb`, `sp_orb`, `sp_homing` | 3B render | Integrated | Özel taşlar; güdümlü taş "kor kuşu" |
-| `ob_box1/2/3`, `ob_ice`, `ob_floor1/2`, `ob_lantern` | 3B render | Integrated | Kutu (3. seviye kilitli), buz, kül zemin, kor feneri |
-| `bg_game`, `bg_map` | 3B render | Integrated | Oyun arkası (kale ve köy), seviye listesi haritası |
-| `mascot`, `mascot_joy` | 3B render | Review | Kor ruhu; maskot henüz kesinleşmedi (Kapı 2) |
-| `ui_star`, `ui_star_empty`, `ic_castle` | 3B ikon | Integrated | Kazandın yıldızları, seviye kartı |
-| `panel`, `btn_green`, `btn_orange`, `ring`, `chip`, `tag`, `check`, `ribbon`, `fx_glow`, `fx_rays` | 9-slice PNG | Integrated | `tools/ui_chrome/` üretir. Panel rengi Kor, henüz kesinleşmedi |
+| `piece_R/G/B/Y/P/O` | Çizim (sayfa: `pieces.png`) | Integrated | Altı renkli taş: yakut, zümrüt, elmas, yıldız, ametist, kehribar. Mavi taş buzdan ayrılsın diye koyulaştırıldı |
+| `sp_rocket`, `sp_rocket_v`, `sp_bomb`, `sp_orb`, `sp_homing` | Çizim (`specials.png`) | Integrated | Çift uçlu roket (yatay ve dikey aynı çizimden), kor bombası, renk küresi, kor kuşu |
+| `ob_box1/2/3`, `ob_ice` | Çizim (`obstacles.png`) | Integrated | Sandık, demir bantlı sandık, zincirli kilitli sandık, buz (ortası yarı saydam, içindeki taş görünür) |
+| `ob_floor1/2`, `ob_lantern` | Çizim (`tiles_rewards.png`, `specials.png`) | Integrated | Kül zemin (açık kül, korlu kömür), kor feneri |
+| `bg_game`, `bg_map` | Çizim (`bg_game.png`) | Integrated | Oyun arkası: çayırlar, iki kulübe, tepede Kor Tahtı ocağı. `bg_map` aynı görselin bulanığı (harita kaydırma boşluğu) |
+| `map_1`, `map_2`, `map_3` | Çizim (`map_1a/1b`, `map_2a/2b`, `map_3`) | Integrated | Bölge haritaları: Kıvılcım Köyü, Fırın Sokağı, Demirci Çarşısı (tepesinde Kor Tahtı). İlk ikisi ikişer yatay parçadan birleştirilir |
+| `mascot`, `mascot_joy`, `mascot_sad` | Çizim (`emby.png`) | Integrated | Emby: el sallayan, sevinen, üzgün. Haritada, seviye başında, kazandın ve kaybettin pencerelerinde |
+| `ui_star`, `ui_star_empty`, `ic_home`, `ic_gear` | Çizim (`specials.png`, `icons.png`) | Integrated | Yıldız (boşu aynı çizimin soluğu), ev (seviyelere dönüş), dişli (Ayarlar) |
+| `bo_hammer`, `bo_row`, `bo_col`, `bo_shuffle` | Çizim (`icons.png`) | Integrated | Oyun içi booster çubuğu |
+| `panel`, `btn_green`, `btn_orange`, `ring`, `chip`, `tag`, `ribbon` | 9-slice PNG (`ui_kit.png`) | Integrated | Ahşap çerçeveli krem pencere, yeşil ve turuncu buton, altın halka, lacivert hap, turuncu etiket, kurdele. Esneyen orta bölümler çizimin orta kesitinden üretilir |
+| `check`, `fx_glow`, `fx_rays` | PNG | Integrated | `tools/ui_chrome/` üretir (onay işareti, ışıltı, ışınlar) |
+| Altın, kalp, sandık, kupa | Çizim (`tiles_rewards.png`) | Brief | Sayfada hazır, oyuna Faz 3'te ekonomiyle girecek |
 | Baloo 2 Bold, ExtraBold | Font | Integrated | `tools/fonts/make_baloo2.py` üretir; Türkçe harfleri `ThemeTests` denetler |
 | Efekt şekilleri (kıymık, ışıltı, halka, kıvılcım…) | Koddan üretilen sprite | Integrated | `Scripts/Game/Art/Art.cs`; beyaz çizilir, olayın rengine boyanır |
-| Uygulama ikonu | Adaptive + round + eski boy + mağaza | Brief | Henüz yok |
-| Açılış ekranı | Ocean Forge logosu | Brief | Şimdilik Unity'nin varsayılan açılışı |
-| Ses ve müzik | SFX + müzik | Brief | Palet `design-system.md`'de |
+| Uygulama ikonu | Adaptive + eski boy + mağaza | Review | Geçici: mevcut maskot render'ı kor arka planda, koyu dış çizgiyle (`tools/icon/make_app_icon.py`; `Art/AppIcon/`, mağaza boyu `docs/release/store_icon_512.png`). Maskot yeni model kalitesine çıkınca seçeneklerle yenilenecek. Unity'ye `Editor/Branding.cs` bağlar |
+| Açılış ekranı | Ocean Forge logosu | Integrated | Pong'daki stüdyo açılışının aynısı: lacivert `#1E2140` zemin, Unity logosu kapalı, "Dolly", 2 sn. Logo `Art/Brand/ocean_forge_splash.png` (Pong'dan); ayarları `Editor/Branding.cs` uygular |
+| Ses efektleri (18) | Sentezlenmiş WAV | Integrated | `tools/audio/generate_sfx.py` üretir, `Resources/Audio/`; palet `design-system.md`'de. Telefonda dinlenip ayarlanacak |
+| Müzik | Döngü | Brief | Menü ve oyun içi; kaynak (besteci ya da lisans) henüz seçilmedi |
+| Karakter kadrosu | 3B model + rig + animasyon | WIP | Emby, Lina, Odo, Mira, kötü karakter Ayaz ve kar bulutu Pofuduk ([story.md](story.md)); kral ya da kraliçe yok. Beş karakterin 4 yönlü konsept sayfası ve Ayaz'ın ifade sayfası hazır (görsel üretim aracıyla, yalnız modelleme referansı; repoda değil) |
+| Bölge açılış sahneleri | Oyun içi sahne | Brief | Bölge başına 20–40 sn, karakter modelleriyle oyunun içinde |
+| Mağaza tanıtım videosu ve reklam videoları | Video | Brief | Faz 6; oyun kaydı ve karakter render'larıyla |
 
 ## Lisans kaydı
 
 | Varlık | Lisans | Kaynak | Not |
 |---|---|---|---|
 | Baloo 2 (değiştirilmiş) | SIL OFL 1.1 | fonts.google.com | Değişken fonttan sabit 700/800 ağırlık, yalnız Latin harfleri. Lisans metni `Assets/EmberThrone/Resources/UI/Fonts/OFL.txt` |
-| Blender 5.1 | GPL (araç) | blender.org | Render edilen görseller bizimdir; modeller ve scriptler `ArtSource/blender/` |
+| Blender 5.1 | GPL (araç) | blender.org | Render edilen görseller bizimdir; modeller ve scriptler `ArtSource/blender/` (v3 dönemi, oyunda artık kullanılmıyor) |
+| Çizim sayfaları (`ArtSource/sheets/`) | Stüdyonun kendi | Görsel üretim aracı, stüdyonun hesabı | Stüdyonun yazdığı tariflerle üretildi, seçildi, kesildi ve düzenlendi. Ticari kullanım aracın kullanım koşullarına göre; yayından önce koşullar yeniden okunacak |
+| Ocean Forge logosu | Stüdyonun kendi | PongMobilePrototype | Açılış ekranı; yazısı Fredoka (SIL OFL 1.1), PNG'ye çizili olarak gelir |
 | `GDD/Referances` ekran görüntüleri | Başkasına ait | — | Yalnız yerelde, git'e girmez; yalnız kalite kıyası için |

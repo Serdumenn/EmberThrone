@@ -1,0 +1,35 @@
+{
+  "id": 27,
+  "name": "Chain Links",
+  "moves": 19,
+  "colors": 5,
+  "difficulty": "normal",
+  "goals": [
+    {
+      "type": "color",
+      "color": "G",
+      "count": 30
+    },
+    {
+      "type": "color",
+      "color": "Y",
+      "count": 30
+    },
+    {
+      "type": "color",
+      "color": "R",
+      "count": 30
+    }
+  ],
+  "board": [
+    "........",
+    "........",
+    "##....##",
+    "........",
+    "...##...",
+    "........",
+    "##....##",
+    "........",
+    "........"
+  ]
+}

@@ -41,25 +41,36 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] 3B görsel hattı: Blender scriptleri, şeffaf PNG sprite ve arka plan ([ArtSource/blender/](ArtSource/blender/README.md))
 - [x] Kapı 2: v3 ara seviye olarak kabul edildi (2026-11-06). Panel rengi şimdilik Kor, maskot kor ruhu; ikisi de kesinleşmedi
 - [x] 3B sprite'ları oyuna bağla (2026-11-06): taşlar, özel taşlar, kutular, buz, zemin ve toplanan obje Blender render'ı; arkada kale ve köy; v3'teki açık dama kareler ve koyu çerçeve. Yeni modeller: kor kuşu (güdümlü), kilitli kutu, kül zemin, kor feneri. Oyun içi hedef ikonları da 3B oldu
-- [ ] Görsel kaliteyi referans seviyesine çıkar: daha detaylı modeller, dolu sandık ve ödül çizimleri, ayrıntılı harita mahalleleri, maskot pozları (sahibi: v3 hedefin altında)
+- [x] Görsel yenileme (2026-11-11): bütün oyun görselleri karakter sayfalarının tarzında yeniden üretildi (taşlar, özel taşlar, engeller, ikonlar, Emby'nin üç pozu, arka plan, arayüz parçaları); kaynak `ArtSource/sheets/`, kesen araç `tools/sprites/`
+- [x] Seviye haritası (2026-11-11): kart ızgarası yerine kıvrılan yollu üç bölge haritası (Kıvılcım Köyü, Fırın Sokağı, Demirci Çarşısı), yol üstünde düğümler, sıradaki düğümde Emby
+- [ ] Yeni görünümü telefonda gör (sahibi bilgisayarda onayladı, 2026-11-11); ödül çizimleri (altın, kalp, sandık, kupa) sayfada hazır, ekonomiyle bağlanacak
 - [x] Design system belgesi: renk ve yazı token'ları, bileşenler, hareket, ses ve titreşim paleti, erişilebilirlik ([docs/design/design-system.md](docs/design/design-system.md))
 - [x] Arayüz parçalarını (panel, buton, hap, rozet, sekme…) 9-slice PNG olarak üreten araç ([tools/ui_chrome/](tools/ui_chrome/render.py))
 - [x] Arayüzün UI Toolkit'e geçişi (2026-11-06): token, bileşen ve ekran USS'leri; Baloo 2 (Latin, 69 KB); HUD, kazandın/kaybettin penceresi ve seviye seçimi yeni görünümde; `ThemeTests` (token dışı renk, kontrast, 9-slice, Türkçe harf); testler butonlara sanal fareyle gerçekten dokunuyor
   - öğrenilen: Unity değişken fontun yalnız varsayılan ağırlığını okur, bu yüzden sabit 700/800 dosyaları üretildi (`tools/fonts/`)
   - öğrenilen: ekran turu editör kapalıyken batch modunda çalışır
 - [ ] Sanat yönü: EmberThrone teması (ateş/kor krallığı), renk paleti, karakter
+- [x] Hikâye ve karakter kadrosu (2026-11-10, brief kararı 12): "Ayaz'a Karşı"; Emby, Lina, Odo, Mira, kötü karakter Ayaz ve Pofuduk; bölge sahnesi kalıbı ([docs/design/story.md](docs/design/story.md))
+- [ ] Karakter modelleri, rig ve animasyonları; pilot maskotla (Unity'de gerçek zamanlı 3B ile kare dizisi karşılaştırılacak)
+- [ ] Bölge açılış sahneleri: oyunun içinde, karakter modelleriyle, bölge başına 20–40 sn
 - [ ] Sprite hattını genişlet: patlama ve parçacık kareleri, harita mahalleleri, yeni engeller
 - [x] Efektler ve his (2026-11-06): eşleşmede savrulan renkli kırıntılar ve ışıltılar; kutuda kıymık, buzda kristal, külde duman ve kor; roket, bomba ve kombolarda ekran sarsıntısı; "Harika!", "Muhteşem!", "İnanılmaz!" yazıları; Android titreşimi (3 seviye); kazanma penceresinde konfeti
 - [x] Seviye sonu kutlaması: kalan her hamle tahtada havai fişeğe dönüşür, sayaç sıfıra iner (yalnız gösteri; coin ödülü Faz 3'te ekonomiyle gelecek)
-- [ ] Ses ve müzik (paleti design-system.md'de), Ayarlar'da ses, titreşim ve "hareketi azalt" seçenekleri
+- [x] Ses efektleri (2026-11-11): 18 sentezlenmiş ses (`tools/audio/`), zincirleme eşleşmede yükselen perde; seviye listesinde Ayarlar penceresi (ses, titreşim, ekran sarsıntısı)
+  - öğrenilen: koddan kurulan kamerada `AudioListener` yoktu; testte yakalandı, ses telefonda hiç duyulmayacaktı
+- [ ] Müzik (menü ve oyun içi döngü), Ayarlar'a müzik seçeneği; "hareketi azalt" için sarsıntıdan sonra efekt yoğunluğu
+- [ ] Sesleri telefonda dinleyip düzeylerini ayarla
 - [ ] Telefonda his ayarı: titreşim gücü, sarsıntı miktarı ve efekt yoğunluğu gerçek cihazda denenip ayarlanacak
-- [ ] Oyun içi booster çubuğu, ipucu (motorda hazır, ekranda yok), "+5 hamle" teklifi
-- [ ] Uygulama ikonu (3B render; adaptive, round, eski boy ve mağaza boyları) ve Ocean Forge logolu açılış ekranı, Unity logosu kapalı (Pong'daki gibi)
+- [x] Oyun içi booster çubuğu, ipucu, "+5 hamle" teklifi (2026-11-11): tahtanın altında 4 booster (her birinden 3 hak, ekonomi gelene kadar); seçili booster parlar, tahtaya dokununca çalışır, hamle harcamaz; 10 sn hamle yoksa (ilk 3 seviyede 3 sn) ipucu nabız gibi atar; kaybedince bir kez ücretsiz "+5 hamle"
+- [x] Seviye akışı (2026-11-11): bir seviye, öncekinden en az 1 yıldız alınınca açılır; kilitli kart soluk, sıradaki kart altın ve liste ona kayar. Karta dokununca "Seviye başı" penceresi: hedefler, hamle sayısı, zor seviye etiketi, "Oyna"
+- [x] Ocean Forge logolu açılış ekranı, Unity logosu kapalı (Pong'daki gibi; 2026-11-07, `Editor/Branding.cs`)
+- [ ] Uygulama ikonu (3B render; adaptive, eski boy ve mağaza boyları). Geçici ikon hazır (2026-11-11, `tools/icon/`); kalıcısı maskot yenilenince
 
 ## Faz 3 — Meta ve ekonomi
 - [ ] Harita / ilerleme, bölge inşa-dekor meta oyunu (yıldızlarla görevler)
 - [ ] Canlar (5 can, 30 dk yenilenme, sunucu saati), coin, booster envanteri
 - [ ] Günlük ödül, seri bonusları, kumbara
+- [x] 30 seviye (2026-11-11): 11–20 Fırın Sokağı, 21–30 Demirci Çarşısı; her 5. seviye zor, ardından nefes seviyesi; hamleler `--tune` ile ayarlı
 - [ ] Seviye üretimi: prosedürel üretici + bot ile ayar → 100, sonra 500+ seviye
 - [ ] Yeni engeller (önce ateş kutusu: yayılan engel), renk fırçası booster'ı
 
@@ -79,6 +90,7 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] İmzalı AAB akışı (`release-android.yml`, etiketle çalışır)
 - [ ] Yükleme anahtarı + imza secret'ları (sahibi yapacak, [docs/release/README.md](docs/release/README.md))
 - [ ] Google Play Billing (IAP), Play Console
+- [ ] Mağaza tanıtım videosu, reklam videoları ve oynanabilir reklam
 - [ ] Diller: İngilizce + Türkçe (yapı çok dile hazır)
 - [ ] Soft launch (tek ülke), KPI: D1 ≥ %40, D7 ≥ %15, seviye bazlı kayıp analizi
 - [ ] Gerçek oyuncu verisiyle bot kalibrasyonu ve seviye ayarı

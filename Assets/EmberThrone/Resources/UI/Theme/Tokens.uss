@@ -27,6 +27,7 @@
     --color-tile-alt: rgba(208, 224, 255, 0.93);
     --color-select: #7AD83A;
     --color-pressed: #EBEBEB;
+    --color-locked: #BDB8CC;
     --color-confetti-blue: #2F8CFF;
     --color-confetti-purple: #B44AF6;
     --color-none: rgba(0, 0, 0, 0);

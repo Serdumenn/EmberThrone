@@ -32,7 +32,11 @@ namespace EmberThrone.Game
 
         public static Button Button(string text, string classes, Action onClick, VisualElement parent, string name = null)
         {
-            var b = new Button(onClick) { text = text ?? "" };
+            var b = new Button(() =>
+            {
+                Sound.Play(Sfx.UiTap);
+                onClick?.Invoke();
+            }) { text = text ?? "" };
             b.RemoveFromClassList(UnityEngine.UIElements.Button.ussClassName);
             Setup(b, classes, parent, name);
             return b;

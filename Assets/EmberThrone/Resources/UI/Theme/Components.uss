@@ -85,9 +85,9 @@
     padding: 0 var(--space-6) 4px var(--space-6);
     justify-content: center;
     background-image: url("../Chrome/tag.png");
-    -unity-slice-left: 35;
+    -unity-slice-left: 38;
     -unity-slice-top: 35;
-    -unity-slice-right: 35;
+    -unity-slice-right: 38;
     -unity-slice-bottom: 35;
     font-size: 46px;
     white-space: nowrap;
@@ -98,9 +98,9 @@
     padding: 0 var(--space-4) 4px var(--space-4);
     justify-content: center;
     background-image: url("../Chrome/chip.png");
-    -unity-slice-left: 32;
+    -unity-slice-left: 34;
     -unity-slice-top: 32;
-    -unity-slice-right: 32;
+    -unity-slice-right: 34;
     -unity-slice-bottom: 32;
     color: var(--color-white);
     -unity-text-align: middle-center;
@@ -118,15 +118,15 @@
 
 .et-ribbon {
     position: absolute;
-    top: -96px;
+    top: -112px;
     left: -70px;
     right: -70px;
-    height: 190px;
+    height: 268px;
     justify-content: center;
-    padding-bottom: 26px;
+    padding-bottom: 72px;
     background-image: url("../Chrome/ribbon.png");
-    -unity-slice-left: 160;
-    -unity-slice-right: 160;
+    -unity-slice-left: 250;
+    -unity-slice-right: 250;
 }
 
 .et-scrim {
@@ -152,9 +152,9 @@
     align-items: center;
     justify-content: center;
     background-color: var(--color-none);
-    -unity-slice-left: 70;
+    -unity-slice-left: 100;
     -unity-slice-top: 70;
-    -unity-slice-right: 70;
+    -unity-slice-right: 100;
     -unity-slice-bottom: 70;
     font-size: var(--font-size-button);
     color: var(--color-white);

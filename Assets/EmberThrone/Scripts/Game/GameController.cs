@@ -8,7 +8,7 @@ namespace EmberThrone.Game
 {
     public sealed class GameController : MonoBehaviour
     {
-        const float BottomMargin = 60f;
+        const float BottomMargin = BoosterBar.Height + 24f;
         const float BoardMargin = 0.32f;
         const int BackdropOrder = -100;
         const float BackdropOverscan = 1.04f;
@@ -18,15 +18,24 @@ namespace EmberThrone.Game
         SpriteRenderer _backdrop;
         HudView _hud;
         PraiseView _praise;
+        BoosterBar _boosters;
         int _praiseLevel;
+        int _wave;
         GridPos _selected = GridPos.Invalid;
         LevelDefinition _level;
         int _levelIndex;
+        BoosterType? _armed;
+        float _idle;
+        bool _hintShown;
+        bool _continued;
 
         public GameSession Session { get; private set; }
         public BoardView View { get; private set; }
         public HudView Hud => _hud;
         public PraiseView Praise => _praise;
+        public BoosterBar Boosters => _boosters;
+        public BoosterType? Armed => _armed;
+        public float HintDelay { get; set; } = Timing.HintDelay;
         public ResultPopup Popup { get; private set; }
         public bool IsBusy { get; private set; }
         public string LastMismatch { get; private set; }
@@ -45,18 +54,22 @@ namespace EmberThrone.Game
             _app = app;
             _level = level;
             _levelIndex = levelIndex;
+            HintDelay = levelIndex < Timing.EarlyHintLevels ? Timing.EarlyHintDelay : Timing.HintDelay;
             Session = new GameSession(level, seed);
             BuildBackdrop();
             BuildView();
 
             _hud = HudView.Create(app.Ui.Content, Session, "Seviye " + level.Id, app.ShowLevelSelect);
             _praise = PraiseView.Create(app.Ui.Content);
+            _boosters = BoosterBar.Create(app.Ui.Content, PickBooster);
+            RefreshBoosters();
 
             _input = gameObject.AddComponent<BoardInput>();
             _input.Init(app.Camera, View);
             _input.Pressed += p =>
             {
-                if (View.IsGrabbableAt(p)) View.SetLifted(p, true);
+                ResetIdle();
+                if (!_armed.HasValue && View.IsGrabbableAt(p)) View.SetLifted(p, true);
             };
             _input.Released += p => View.SetLifted(p, false);
             _input.Swiped += RequestSwap;
@@ -76,7 +89,11 @@ namespace EmberThrone.Game
             boardObject.transform.SetParent(transform, false);
             View = boardObject.AddComponent<BoardView>();
             View.Build(Session);
-            View.GoalProgressed += e => _hud.SetGoal(e.GoalIndex, e.Remaining);
+            View.GoalProgressed += e =>
+            {
+                Sound.Play(Sfx.Collect);
+                _hud.SetGoal(e.GoalIndex, e.Remaining);
+            };
             View.Impacted += OnImpact;
             View.WaveStarted += OnWave;
             View.ComboFired += OnCombo;
@@ -105,7 +122,72 @@ namespace EmberThrone.Game
         {
             if (_app != null && _app.Ui != null) _app.Ui.LayoutChanged -= FitCamera;
             _hud?.Remove();
+            _boosters?.Remove();
             Popup?.Close();
+        }
+
+        void Update()
+        {
+            if (View == null || IsBusy || Popup != null || _armed.HasValue || Session.State != GameState.Playing) return;
+            _idle += Time.deltaTime;
+            if (_hintShown || _idle < HintDelay) return;
+            var hint = Session.FindHint();
+            if (!hint.HasValue) return;
+            View.ShowHint(hint.Value);
+            _hintShown = true;
+        }
+
+        void ResetIdle()
+        {
+            _idle = 0f;
+            if (!_hintShown) return;
+            _hintShown = false;
+            View.ClearHint();
+        }
+
+        void RefreshBoosters()
+        {
+            foreach (var type in BoosterInventory.All) _boosters.SetCount(type, BoosterInventory.Count(type, Session.Rules));
+        }
+
+        public void PickBooster(BoosterType type)
+        {
+            ResetIdle();
+            if (IsBusy || Session.State != GameState.Playing) return;
+            if (BoosterInventory.Count(type, Session.Rules) <= 0)
+            {
+                _boosters.Shake(type);
+                return;
+            }
+            Select(GridPos.Invalid);
+            if (type == BoosterType.Shuffle)
+            {
+                Arm(null);
+                FireBooster(type, GridPos.Invalid);
+                return;
+            }
+            Arm(_armed == type ? (BoosterType?)null : type);
+        }
+
+        void Arm(BoosterType? type)
+        {
+            _armed = type;
+            _boosters.SetArmed(type);
+        }
+
+        void FireBooster(BoosterType type, GridPos target)
+        {
+            var outcome = Session.UseBooster(type, target);
+            if (!outcome.Accepted)
+            {
+                if (target.IsValid) View.Nudge(target);
+                else _boosters.Shake(type);
+                return;
+            }
+            BoosterInventory.Spend(type, Session.Rules);
+            Arm(null);
+            RefreshBoosters();
+            Run(outcome);
         }
 
         void FitCamera()
@@ -138,7 +220,13 @@ namespace EmberThrone.Game
 
         public void OnTap(GridPos p)
         {
+            ResetIdle();
             if (IsBusy) return;
+            if (_armed.HasValue)
+            {
+                FireBooster(_armed.Value, p);
+                return;
+            }
             if (_selected.IsValid)
             {
                 var first = _selected;
@@ -157,7 +245,8 @@ namespace EmberThrone.Game
 
         public void RequestSwap(GridPos a, GridPos b)
         {
-            if (IsBusy) return;
+            ResetIdle();
+            if (IsBusy || _armed.HasValue) return;
             Select(GridPos.Invalid);
             var outcome = Session.TrySwap(a, b);
             if (outcome.Steps.Count == 0)
@@ -182,8 +271,10 @@ namespace EmberThrone.Game
 
         IEnumerator Resolve(MoveOutcome outcome)
         {
+            ResetIdle();
             IsBusy = true;
             _praiseLevel = 0;
+            _wave = 0;
             _input.SetEnabled(false);
             _hud.SetMoves(outcome.MovesLeft);
             SaveIfWon();
@@ -236,9 +327,14 @@ namespace EmberThrone.Game
         {
             _app.Shake.Add(Feel.TraumaOf(impact));
             Haptics.Play(Feel.HapticOf(impact));
+            Sound.Play(Feel.SoundOf(impact), impact == Impact.Match ? Sound.CascadeStep(_wave) : 0f);
         }
 
-        void OnWave(int wave) => ShowPraise(wave >= 6 ? 3 : wave >= 4 ? 2 : wave >= 3 ? 1 : 0);
+        void OnWave(int wave)
+        {
+            _wave = wave;
+            ShowPraise(wave >= 6 ? 3 : wave >= 4 ? 2 : wave >= 3 ? 1 : 0);
+        }
 
         void OnCombo(ComboKind combo) => ShowPraise(combo == ComboKind.ColorColor ? 3 : 2);
 
@@ -280,9 +376,25 @@ namespace EmberThrone.Game
         {
             yield return new WaitForSeconds(Timing.LoseDelay);
             OnImpact(Impact.Lose);
-            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", RemainingText(), -1,
-                new ResultPopup.Choice("Tekrar dene", ButtonKind.Cta, () => _app.StartLevel(_levelIndex)),
-                new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, _app.ShowLevelSelect));
+            var choices = new List<ResultPopup.Choice>();
+            if (!_continued)
+                choices.Add(new ResultPopup.Choice("+" + Session.Rules.ContinueMoves + " hamle", ButtonKind.Cta, ContinueWithExtraMoves));
+            choices.Add(new ResultPopup.Choice("Tekrar dene", _continued ? ButtonKind.Cta : ButtonKind.Secondary, () => _app.StartLevel(_levelIndex)));
+            choices.Add(new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, _app.ShowLevelSelect));
+            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", RemainingText(), -1, choices.ToArray());
+        }
+
+        void ContinueWithExtraMoves()
+        {
+            if (_continued || Session.State != GameState.Lost) return;
+            _continued = true;
+            Popup?.Close();
+            Popup = null;
+            Session.AddMoves(Session.Rules.ContinueMoves);
+            Sound.Play(Sfx.MovesAdded);
+            _hud.SetMoves(Session.MovesLeft);
+            ResetIdle();
+            _input.SetEnabled(true);
         }
 
         Vector3 MovesPanelWorld()

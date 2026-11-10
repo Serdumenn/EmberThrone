@@ -21,6 +21,10 @@ namespace EmberThrone.Core
 
         public int ThreeStarMovesLeft = 6;
 
+        public int ContinueMoves = 5;
+
+        public int StartingBoosters = 3;
+
         public int StarsFor(int movesLeft)
         {
             if (movesLeft >= ThreeStarMovesLeft) return 3;

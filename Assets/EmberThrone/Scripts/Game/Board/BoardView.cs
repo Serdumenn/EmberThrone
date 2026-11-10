@@ -47,10 +47,44 @@ namespace EmberThrone.Game
         SpriteRenderer _selection;
         readonly Dictionary<GridPos, float> _delays = new Dictionary<GridPos, float>();
         readonly Dictionary<GridPos, GridPos> _mergeTargets = new Dictionary<GridPos, GridPos>();
+        readonly List<PieceView> _hint = new List<PieceView>();
+        float _hintTime;
         Transform _pieceRoot;
 
         public int Width => _w;
         public int Height => _h;
+        public bool HintShown => _hint.Count > 0;
+
+        public void ShowHint(Move move)
+        {
+            ClearHint();
+            AddHint(move.A);
+            if (move.Type == MoveType.Swap) AddHint(move.B);
+            _hintTime = 0f;
+        }
+
+        void AddHint(GridPos p)
+        {
+            if (!InBounds(p)) return;
+            var v = _grid[Index(p)];
+            if (v != null) _hint.Add(v);
+        }
+
+        public void ClearHint()
+        {
+            foreach (var v in _hint)
+                if (v.T != null) v.T.localScale = Vector3.one;
+            _hint.Clear();
+        }
+
+        void Update()
+        {
+            if (_hint.Count == 0) return;
+            _hintTime += Time.deltaTime;
+            float wave = 0.5f - 0.5f * Mathf.Cos(_hintTime * Mathf.PI * 2f / Timing.HintPulse);
+            var scale = Vector3.one * (1f + Timing.HintScale * wave);
+            foreach (var v in _hint) v.T.localScale = scale;
+        }
 
         public void Build(GameSession session)
         {
@@ -289,6 +323,7 @@ namespace EmberThrone.Game
                 if (!(ev is SwapEvent e)) continue;
                 var a = _grid[Index(e.A)];
                 var b = _grid[Index(e.B)];
+                Sound.Play(Sfx.Swap);
                 a.R.sortingOrder = SortLifted;
                 a.T.localScale = Vector3.one;
                 b.T.localScale = Vector3.one;
@@ -297,6 +332,7 @@ namespace EmberThrone.Game
                 yield return new WaitForSeconds(Timing.Swap);
                 if (e.Reverted)
                 {
+                    Sound.Play(Sfx.SwapBack);
                     MoveTo(a, World(e.A), Timing.Swap);
                     MoveTo(b, World(e.B), Timing.Swap);
                     yield return new WaitForSeconds(Timing.Swap);
@@ -392,7 +428,12 @@ namespace EmberThrone.Game
                         e = CollectPiece(c);
                         break;
                     case ShuffleEvent s:
+                        Sound.Play(Sfx.Shuffle);
                         e = ShufflePieces(s);
+                        break;
+                    case BoosterUsedEvent b:
+                        if (b.Type == BoosterType.Hammer) Sound.Play(Sfx.Hammer);
+                        else if (b.Type != BoosterType.Shuffle) Sound.Play(Sfx.LineBlast);
                         break;
                     case GoalProgressEvent g:
                         var goal = g;

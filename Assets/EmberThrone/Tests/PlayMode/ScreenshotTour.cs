@@ -129,6 +129,7 @@ namespace EmberThrone.Game.Tests
         IEnumerator Begin(LevelDefinition level, int seed = 7)
         {
             _app.StartLevel(level, 0, seed);
+            _app.Game.HintDelay = float.MaxValue;
             for (int i = 0; i < 3; i++) yield return null;
         }
 
@@ -148,6 +149,10 @@ namespace EmberThrone.Game.Tests
         public IEnumerator TakeAll()
         {
             yield return Shot("01_seviye_secimi");
+            _app.ShowLevelStart(8);
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01b_seviye_basi");
+            _app.LevelStart.Close();
 
             yield return Begin(_app.Levels[0]);
             yield return Shot("02_tahta_ve_hud");

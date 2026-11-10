@@ -75,7 +75,7 @@ Ana sayfa fikri: ada üstünde kül olmuş mahalleler var; oyuncu yıldız harca
 - Repo, CI ve yayın düzeni PongMobilePrototype ile aynı
 
 ## Kapsam dışı (v1)
-Gerçek zamanlı PvP, süren hikâye, haftalık elle hazırlanan etkinlik, lansmanda 1000'den fazla seviye, PC ve konsol (PTH-001 §6). Lansmanda takımlar ve İngilizce ile Türkçe dışındaki diller de yok (aşağıdaki kararlar 6 ve 8).
+Gerçek zamanlı PvP, haftalık elle hazırlanan etkinlik, lansmanda 1000'den fazla seviye, PC ve konsol (PTH-001 §6). Lansmanda takımlar ve İngilizce ile Türkçe dışındaki diller de yok (aşağıdaki kararlar 6 ve 8).
 
 ## Kararlar (2026-11-06, ürün sahibi onayladı)
 GDD ile bugünkü motor ve yol haritası birkaç yerde ayrışıyordu. Aşağıdaki kararlar onaylandı; GDD ile çeliştiği yerde bu brief ve ROADMAP geçerlidir.
@@ -91,5 +91,6 @@ GDD ile bugünkü motor ve yol haritası birkaç yerde ayrışıyordu. Aşağıd
 | 7 | Sunucu | GDD: Firebase · Yol haritası: Nakama · Pong: Unity Gaming Services | **Unity Gaming Services**: Pong'da denendi (giriş, bulut kayıt, sıralama) |
 | 8 | Diller | PTH-001: lansmanda tek dil · Pong: 8 dil | **Lansmanda EN + TR**, yapı çok dile hazır |
 | 9 | Arayüz teknolojisi | Bugün: uGUI · Pong: UI Toolkit | Design System adımında karar; **UI Toolkit'e geçiş** (Pong ile aynı token ve tema düzeni) |
-| 10 | Maskot | Yok · küçük bir kor ruhu · yavru ejder | Style frame'lerle birlikte seçilecek (UX-001 OQ-302) |
+| 10 | Maskot | Yok · küçük bir kor ruhu · yavru ejder | **Kor ruhu Emby** (2026-11-10, hikâye yönü "Ayaz'a Karşı", [story.md](story.md)) |
 | 11 | Gelir modeli | GDD: gem paketleri + ödüllü reklam · Pong: Pass + reklamsız + tek tek satış + geçiş reklamı | GDD'deki model; ayrıntısı Faz 3 ekonomi tasarımında |
+| 12 | Hikâye ve karakterler (2026-11-10) | GDD: hikâyesiz restorasyon (PTH-001 kapsam dışı, META-001) · Türün lideri: karakter kadrosu, bölge açılış sahneleri, kötü karakter | **Eklendi.** Kor ruhunun yanında 3–5 karakter ve bir kötü karakter; her bölge açılışında oyunun içinde kurgulanan 20–40 saniyelik sahne. Karakterler kral ya da kraliçe değil (kopyalanmayacaklar listesi geçerli). Seçilen yön: **Ayaz'a Karşı** ([story.md](story.md)) |

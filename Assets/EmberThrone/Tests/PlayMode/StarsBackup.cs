@@ -24,5 +24,37 @@ namespace EmberThrone.Game.Tests
             foreach (var pair in stars) PlayerPrefs.SetInt(LevelProgress.StarsKey + pair.Key, pair.Value);
             PlayerPrefs.Save();
         }
+
+        static readonly string[] SettingKeys = { Sound.EnabledKey, Haptics.EnabledKey, CameraShake.EnabledKey };
+
+        public static Dictionary<string, int> SnapshotSettings()
+        {
+            var values = new Dictionary<string, int>();
+            foreach (var key in SettingKeys)
+                if (PlayerPrefs.HasKey(key)) values[key] = PlayerPrefs.GetInt(key);
+            return values;
+        }
+
+        public static void RestoreSettings(Dictionary<string, int> values)
+        {
+            foreach (var key in SettingKeys) PlayerPrefs.DeleteKey(key);
+            foreach (var pair in values) PlayerPrefs.SetInt(pair.Key, pair.Value);
+            PlayerPrefs.Save();
+        }
+
+        public static Dictionary<EmberThrone.Core.BoosterType, int> SnapshotBoosters()
+        {
+            var counts = new Dictionary<EmberThrone.Core.BoosterType, int>();
+            foreach (var type in BoosterInventory.All)
+                if (PlayerPrefs.HasKey(BoosterInventory.Key + type)) counts[type] = PlayerPrefs.GetInt(BoosterInventory.Key + type);
+            return counts;
+        }
+
+        public static void RestoreBoosters(Dictionary<EmberThrone.Core.BoosterType, int> counts)
+        {
+            foreach (var type in BoosterInventory.All) PlayerPrefs.DeleteKey(BoosterInventory.Key + type);
+            foreach (var pair in counts) PlayerPrefs.SetInt(BoosterInventory.Key + pair.Key, pair.Value);
+            PlayerPrefs.Save();
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace EmberThrone.EditorTools
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(BootstrapScene, true) };
             PlayerSettings.runInBackground = true;
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;
-            AssetDatabase.SaveAssets();
+            Branding.Apply();
             if (!EditorApplication.isPlaying) EditorSceneManager.OpenScene(BootstrapScene, OpenSceneMode.Single);
             Debug.Log("[EmberThrone] Bootstrap scene ready and set as the only build scene.");
         }

@@ -20,6 +20,8 @@ namespace EmberThrone.Game.Tests
         GameApp _app;
         Mouse _mouse;
         System.Collections.Generic.Dictionary<int, int> _savedStars;
+        System.Collections.Generic.Dictionary<BoosterType, int> _savedBoosters;
+        System.Collections.Generic.Dictionary<string, int> _savedSettings;
         InputSettings.BackgroundBehavior _background;
         InputSettings.EditorInputBehaviorInPlayMode _editorInput;
 
@@ -29,6 +31,9 @@ namespace EmberThrone.Game.Tests
         public IEnumerator SetUp()
         {
             _savedStars = StarsBackup.Snapshot();
+            _savedBoosters = StarsBackup.SnapshotBoosters();
+            _savedSettings = StarsBackup.SnapshotSettings();
+            CameraShake.Enabled = true;
             _background = InputSystem.settings.backgroundBehavior;
             _editorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
@@ -51,6 +56,8 @@ namespace EmberThrone.Game.Tests
             InputSystem.settings.editorInputBehaviorInPlayMode = _editorInput;
             Object.Destroy(_app.gameObject);
             StarsBackup.Restore(_savedStars);
+            StarsBackup.RestoreBoosters(_savedBoosters);
+            StarsBackup.RestoreSettings(_savedSettings);
             yield return null;
         }
 
@@ -67,6 +74,7 @@ namespace EmberThrone.Game.Tests
         IEnumerator Begin(LevelDefinition level)
         {
             _app.StartLevel(level, 0, Seed);
+            Game.HintDelay = float.MaxValue;
             yield return null;
             Assert.IsNull(Game.View.FindMismatch(Game.Session.Board));
         }
@@ -154,11 +162,42 @@ namespace EmberThrone.Game.Tests
         }
 
         [UnityTest]
-        public IEnumerator LevelSelect_TappingACard_StartsThatLevel()
+        public IEnumerator LevelSelect_TappingACard_ShowsItsGoals_ThenPlayStartsIt()
         {
+            LevelProgress.SaveStars(_app.Levels[0].Id, 1);
+            _app.ShowLevelSelect();
+            yield return null;
+            Assert.IsFalse(_app.LevelSelect.IsLocked(1));
             yield return TapUi(_app.LevelSelect.Buttons[1]);
-            Assert.IsNotNull(_app.Game, "the tap reached the card");
+            Assert.IsNull(_app.Game, "a window comes first");
+            var start = _app.LevelStart;
+            Assert.IsNotNull(start, "the tap reached the card");
+            Assert.AreEqual(_app.Levels[1].Goals.Count, start.GoalCount);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(start.PlayButton);
+            Assert.IsNull(_app.LevelStart);
+            Assert.IsNotNull(_app.Game);
             Assert.AreEqual(_app.Levels[1].Moves.ToString(), Game.Hud.MovesText);
+        }
+
+        [UnityTest]
+        public IEnumerator LevelSelect_LockedCard_StaysShut_AndBackClosesTheWindow()
+        {
+            StarsBackup.Restore(new System.Collections.Generic.Dictionary<int, int>());
+            _app.ShowLevelSelect();
+            yield return null;
+            Assert.AreEqual(0, _app.LevelSelect.CurrentIndex);
+            Assert.IsFalse(_app.LevelSelect.IsLocked(0));
+            Assert.IsTrue(_app.LevelSelect.IsLocked(1));
+            yield return TapUi(_app.LevelSelect.Buttons[1]);
+            Assert.IsNull(_app.LevelStart, "a locked level does not open");
+
+            yield return TapUi(_app.LevelSelect.Buttons[0]);
+            Assert.IsNotNull(_app.LevelStart);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(_app.LevelStart.BackButton);
+            Assert.IsNull(_app.LevelStart);
+            Assert.IsNull(_app.Game);
         }
 
         [UnityTest]
@@ -366,11 +405,141 @@ namespace EmberThrone.Game.Tests
             yield return new WaitForSeconds(Timing.LoseDelay + 0.1f);
             Assert.AreEqual("Kaybettin", Game.Popup.Title);
 
-            Assert.AreEqual(2, Game.Popup.Buttons.Count);
+            Assert.AreEqual(3, Game.Popup.Buttons.Count);
             yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
-            yield return TapUi(Game.Popup.Buttons[0]);
+            yield return TapUi(Game.Popup.Buttons[1]);
             Assert.AreNotSame(game, _app.Game, "retry starts a new game");
             Assert.AreEqual(GameState.Playing, _app.Game.Session.State);
+        }
+
+        [UnityTest]
+        public IEnumerator Lose_OffersExtraMovesOnce_AndPlayContinues()
+        {
+            yield return Begin(Level(1, null, Even, Odd, "RRBRY", "OGRPO", Even));
+            var game = Game;
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            Assert.AreEqual("+5 hamle", Game.Popup.Buttons[0].text);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(Game.Popup.Buttons[0]);
+            Assert.AreSame(game, _app.Game, "the same game goes on");
+            Assert.IsNull(Game.Popup);
+            Assert.AreEqual(GameState.Playing, Game.Session.State);
+            Assert.AreEqual(5, Game.Session.MovesLeft);
+            Assert.AreEqual("5", Game.Hud.MovesText);
+        }
+
+        [UnityTest]
+        public IEnumerator BoosterBar_Hammer_ClearsTheTappedPiece_WithoutSpendingAMove()
+        {
+            BoosterInventory.Set(BoosterType.Hammer, 2);
+            yield return Begin(Level(10, null, Even, Odd, Even, Odd, Even));
+            Assert.AreEqual("2", Game.Boosters.CountText(BoosterType.Hammer));
+            int moves = Game.Session.MovesLeft;
+            yield return TapUi(Game.Boosters.ButtonOf(BoosterType.Hammer));
+            Assert.AreEqual(BoosterType.Hammer, Game.Armed);
+
+            var target = new GridPos(2, 2);
+            int id = Game.Session.Board.CellAt(target).Piece.Id;
+            yield return Click(target);
+            yield return WaitIdle();
+
+            Assert.IsNull(Game.Armed);
+            Assert.AreEqual(moves, Game.Session.MovesLeft, "a booster is not a move");
+            Assert.AreEqual(1, BoosterInventory.Count(BoosterType.Hammer, Game.Session.Rules));
+            Assert.AreEqual("1", Game.Boosters.CountText(BoosterType.Hammer));
+            var piece = Game.Session.Board.CellAt(target).Piece;
+            Assert.IsTrue(piece == null || piece.Id != id, "the piece under the hammer is gone");
+            Assert.IsNull(Game.LastMismatch);
+        }
+
+        [UnityTest]
+        public IEnumerator BoosterBar_TappingAgain_Disarms_AndAnEmptyBoosterDoesNothing()
+        {
+            BoosterInventory.Set(BoosterType.RowBlast, 1);
+            BoosterInventory.Set(BoosterType.ColumnBlast, 0);
+            yield return Begin(Level(10, null, Even, Odd, Even, Odd, Even));
+            yield return TapUi(Game.Boosters.ButtonOf(BoosterType.RowBlast));
+            Assert.AreEqual(BoosterType.RowBlast, Game.Armed);
+            yield return TapUi(Game.Boosters.ButtonOf(BoosterType.RowBlast));
+            Assert.IsNull(Game.Armed);
+            yield return TapUi(Game.Boosters.ButtonOf(BoosterType.ColumnBlast));
+            Assert.IsNull(Game.Armed, "no charges left");
+            Assert.AreEqual(1, BoosterInventory.Count(BoosterType.RowBlast, Game.Session.Rules));
+        }
+
+        [UnityTest]
+        public IEnumerator Sound_AllClipsLoad_AndASwapPlaysSounds()
+        {
+            Assert.AreEqual(System.Enum.GetValues(typeof(Sfx)).Length - 1, Sound.Loaded, "every sound has a clip");
+            Assert.AreEqual(1, Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None).Length, "someone has to hear it");
+            Sound.Enabled = true;
+            yield return Begin(Level(10, null, Even, Odd, "RRBRY", "OGRPO", Even));
+            int before = Sound.Count;
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            Assert.Greater(Sound.Count, before + 1, "a swap and its match are heard");
+        }
+
+        [UnityTest]
+        public IEnumerator Settings_TogglesSoundHapticsAndShake_AndCloses()
+        {
+            Sound.Enabled = true;
+            Haptics.Enabled = true;
+            CameraShake.Enabled = true;
+            yield return TapUi(_app.LevelSelect.SettingsButton);
+            var settings = _app.LevelSelect.Settings;
+            Assert.IsNotNull(settings);
+            Assert.AreEqual("Ses: Açık", settings.SoundButton.text);
+            Assert.AreEqual("Titreşim: Açık", settings.HapticsButton.text);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+
+            yield return TapUi(settings.SoundButton);
+            Assert.IsFalse(Sound.Enabled);
+            Assert.AreEqual("Ses: Kapalı", settings.SoundButton.text);
+            int count = Sound.Count;
+            yield return TapUi(settings.HapticsButton);
+            Assert.IsFalse(Haptics.Enabled);
+            Assert.AreEqual("Titreşim: Kapalı", settings.HapticsButton.text);
+            Assert.AreEqual(count, Sound.Count, "a muted game stays silent");
+            yield return TapUi(settings.ShakeButton);
+            Assert.IsFalse(CameraShake.Enabled);
+            Assert.AreEqual("Sarsıntı: Kapalı", settings.ShakeButton.text);
+            _app.Shake.Add(0.8f);
+            Assert.AreEqual(0f, _app.Shake.Trauma, "no shake when it is turned off");
+
+            yield return TapUi(settings.CloseButton);
+            Assert.IsNull(_app.LevelSelect.Settings);
+            Assert.IsNull(settings.Root.panel);
+        }
+
+        [UnityTest]
+        public IEnumerator Hint_ComesSooner_OnTheFirstLevels()
+        {
+            _app.StartLevel(0);
+            yield return null;
+            Assert.AreEqual(Timing.EarlyHintDelay, Game.HintDelay);
+            _app.StartLevel(Timing.EarlyHintLevels);
+            yield return null;
+            Assert.AreEqual(Timing.HintDelay, Game.HintDelay);
+        }
+
+        [UnityTest]
+        public IEnumerator Hint_PulsesAMove_AfterIdle_AndAMoveClearsIt()
+        {
+            yield return Begin(Level(10, null, Even, Odd, "RRBRY", "OGRPO", Even));
+            Game.HintDelay = 0.3f;
+            float limit = Time.time + 5f;
+            while (!Game.View.HintShown)
+            {
+                Assert.Less(Time.time, limit, "no hint after idling");
+                yield return null;
+            }
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            Assert.IsFalse(Game.View.HintShown, "a move clears the hint");
+            yield return WaitIdle();
+            Assert.IsNull(Game.LastMismatch);
         }
 
         [UnityTest]

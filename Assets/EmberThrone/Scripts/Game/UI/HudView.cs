@@ -69,7 +69,7 @@ namespace EmberThrone.Game
             return s;
         }
 
-        static Sprite GoalSprite(Goal goal)
+        public static Sprite GoalSprite(Goal goal)
         {
             switch (goal.Type)
             {
