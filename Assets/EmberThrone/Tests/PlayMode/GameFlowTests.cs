@@ -550,6 +550,14 @@ namespace EmberThrone.Game.Tests
             _app.Shake.Add(0.8f);
             Assert.AreEqual(0f, _app.Shake.Trauma, "no shake when it is turned off");
 
+            string opened = null;
+            var open = SettingsPopup.OpenUrl;
+            SettingsPopup.OpenUrl = url => opened = url;
+            yield return TapUi(settings.PolicyButton);
+            SettingsPopup.OpenUrl = open;
+            Assert.AreEqual(SettingsPopup.PrivacyPolicyUrl, opened, "the privacy policy opens from Settings");
+            Assert.IsNull(settings.PrivacyButton, "privacy options show only where consent is required");
+
             yield return TapUi(settings.CloseButton);
             Assert.IsNull(_app.LevelSelect.Settings);
             Assert.IsNull(settings.Root.panel);

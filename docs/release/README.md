@@ -58,8 +58,9 @@ Kişisel geliştirici hesaplarında üretimden önce en az 12 test kullanıcıs�
 5. Mağaza sayfası yayınlanınca uygulama AdMob'da mağazaya bağlanır; `app-ads.txt` stüdyo sitesinde durur.
 
 ### 5. Gizlilik ve mağaza formları
-- Stüdyo sitesinde (`serdumenn.github.io`) EmberThrone için oyun sayfası ve gizlilik politikası sayfası açılır; adresi Play Console'a ve Ayarlar'daki bağlantıya girer.
-- Play Console → **Data safety**: reklam kimliği ve yaklaşık konum reklam için toplanır (AdMob), hesap ya da bulut kayıt yok.
+- Stüdyo sitesinde (`serdumenn.github.io`) EmberThrone sayfaları hazır: `/ember-throne/` (oyun sayfası) ve `/ember-throne/privacy/` (gizlilik politikası, İngilizce ve Türkçe). Site yayınlanınca Play Console'a `https://serdumenn.github.io/ember-throne/privacy/` girilir; oyunda Ayarlar → "Gizlilik politikası" aynı adresi açar (`SettingsPopup.PrivacyPolicyUrl`).
+- Mağaza görselleri: `docs/release/store_icon_512.png` (ikon) ve `docs/release/feature_1024x500.png` (öne çıkan görsel). Ekran görüntüleri ekran turundan alınır.
+- Play Console → **Data safety**: reklam kimliği ve yaklaşık konum reklam için toplanır (AdMob), hesap ya da bulut kayıt yok. Unity'nin motor tanılama gönderimi kapalıdır (`UnityConnectSettings`).
 - **Ads** bölümünde "Contains ads" işaretlenir; içerik derecelendirme anketi doldurulur.
 
 ## Sürüm ve commit düzeni

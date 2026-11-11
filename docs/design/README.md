@@ -99,6 +99,7 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 | 2026-11-11 | Reklam: AdMob, Pong'daki kurulumla aynı eklenti ve sürüm. Kaybedince "+5 hamle" artık ödüllü reklamla; hazır reklam yoksa teklif gösterilmez | Tek reklam hesabı ve denenmiş kurulum; ücretsiz devam ekonomiyi boşa çıkarırdı |
 | 2026-11-11 | Geçiş reklamı yalnız kazanılan seviyeden sonra, 6. seviyeden itibaren, en çok 3 dakikada bir (`AdRules`) | İlk seviyelerde ve kaybın ardından reklam oyuncuyu kaçırır |
 | 2026-11-11 | Gerçek kimlikler girilene kadar Google'ın deneme reklam kimlikleri kullanılır | Hesap adımı ürün sahibinde; deneme reklamları tıklansa da hesabı riske atmaz |
+| 2026-11-11 | Gizlilik politikası stüdyo sitesinde, Pong'unkiyle aynı düzende; oyunda Ayarlar'dan açılır. Unity motor tanılaması kapatıldı | Reklamlı uygulamada mağaza ve uygulama içi bağlantı zorunlu; oyun AdMob dışında veri göndermesin |
 | 2026-11-11 | Geçici uygulama ikonu: mevcut maskot render'ı kor ışınlı arka planda | Test APK'ları Unity'nin varsayılan ikonuyla gelmesin; kalıcı ikon maskot yenilenince |
 | 2026-11-11 | Ses efektleri koddan sentezlenir (`tools/audio/generate_sfx.py`, Pong'daki yöntem). Müzik sonra | Lisans derdi yok, her ses yeniden üretilebilir; müzik için ayrı karar gerekir |
 | 2026-11-11 | Seviye 11–30: Fırın Sokağı (11–20) ve Demirci Çarşısı (21–30). Her 5. seviye zor, ardından kolay bir nefes seviyesi; hamle sayıları botla ayarlı | Dalgalı zorluk eğrisi türün standardı; her bölüm yeni bir engel karışımı öğretir |

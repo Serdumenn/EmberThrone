@@ -6,11 +6,16 @@ namespace EmberThrone.Game
 {
     public sealed class SettingsPopup
     {
+        public const string PrivacyPolicyUrl = "https://serdumenn.github.io/ember-throne/privacy/";
+
+        public static Action<string> OpenUrl = Application.OpenURL;
+
         public VisualElement Root { get; private set; }
         public Button SoundButton { get; private set; }
         public Button HapticsButton { get; private set; }
         public Button ShakeButton { get; private set; }
         public Button PrivacyButton { get; private set; }
+        public Button PolicyButton { get; private set; }
         public Button CloseButton { get; private set; }
 
         Action _closed;
@@ -37,6 +42,7 @@ namespace EmberThrone.Game
             var ads = GameApp.Instance != null ? GameApp.Instance.Ads : null;
             if (ads != null && ads.PrivacyOptionsRequired)
                 PrivacyButton = Ui.Button("Gizlilik seçenekleri", Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", () => ads.ShowPrivacyOptions(null), panel, "Privacy");
+            PolicyButton = Ui.Button("Gizlilik politikası", Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", () => OpenUrl(PrivacyPolicyUrl), panel, "Policy");
             CloseButton = Ui.Button("Tamam", Ui.ClassOf(ButtonKind.Cta) + " et-result__button", Close, panel, "Close");
             Refresh();
 
