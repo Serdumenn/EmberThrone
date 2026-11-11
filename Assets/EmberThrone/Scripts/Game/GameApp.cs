@@ -20,6 +20,7 @@ namespace EmberThrone.Game
         public GameController Game { get; private set; }
         public LevelSelectScreen LevelSelect { get; private set; }
         public LevelStartPopup LevelStart { get; private set; }
+        public bool ScreenStaysOn { get; private set; }
         public IReadOnlyList<LevelDefinition> Levels => _levels;
 
         List<LevelDefinition> _levels;
@@ -112,13 +113,19 @@ namespace EmberThrone.Game
         public void StartLevel(LevelDefinition level, int index, int seed)
         {
             CloseCurrent();
-            Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            KeepScreenOn(true);
             Game = GameController.Create(this, transform, level, index, seed);
+        }
+
+        void KeepScreenOn(bool on)
+        {
+            ScreenStaysOn = on;
+            Screen.sleepTimeout = on ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting;
         }
 
         void CloseCurrent()
         {
-            Screen.sleepTimeout = SleepTimeout.SystemSetting;
+            KeepScreenOn(false);
             Tweens.KillAll();
             if (Game != null)
             {

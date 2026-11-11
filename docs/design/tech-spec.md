@@ -167,6 +167,7 @@ Birincisi zorluk tablosu (açgözlü bot, %35 rastgele hamle ≈ sıradan oyuncu
 
 - `core-tests.yml`: Unity lisansı gerekmez; `.meta` denetimi, motor testleri, seviye simülasyonu.
 - `build-android.yml`: `main`'e her push'ta EditMode + PlayMode testleri, sonra geliştirme APK'sı. Unity secret'ları yokken atlanır.
+- CI testleri Linux editöründe koşar. Orada bazı platform ayarları saklanmaz (`Screen.sleepTimeout` hep `NeverSleep` döner). Testler platformdan geri okumaz, oyunun kendi durumuna bakar (`GameApp.ScreenStaysOn`).
 - `release-android.yml`: `v*` etiketi ya da elle çalıştırma → imzalı AAB.
 - APK yalnız GitHub Actions'ta üretilir; ayrıntılar [../CI-ANDROID.md](../CI-ANDROID.md) ve [../release/README.md](../release/README.md).
 

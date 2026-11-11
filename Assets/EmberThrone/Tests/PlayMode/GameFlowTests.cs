@@ -219,11 +219,11 @@ namespace EmberThrone.Game.Tests
                 yield return null;
                 Assert.IsNull(Game.View.FindMismatch(Game.Session.Board), "level index " + i);
                 Assert.AreEqual(_app.Levels[i].Moves.ToString(), Game.Hud.MovesText);
-                Assert.AreEqual(SleepTimeout.NeverSleep, Screen.sleepTimeout);
+                Assert.IsTrue(_app.ScreenStaysOn, "the screen stays on during a level");
             }
             _app.ShowLevelSelect();
             yield return null;
-            Assert.AreEqual(SleepTimeout.SystemSetting, Screen.sleepTimeout);
+            Assert.IsFalse(_app.ScreenStaysOn, "the screen may sleep on the map");
             Assert.IsNull(_app.Game);
             Assert.AreEqual(_app.Levels.Count, _app.LevelSelect.ButtonCount);
         }

@@ -28,7 +28,8 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] GitHub Actions: test + APK akışı (PongMobilePrototype örnek alındı)
 - [x] Pong'daki repo düzeni: etiketle imzalı AAB akışı, Git LFS, tescilli lisans, README, `docs/` (CI, yayın, tasarım kararları, QA), tek branch `main`
 - [x] Kod denetimi ve 10 düzeltme ([docs/qa/audit-2026-11-05.md](docs/qa/audit-2026-11-05.md))
-- [ ] Unity secret'larını bu repoya ekle (sahibi yapacak), ilk bulut APK'sını al
+- [x] Unity secret'ları bu repoya eklendi (2026-11-11)
+- [ ] İlk bulut APK'sını al. İlk koşuda testler Linux'ta düştü (`Screen.sleepTimeout` orada saklanmıyor); test düzeltildi, APK aşaması henüz hiç çalışmadı
 - [ ] Gerçek telefonda dene: his, dokunma, performans (henüz hiç cihazda çalışmadı)
 - [ ] Bulutta test edilecek: `Sprites/Default`, UI Toolkit paneli ve Baloo 2 yazı tipi Android build'inde sorunsuz mu
 
