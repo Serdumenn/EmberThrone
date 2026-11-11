@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import subprocess
 import sys
 import uuid
 
@@ -26,9 +27,19 @@ IMPORTED = {".png", ".jpg", ".jpeg", ".tga", ".psd", ".exr", ".wav", ".ogg", ".m
 def skip(name):
     return name.startswith(".") or name.endswith("~") or name.endswith(".meta")
 
+def ignored():
+    repo = os.path.join(ROOT, "..")
+    try:
+        out = subprocess.run(["git", "ls-files", "--others", "--ignored", "--exclude-standard", "-z", "Assets"],
+                             cwd=repo, capture_output=True, check=True).stdout.decode("utf-8")
+    except (OSError, subprocess.CalledProcessError):
+        return set()
+    return {os.path.normpath(os.path.join(repo, p)) for p in out.split("\0") if p}
+
 def main():
     check = "--check" in sys.argv
     missing, orphans = [], []
+    hidden = ignored()
     for dirpath, dirnames, filenames in os.walk(ROOT):
         dirnames[:] = [d for d in dirnames if not skip(d)]
         if dirpath.endswith(".androidlib"):
@@ -40,6 +51,8 @@ def main():
             path = os.path.join(dirpath, name)
             if not os.path.exists(path + ".meta"):
                 missing.append(path)
+            elif os.path.normpath(path) in hidden and os.path.normpath(path + ".meta") not in hidden:
+                orphans.append(path + ".meta")
         for name in filenames:
             if name.endswith(".meta") and not os.path.exists(os.path.join(dirpath, name[:-5])):
                 orphans.append(os.path.join(dirpath, name))
