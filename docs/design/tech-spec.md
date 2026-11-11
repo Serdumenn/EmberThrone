@@ -34,6 +34,13 @@
 - `Feel/Sound.cs`: `Sfx` adı dosya adına çevrilir (`LineBlast` → `sfx_line_blast`); kamerada tek `AudioListener` var. Zincirleme eşleşmede perde her dalgada majör dizide bir basamak yükselir.
 - Palet ve olay tablosu: [design-system.md](design-system.md). Müzik henüz yok.
 
+## Reklam
+
+- `Scripts/Game/Ads/AdService.cs`: ödüllü reklam, geçiş reklamı ve onay penceresi (Google UMP). `GameApp` kurar; editörde gerçek reklam açılmaz, ödüllü reklam benzetilir (`AdService.SimulateRewardedInEditor`).
+- `Scripts/Game/Ads/AdRules.cs`: reklam birimi kimlikleri, geçiş reklamı aralığı (180 sn) ve ilk geçiş reklamının seviyesi (6).
+- Eklenti ve Android bağımlılıkları: `Assets/GoogleMobileAds/`, `Assets/ExternalDependencyManager/`, `Assets/Plugins/Android/` (`mainTemplate.gradle`, `settingsTemplate.gradle`, `gradleTemplate.properties`). Bu klasörler üçüncü taraf dosyalarıdır; yorum satırı kuralı onlara uygulanmaz ve Gradle şablonlarındaki "Android Resolver" satırları silinmez.
+- Hesap adımları: [yayın kılavuzu](../release/README.md), adım 4.
+
 ## Cihazda saklananlar (PlayerPrefs)
 
 | Anahtar | İçerik |
@@ -41,6 +48,7 @@
 | `et.stars.<id>` | Seviyenin en iyi yıldızı |
 | `et.booster.<Hammer\|RowBlast\|ColumnBlast\|Shuffle>` | Booster hakkı; yoksa `GameRules.StartingBoosters` |
 | `et.sound`, `et.haptics`, `et.shake` | Ayarlar (ses, titreşim, ekran sarsıntısı): 1 açık, 0 kapalı |
+| `et.ads.lastInterstitial` | Son geçiş reklamının kapandığı an (Unix saniyesi) |
 
 PlayMode testleri bu anahtarları başta kaydeder, sonda geri yazar (`StarsBackup`); sahibinin kendi oyunu bozulmaz.
 
@@ -87,7 +95,7 @@ PlayMode testleri bu anahtarları başta kaydeder, sonda geri yazar (`StarsBacku
 2. **Determinizm.** Core'da rastgelelik yalnız `Pcg32`'den gelir; `System.Random`, saat ya da hash sırasına bağlı mantık yok. Aynı seviye + tohum + hamleler ⇒ aynı oyun (tekrar, sunucu doğrulaması ve bot buna dayanır).
 3. **Sunum yalnız izler.** Unity kodu `GameSession`'ı çağırır ve dönen `MoveOutcome.Steps` adımlarını canlandırır; `Board`'u hiç değiştirmez.
 4. **Denge veride.** `GameRules` ve seviye JSON'u; kodda sihirli sayı yok.
-5. **`.meta` dosyaları.** Editör açık değilken `Assets/` altına kod, JSON ya da klasör eklenince `python3 tools/gen_meta.py`. PNG, WAV, font gibi içe aktarılan dosyaların `.meta`'sını Unity yazar (editörü ya da batch testlerini bir kez açmak yeter); araç onları atlar. Var olan GUID değişmez.
+5. **`.meta` dosyaları.** Editör açık değilken `Assets/` altına kod, JSON ya da klasör eklenince `python3 tools/gen_meta.py` (`.androidlib` klasörlerinin içine dokunmaz). PNG, WAV, font gibi içe aktarılan dosyaların `.meta`'sını Unity yazar (editörü ya da batch testlerini bir kez açmak yeter); araç onları atlar. Var olan GUID değişmez.
 6. **Testler.** Yalnız NUnit 3 klasik assert'leri (`Assert.AreEqual/IsTrue/Throws`, `CollectionAssert`); Unity'nin NUnit 3.5 sürümü yüzünden `Assert.Multiple` ve NUnit 4 API'leri yok. Tahta yardımcıları `TestUtil.cs`'de (satırlar üstten, y=0 altta).
 7. **Özgün kimlik.** İsimler, karakterler, görseller, müzik, seviyeler ve arayüz EmberThrone'a aittir; başka oyunlarla yalnız türün genel mekanikleri ortaktır.
 8. **Yorum satırı yok.** Kod, USS, Python ve workflow dosyaları yorumsuzdur; açıklama gereken bilgi bu belgeye ya da `docs/` altına yazılır.

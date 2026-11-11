@@ -34,6 +34,7 @@ namespace EmberThrone.Game.Tests
             _savedBoosters = StarsBackup.SnapshotBoosters();
             _savedSettings = StarsBackup.SnapshotSettings();
             CameraShake.Enabled = true;
+            AdService.SimulateRewardedInEditor = true;
             _background = InputSystem.settings.backgroundBehavior;
             _editorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
@@ -420,14 +421,54 @@ namespace EmberThrone.Game.Tests
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
             yield return WaitForPopup();
-            Assert.AreEqual("+5 hamle", Game.Popup.Buttons[0].text);
+            Assert.AreEqual("İzle: +5 hamle", Game.Popup.Buttons[0].text);
             yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
             yield return TapUi(Game.Popup.Buttons[0]);
+            Assert.AreEqual(1, _app.Ads.RewardedShown, "the extra moves come from a rewarded ad");
             Assert.AreSame(game, _app.Game, "the same game goes on");
             Assert.IsNull(Game.Popup);
             Assert.AreEqual(GameState.Playing, Game.Session.State);
             Assert.AreEqual(5, Game.Session.MovesLeft);
             Assert.AreEqual("5", Game.Hud.MovesText);
+        }
+
+        [UnityTest]
+        public IEnumerator Lose_WithoutAReadyAd_HasNoExtraMovesOffer()
+        {
+            AdService.SimulateRewardedInEditor = false;
+            yield return Begin(Level(1, null, Even, Odd, "RRBRY", "OGRPO", Even));
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            Assert.AreEqual(2, Game.Popup.Buttons.Count);
+            Assert.AreEqual("Tekrar dene", Game.Popup.Buttons[0].text);
+            Assert.AreEqual(0, _app.Ads.RewardedShown);
+        }
+
+        [UnityTest]
+        public IEnumerator Win_AsksForAnInterstitial_OnlyAfterTheFirstLevels()
+        {
+            var early = Level(10, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even);
+            early.Id = AdRules.FirstInterstitialLevel - 1;
+            yield return Begin(early);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            yield return new WaitForSeconds(Timing.ModalIn + Timing.StarFill * 3f);
+            yield return TapUi(Game.Popup.Buttons[1]);
+            Assert.IsNull(_app.Game, "back on the map");
+            Assert.AreEqual(0, _app.Ads.InterstitialRequests, "no ads on the first levels");
+
+            var later = Level(10, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even);
+            later.Id = 4242;
+            yield return Begin(later);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            yield return new WaitForSeconds(Timing.ModalIn + Timing.StarFill * 3f);
+            yield return TapUi(Game.Popup.Buttons[1]);
+            Assert.IsNull(_app.Game, "the ad does not block the way back");
+            Assert.AreEqual(1, _app.Ads.InterstitialRequests);
         }
 
         [UnityTest]

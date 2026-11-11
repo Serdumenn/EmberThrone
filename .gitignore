@@ -87,19 +87,9 @@ Assets/Plugins/Android/FirebaseRemoteConfig.androidlib/
 Assets/Plugins/Android/FirebaseRemoteConfig.androidlib.meta
 crashlytics-build.properties
 
-# ── External Dependency Manager
-Assets/ExternalDependencyManager/
-Assets/ExternalDependencyManager.meta
+# ── Play Services Resolver (eski ad)
 Assets/PlayServicesResolver/
 Assets/PlayServicesResolver.meta
-
-# ── Google Mobile Ads
-Assets/GoogleMobileAds/
-Assets/GoogleMobileAds.meta
-Assets/Plugins/Android/GoogleMobileAdsPlugin.androidlib/
-Assets/Plugins/Android/GoogleMobileAdsPlugin.androidlib.meta
-Assets/Plugins/Android/googlemobileads-unity.aar
-Assets/Plugins/Android/googlemobileads-unity.aar.meta
 
 # ── Build Outputs
 *.apk

@@ -95,6 +95,10 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 | 2026-11-11 | Görseller çizim sayfası olarak üretilir, sprite'ları `tools/sprites/cut_sheets.py` keser. Kaynak sayfalar ve kesim tarifi `ArtSource/sheets/` altında | Her sprite tek komutla yeniden üretilir; boy, doluluk ve renk ayarı tarifte durur |
 | 2026-11-11 | Seviye listesi yerine kıvrılan yollu harita: her bölgenin kendi harita görseli, 10 seviye düğümü yolun üstünde, bölge adı bantta; sıradaki düğümün üstünde Emby | Türün standart ilerleme ekranı; kart ızgarası beğenilmedi |
 | 2026-11-11 | Yeni görünüm onaylandı: çizim tarzı, harita ve yeni arayüz parçaları oyunun görünümü olarak kalır | Ürün sahibi önce/sonra karşılaştırmasını görüp onayladı. Telefonda görülünce ince ayar yapılabilir |
+| 2026-11-11 | Bölünmüş ekran kapalı (`androidResizeableActivity: 0`), Pong'daki gibi | Arayüz dikey ekrana göre kurulu; yarım pencerede tahta ve HUD sığmaz |
+| 2026-11-11 | Reklam: AdMob, Pong'daki kurulumla aynı eklenti ve sürüm. Kaybedince "+5 hamle" artık ödüllü reklamla; hazır reklam yoksa teklif gösterilmez | Tek reklam hesabı ve denenmiş kurulum; ücretsiz devam ekonomiyi boşa çıkarırdı |
+| 2026-11-11 | Geçiş reklamı yalnız kazanılan seviyeden sonra, 6. seviyeden itibaren, en çok 3 dakikada bir (`AdRules`) | İlk seviyelerde ve kaybın ardından reklam oyuncuyu kaçırır |
+| 2026-11-11 | Gerçek kimlikler girilene kadar Google'ın deneme reklam kimlikleri kullanılır | Hesap adımı ürün sahibinde; deneme reklamları tıklansa da hesabı riske atmaz |
 | 2026-11-11 | Geçici uygulama ikonu: mevcut maskot render'ı kor ışınlı arka planda | Test APK'ları Unity'nin varsayılan ikonuyla gelmesin; kalıcı ikon maskot yenilenince |
 | 2026-11-11 | Ses efektleri koddan sentezlenir (`tools/audio/generate_sfx.py`, Pong'daki yöntem). Müzik sonra | Lisans derdi yok, her ses yeniden üretilebilir; müzik için ayrı karar gerekir |
 | 2026-11-11 | Seviye 11–30: Fırın Sokağı (11–20) ve Demirci Çarşısı (21–30). Her 5. seviye zor, ardından kolay bir nefes seviyesi; hamle sayıları botla ayarlı | Dalgalı zorluk eğrisi türün standardı; her bölüm yeni bir engel karışımı öğretir |
@@ -133,6 +137,8 @@ Durumlar: `Brief → WIP → Review → Approved → Integrated`
 | Varlık | Lisans | Kaynak | Not |
 |---|---|---|---|
 | Baloo 2 (değiştirilmiş) | SIL OFL 1.1 | fonts.google.com | Değişken fonttan sabit 700/800 ağırlık, yalnız Latin harfleri. Lisans metni `Assets/EmberThrone/Resources/UI/Fonts/OFL.txt` |
+| Google Mobile Ads Unity eklentisi 10.7.0 | Apache 2.0 | github.com/googleads/googleads-mobile-unity | `Assets/GoogleMobileAds/`, `Assets/Plugins/Android/`; UMP onay kitaplığı içinde |
+| External Dependency Manager 1.2.186 | Apache 2.0 | github.com/googlesamples/unity-jar-resolver | `Assets/ExternalDependencyManager/`; Android bağımlılıklarını Gradle şablonlarına yazar |
 | Blender 5.1 | GPL (araç) | blender.org | Render edilen görseller bizimdir; modeller ve scriptler `ArtSource/blender/` (v3 dönemi, oyunda artık kullanılmıyor) |
 | Çizim sayfaları (`ArtSource/sheets/`) | Stüdyonun kendi | Görsel üretim aracı, stüdyonun hesabı | Stüdyonun yazdığı tariflerle üretildi, seçildi, kesildi ve düzenlendi. Ticari kullanım aracın kullanım koşullarına göre; yayından önce koşullar yeniden okunacak |
 | Ocean Forge logosu | Stüdyonun kendi | PongMobilePrototype | Açılış ekranı; yazısı Fredoka (SIL OFL 1.1), PNG'ye çizili olarak gelir |

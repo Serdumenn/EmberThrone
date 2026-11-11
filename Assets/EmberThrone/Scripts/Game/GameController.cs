@@ -365,11 +365,17 @@ namespace EmberThrone.Game
             OnImpact(Impact.Win);
             int stars = Session.Rules.StarsFor(Session.MovesLeft);
             var next = _app.HasLevel(_levelIndex + 1)
-                ? new ResultPopup.Choice("Sonraki seviye", ButtonKind.Cta, () => _app.StartLevel(_levelIndex + 1))
-                : new ResultPopup.Choice("Tekrar oyna", ButtonKind.Cta, () => _app.StartLevel(_levelIndex));
+                ? new ResultPopup.Choice("Sonraki seviye", ButtonKind.Cta, AfterAd(() => _app.StartLevel(_levelIndex + 1)))
+                : new ResultPopup.Choice("Tekrar oyna", ButtonKind.Cta, AfterAd(() => _app.StartLevel(_levelIndex)));
             Popup = ResultPopup.Show(_app.Ui.Popups, "Kazandın!", Session.MovesLeft + " hamle arttı", stars,
                 next,
-                new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, _app.ShowLevelSelect));
+                new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, AfterAd(_app.ShowLevelSelect)));
+        }
+
+        Action AfterAd(Action go)
+        {
+            if (_level.Id < AdRules.FirstInterstitialLevel) return go;
+            return () => _app.Ads.ShowInterstitialThen(go);
         }
 
         IEnumerator ShowLose()
@@ -377,11 +383,20 @@ namespace EmberThrone.Game
             yield return new WaitForSeconds(Timing.LoseDelay);
             OnImpact(Impact.Lose);
             var choices = new List<ResultPopup.Choice>();
-            if (!_continued)
-                choices.Add(new ResultPopup.Choice("+" + Session.Rules.ContinueMoves + " hamle", ButtonKind.Cta, ContinueWithExtraMoves));
-            choices.Add(new ResultPopup.Choice("Tekrar dene", _continued ? ButtonKind.Cta : ButtonKind.Secondary, () => _app.StartLevel(_levelIndex)));
+            bool offer = !_continued && _app.Ads.IsRewardedReady;
+            if (offer)
+                choices.Add(new ResultPopup.Choice(ContinueLabel(Session.Rules.ContinueMoves), ButtonKind.Cta, WatchForExtraMoves));
+            choices.Add(new ResultPopup.Choice("Tekrar dene", offer ? ButtonKind.Secondary : ButtonKind.Cta, () => _app.StartLevel(_levelIndex)));
             choices.Add(new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, _app.ShowLevelSelect));
             Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", RemainingText(), -1, choices.ToArray());
+        }
+
+        public static string ContinueLabel(int moves) => "İzle: +" + moves + " hamle";
+
+        void WatchForExtraMoves()
+        {
+            if (_continued || Session.State != GameState.Lost) return;
+            _app.Ads.ShowRewarded(ContinueWithExtraMoves, null);
         }
 
         void ContinueWithExtraMoves()

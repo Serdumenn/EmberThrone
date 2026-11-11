@@ -16,6 +16,7 @@ namespace EmberThrone.Game
         public Camera Camera { get; private set; }
         public CameraShake Shake { get; private set; }
         public UiRoot Ui { get; private set; }
+        public AdService Ads { get; private set; }
         public GameController Game { get; private set; }
         public LevelSelectScreen LevelSelect { get; private set; }
         public LevelStartPopup LevelStart { get; private set; }
@@ -43,6 +44,7 @@ namespace EmberThrone.Game
             Art.Preload();
             gameObject.AddComponent<Tweens>();
             Sound.Init(gameObject);
+            Ads = gameObject.AddComponent<AdService>();
             Camera = BuildCamera();
             Shake = Camera.gameObject.AddComponent<CameraShake>();
             Shake.SetRest(Camera.transform.position);

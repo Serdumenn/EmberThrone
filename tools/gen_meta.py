@@ -31,6 +31,9 @@ def main():
     missing, orphans = [], []
     for dirpath, dirnames, filenames in os.walk(ROOT):
         dirnames[:] = [d for d in dirnames if not skip(d)]
+        if dirpath.endswith(".androidlib"):
+            dirnames[:] = []
+            continue
         for name in dirnames + filenames:
             if skip(name):
                 continue

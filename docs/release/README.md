@@ -1,6 +1,6 @@
 # Yayın kılavuzu (Google Play, yalnız Android)
 
-Durum: 2026-11-06. Oyun prototip aşamasında; imzalı sürüm akışı hazır, mağaza adımları Faz 6'da ([ROADMAP.md](../../ROADMAP.md)). Düzen PongMobilePrototype ile aynıdır.
+Durum: 2026-11-11. İmzalı sürüm akışı ve reklam altyapısı hazır; hesap adımları aşağıda. Düzen PongMobilePrototype ile aynıdır.
 
 ## Projede hazır olanlar
 
@@ -9,6 +9,9 @@ Durum: 2026-11-06. Oyun prototip aşamasında; imzalı sürüm akışı hazır, 
 | Paket adı | `com.oceanforge.emberthrone` (Pong'daki `com.oceanforge.pingipongi` düzeni; ilk mağaza yüklemesinden sonra değiştirilemez), hedef API 36, en düşük API 25, IL2CPP, ARMv7 + ARM64 |
 | Geliştirme APK'sı | `.github/workflows/build-android.yml`: `main`'e her push'ta testler, sonra APK |
 | İmzalı AAB | `.github/workflows/release-android.yml`: `v0.1.0` gibi bir etiket push edilince (ya da Actions'tan elle) testler koşar, imzalı `.aab` ve sembol dosyası üretilir. Sürüm adı etiketten, sürüm kodu 1000 + çalıştırma numarasından gelir |
+| Ekran | Yalnız dikey; 16:9, 20:9, 21:9 ve tablet 3:4 ekran turuyla denetlenir. Çentik payı hesaplanır, bölünmüş ekran kapalı |
+| Reklam | AdMob (Google Mobile Ads 10.7.0): kaybedince ödüllü reklamla "+5 hamle", 6. seviyeden sonra kazanılan seviyelerin ardından en çok 3 dakikada bir geçiş reklamı. Avrupa'da ilk açılışta Google UMP onay penceresi, gerektiğinde Ayarlar'da "Gizlilik seçenekleri". Kod: `Scripts/Game/Ads/` |
+| Reklam kimlikleri | **Şu an Google'ın herkese açık deneme kimlikleri.** Gerçek kimlikler girilmeden mağazaya çıkılmaz (adım 4) |
 | Lisans | Tescilli ("All rights reserved"), Ocean Forge |
 
 ## Hesap adımları
@@ -46,6 +49,18 @@ GitHub → Settings → Secrets and variables → Actions:
 3. Testing → **Internal testing** → yeni sürüm → `.aab` yüklenir, test kullanıcıları eklenir.
 
 Kişisel geliştirici hesaplarında üretimden önce en az 12 test kullanıcısıyla 14 günlük kapalı test zorunludur.
+
+### 4. AdMob
+1. AdMob → Apps → **Add app** → Android → EmberThrone. Uygulama kimliği (`ca-app-pub-…~…`) Unity'de **Assets → Google Mobile Ads → Settings** penceresindeki "Android App ID" alanına yazılır (`Assets/GoogleMobileAds/Resources/GoogleMobileAdsSettings.asset`).
+2. İki reklam birimi açılır: **Rewarded** ("+5 hamle") ve **Interstitial** (seviye arası). Kimlikleri `Assets/EmberThrone/Scripts/Game/Ads/AdRules.cs` içindeki `RewardedUnitId` ve `InterstitialUnitId` alanlarına yazılır.
+3. Geliştiricinin telefonu AdMob → Settings → **Test devices** listesine eklenir; kendi reklamına tıklamak hesabı riske atar.
+4. Privacy & messaging → **GDPR** mesajı oluşturulup yayınlanır (dil: otomatik).
+5. Mağaza sayfası yayınlanınca uygulama AdMob'da mağazaya bağlanır; `app-ads.txt` stüdyo sitesinde durur.
+
+### 5. Gizlilik ve mağaza formları
+- Stüdyo sitesinde (`serdumenn.github.io`) EmberThrone için oyun sayfası ve gizlilik politikası sayfası açılır; adresi Play Console'a ve Ayarlar'daki bağlantıya girer.
+- Play Console → **Data safety**: reklam kimliği ve yaklaşık konum reklam için toplanır (AdMob), hesap ya da bulut kayıt yok.
+- **Ads** bölümünde "Contains ads" işaretlenir; içerik derecelendirme anketi doldurulur.
 
 ## Sürüm ve commit düzeni
 - Tek branch vardır: `main`. Her zaman derlenebilir tutulur; her push'ta testler ve geliştirme APK'sı koşar.

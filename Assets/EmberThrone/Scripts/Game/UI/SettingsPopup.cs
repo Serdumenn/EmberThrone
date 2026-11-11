@@ -10,6 +10,7 @@ namespace EmberThrone.Game
         public Button SoundButton { get; private set; }
         public Button HapticsButton { get; private set; }
         public Button ShakeButton { get; private set; }
+        public Button PrivacyButton { get; private set; }
         public Button CloseButton { get; private set; }
 
         Action _closed;
@@ -33,6 +34,9 @@ namespace EmberThrone.Game
             SoundButton = Ui.Button(null, Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", ToggleSound, panel, "Sound");
             HapticsButton = Ui.Button(null, Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", ToggleHaptics, panel, "Haptics");
             ShakeButton = Ui.Button(null, Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", ToggleShake, panel, "Shake");
+            var ads = GameApp.Instance != null ? GameApp.Instance.Ads : null;
+            if (ads != null && ads.PrivacyOptionsRequired)
+                PrivacyButton = Ui.Button("Gizlilik seçenekleri", Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", () => ads.ShowPrivacyOptions(null), panel, "Privacy");
             CloseButton = Ui.Button("Tamam", Ui.ClassOf(ButtonKind.Cta) + " et-result__button", Close, panel, "Close");
             Refresh();
 

@@ -89,6 +89,10 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 ## Faz 6 — Yayın
 - [x] İmzalı AAB akışı (`release-android.yml`, etiketle çalışır)
 - [ ] Yükleme anahtarı + imza secret'ları (sahibi yapacak, [docs/release/README.md](docs/release/README.md))
+- [x] Reklam altyapısı (2026-11-11): AdMob eklentisi ve Gradle şablonları Pong'dan; `AdService` (ödüllü, geçiş, UMP onayı), "+5 hamle" ödüllü reklamla, kazanılan seviyeden sonra aralıklı geçiş reklamı, Ayarlar'da gizlilik seçenekleri
+- [ ] Gerçek AdMob uygulama ve reklam birimi kimlikleri (sahibi açacak; şu an Google'ın deneme kimlikleri), GDPR mesajı, test cihazı
+- [ ] Reklamı gerçek telefonda dene (APK çıkınca): onay penceresi, ödüllü ve geçiş reklamı
+- [ ] Gizlilik politikası ve `app-ads.txt` (stüdyo sitesinde oyun sayfası), Play Console veri güvenliği formu
 - [ ] Google Play Billing (IAP), Play Console
 - [ ] Mağaza tanıtım videosu, reklam videoları ve oynanabilir reklam
 - [ ] Diller: İngilizce + Türkçe (yapı çok dile hazır)
