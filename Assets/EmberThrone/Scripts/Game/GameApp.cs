@@ -12,6 +12,7 @@ namespace EmberThrone.Game
         public const string BootstrapScene = "Bootstrap";
 
         public static bool ShowLoading = true;
+        public static bool ShowStories = true;
 
         public static GameApp Instance { get; private set; }
 
@@ -25,6 +26,7 @@ namespace EmberThrone.Game
         public Popup Modal { get; private set; }
         public RewardPopup Rewards { get; private set; }
         public LoadingScreen Loading { get; private set; }
+        public StoryScene Story { get; private set; }
         public bool ScreenStaysOn { get; private set; }
         public IReadOnlyList<LevelDefinition> Levels => _levels;
 
@@ -65,7 +67,7 @@ namespace EmberThrone.Game
         {
             Loading?.Close();
             LoadingScreen screen = null;
-            screen = LoadingScreen.Show(Ui.Popups, () =>
+            screen = LoadingScreen.Show(Ui.Popups, transform, () =>
             {
                 if (Loading == screen) Loading = null;
             });
@@ -98,6 +100,11 @@ namespace EmberThrone.Game
         {
             var keyboard = Keyboard.current;
             if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+            if (Story != null)
+            {
+                Story.Close();
+                return;
+            }
             if (Rewards != null)
             {
                 Rewards.Close();
@@ -133,13 +140,32 @@ namespace EmberThrone.Game
 
         public void ShowLevelStart(int index)
         {
-            if (LevelStart != null || Modal != null || !HasLevel(index)) return;
+            if (LevelStart != null || Modal != null || Story != null || !HasLevel(index)) return;
             if (Meta.Economy.Lives <= 0)
             {
                 OpenLives();
                 return;
             }
+            int chapter = LevelMap.ChapterStarting(index);
+            if (ShowStories && chapter >= 0 && Meta.Economy.MarkSceneSeen(chapter))
+            {
+                Meta.Save();
+                PlayStory(chapter, () => ShowLevelStart(index));
+                return;
+            }
             LevelStart = LevelStartPopup.Show(Ui.Popups, _levels[index], () => StartLevel(index), () => LevelStart = null);
+        }
+
+        public void PlayStory(int chapter, Action done = null)
+        {
+            if (Story != null || chapter < 0 || chapter >= LevelMap.Chapters.Length) return;
+            StoryScene scene = null;
+            scene = StoryScene.Show(Ui.Popups, transform, chapter, finished =>
+            {
+                if (Story == scene) Story = null;
+                if (finished) done?.Invoke();
+            });
+            Story = scene;
         }
 
         public void StartLevel(int index)
@@ -170,6 +196,22 @@ namespace EmberThrone.Game
             if (draws == null) return;
             Meta.Save();
             OpenModal(closed => PackPopup.Show(Ui.Popups, draws, Meta.Cards.Packs > 0, OpenPack, closed));
+        }
+
+        public void OpenEvent()
+        {
+            if (Meta.Event.Current(Meta.Now) == null) return;
+            OpenModal(closed => EventPopup.Show(Ui.Popups, ShowRewards, closed));
+        }
+
+        public void ShowRaceResult()
+        {
+            var race = Meta.Race;
+            if (!race.ResultReady) return;
+            int rank = race.ResultRank;
+            var prize = race.ClaimResult();
+            Meta.Save();
+            ShowRewards(rank + ". oldun!", prize, false);
         }
 
         public void OpenInfo(string title, string message) => OpenModal(closed => InfoPopup.Show(Ui.Popups, title, message, closed));
@@ -223,6 +265,8 @@ namespace EmberThrone.Game
                 Destroy(Game.gameObject);
                 Game = null;
             }
+            Story?.Close(false);
+            Story = null;
             LevelStart?.Close();
             Rewards?.Close();
             Modal?.Close();

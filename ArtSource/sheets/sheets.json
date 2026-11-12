@@ -569,6 +569,19 @@
             {
               "path": "Assets/EmberThrone/Resources/UI/Art/ic_medal.png",
               "fill": 0.88
+            },
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_medal_2.png",
+              "fill": 0.88,
+              "saturation": 0.16,
+              "value": 0.9
+            },
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_medal_3.png",
+              "fill": 0.88,
+              "hue": -0.035,
+              "saturation": 0.85,
+              "value": 0.78
             }
           ]
         }

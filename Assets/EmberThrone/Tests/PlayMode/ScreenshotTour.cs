@@ -39,6 +39,7 @@ namespace EmberThrone.Game.Tests
             Meta.Save();
             Time.timeScale = 1f;
             GameApp.ShowLoading = false;
+            GameApp.ShowStories = false;
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = new Vector2Int(1080, 1920);
             _app = GameApp.Create();
@@ -51,6 +52,7 @@ namespace EmberThrone.Game.Tests
         {
             Time.timeScale = 1f;
             GameApp.ShowLoading = true;
+            GameApp.ShowStories = true;
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = null;
             Object.Destroy(_app.gameObject);
@@ -162,8 +164,18 @@ namespace EmberThrone.Game.Tests
         public IEnumerator TakeAll()
         {
             _app.ShowLoadingScreen();
-            for (int i = 0; i < 20; i++) yield return null;
+            yield return new WaitForSecondsRealtime(1f);
             yield return Shot("00_yukleme");
+            _app.Loading?.Close();
+            for (int chapter = 0; chapter < LevelMap.Chapters.Length; chapter++)
+            {
+                _app.PlayStory(chapter);
+                yield return new WaitForSecondsRealtime(1.5f);
+                yield return Shot("00" + (char)('a' + chapter) + "_sahne_" + (chapter + 1) + "_basi");
+                yield return new WaitForSecondsRealtime(6.5f);
+                yield return Shot("00" + (char)('a' + chapter) + "_sahne_" + (chapter + 1) + "_sonu");
+                _app.Story?.Close(false);
+            }
             _app.Loading?.Close();
             yield return Shot("01_seviye_secimi");
             _app.LevelSelect.ShowMap(true);
@@ -189,6 +201,55 @@ namespace EmberThrone.Game.Tests
             yield return GameTime(Timing.ModalIn + Timing.StarFill * 4f);
             yield return Shot("01j_kart_paketi");
             _app.Modal.Close();
+
+            long real = Meta.WallClock();
+            long shown = RaceRules.WeekStart(RaceRules.WeekOf(real)) + 3 * EconomyRules.SecondsPerDay + 14 * 3600;
+            Meta.Clock = () => shown;
+            for (int i = 0; i < 9; i++) Meta.Race.AddWin(3, true, shown);
+            Meta.Save();
+            _app.LevelSelect.Show(LobbyPage.Rank);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01k_siralama");
+            _app.LevelSelect.Show(LobbyPage.Team);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01l_takimlar");
+            Meta.Team.Join(2);
+            for (int guard = 0; Meta.Team.OpenAsks(shown) == 0 && guard < 600; guard++) shown += 300;
+            Meta.Economy.LoseLife(shown);
+            Meta.Economy.LoseLife(shown);
+            Meta.Team.Request(shown);
+            shown += 200;
+            Meta.Save();
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01m_takim");
+            Meta.Team.Leave();
+
+            long harvest = (long)(new System.DateTime(2026, 11, 12, 14, 0, 0) - new System.DateTime(1970, 1, 1)).TotalSeconds;
+            Meta.Clock = () => harvest;
+            Meta.Event.Report(EventMetric.Obstacles, 380, harvest);
+            Meta.Event.Claim(harvest);
+            Meta.Event.Claim(harvest);
+            Meta.Save();
+            _app.LevelSelect.Show(LobbyPage.Home);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01n_ana_ekran_etkinlik");
+            _app.OpenEvent();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01o_etkinlik");
+            _app.Modal.Close();
+
+            long raid = (long)(new System.DateTime(2027, 2, 11, 12, 0, 0) - new System.DateTime(1970, 1, 1)).TotalSeconds;
+            Meta.Clock = () => raid;
+            for (int i = 0; i < 8; i++) Meta.Event.ReportWin(3, false, raid);
+            Meta.Save();
+            _app.OpenEvent();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01p_etkinlik_sprint");
+            _app.Modal.Close();
+
+            Meta.Clock = Meta.WallClock;
+            Meta.Economy.Profile.Lives = Meta.Rules.MaxLives;
+            Meta.Save();
             _app.LevelSelect.ShowMap(false);
             yield return null;
             _app.OpenShop();

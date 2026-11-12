@@ -216,6 +216,15 @@ namespace EmberThrone.Core
             }
         }
 
+        public bool SceneSeen(int scene) => scene >= 0 && scene < 31 && (Profile.ScenesSeen & (1 << scene)) != 0;
+
+        public bool MarkSceneSeen(int scene)
+        {
+            if (scene < 0 || scene >= 31 || SceneSeen(scene)) return false;
+            Profile.ScenesSeen |= 1 << scene;
+            return true;
+        }
+
         public bool DailyReady(long now) => EconomyRules.DayOf(now) > Profile.DailyDay;
 
         public int DailyIndex(long now)

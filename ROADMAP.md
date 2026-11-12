@@ -54,7 +54,8 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [ ] Sanat yönü: EmberThrone teması (ateş/kor krallığı), renk paleti, karakter
 - [x] Hikâye ve karakter kadrosu (2026-11-10, brief kararı 12): "Ayaz'a Karşı"; Emby, Lina, Odo, Mira, kötü karakter Ayaz ve Pofuduk; bölge sahnesi kalıbı ([docs/design/story.md](docs/design/story.md))
 - [ ] Karakter modelleri, rig ve animasyonları; pilot maskotla (Unity'de gerçek zamanlı 3B ile kare dizisi karşılaştırılacak)
-- [ ] Bölge açılış sahneleri: oyunun içinde, karakter modelleriyle, bölge başına 20–40 sn
+- [x] Bölge açılış sahneleri (2026-11-12): bölge başına 10 saniyelik video (Ayaz'ın buzu, Emby ocağı yakar, sıcaklık geri gelir); bölgenin ilk seviyesinden önce bir kez oynar, dünya ekranında bölge resmine dokununca yeniden izlenir
+- [ ] Karakter modelleriyle kurgulanan uzun sahneler (Lina, Odo, Mira, Ayaz ve Pofuduk sahnede)
 - [ ] Sprite hattını genişlet: patlama ve parçacık kareleri, harita mahalleleri, yeni engeller
 - [x] Efektler ve his (2026-11-06): eşleşmede savrulan renkli kırıntılar ve ışıltılar; kutuda kıymık, buzda kristal, külde duman ve kor; roket, bomba ve kombolarda ekran sarsıntısı; "Harika!", "Muhteşem!", "İnanılmaz!" yazıları; Android titreşimi (3 seviye); kazanma penceresinde konfeti
 - [x] Efekt yenilemesi (2026-11-12): parçacık sistemi (kıvılcım, kırıntı, duman, kor, konfeti), iki shader (toplamalı ışık; taşta parlama ve parıltı şeridi), şimşekli renk bombası, alev izli roket, şok halkalı bomba, vuruş duraklaması, çevredeki taşların itilmesi, hedefe uçan taşlar, seviye başı giriş animasyonu, nefes alan özel taşlar, arka planda korlar; tahta koyu lacivert
@@ -79,10 +80,14 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] Dünya ekranı bölge kartları oldu (görsel, ilerleme, yıldız, düğüm ızgarası); eski yol haritaları kaldırıldı
 - [x] Bölge görselleri (2026-11-12): Fırın Sokağı ve Demirci Çarşısı kendi çizimlerini aldı; Kıvılcım Köyü oyun arka planından kırpılır
 - [ ] Mor sandık hâlâ eski tarzda (henüz kullanılmıyor)
-- [ ] Hareketli yükleme ekranı ve bölge açılış sahneleri (video üretimiyle)
+- [x] Hareketli yükleme ekranı ve bölge açılış sahneleri (2026-11-12, video üretimiyle; kaynaklar `ArtSource/video/`)
+- [ ] Videoları telefonda dene (açılış hızı, ses, APK boyutu: dört video yaklaşık 7 MB)
 - [x] Koleksiyon sekmesi (2026-11-12): 6 set, 36 kart, kart paketleri, set ödülleri, büyük ödül; motor tarafında testli
 - [x] Koleksiyonun 36 kart çizimi (2026-11-12): set başına bir sayfa, altı nesne; eksik kart aynı çizimin koyu silueti olarak görünür
-- [ ] Sıralama sekmesi (haftalık yarış) ve Takım sekmesi (can isteme, sohbet): Faz 4'te; önce proje Unity Cloud'a bağlanacak (sahibi yapacak)
+- [x] Sıralama sekmesi (2026-11-12): Köy Ligi, haftalık yarış. 29 rakip köy halkıdır; kazanılan yıldız kadar kupa (ilk kazanış iki katı), hafta sonunda sıraya göre ödül. Cihazda çalışır
+- [x] Takım sekmesi (2026-11-12): altı hazır takım, can isteme (4 saatte bir 5 can), can gönderme (20 altın), üye listesi. Üyeler köy halkıdır; cihazda çalışır
+- [ ] Sıralama ve Takım'ı telefonda dene; kupa ve ödül dengesini oynayarak ayarla
+- [ ] Gerçek oyuncular: proje Unity Cloud'a bağlanacak (sahibi yapar, adımlar [docs/ONLINE.md](docs/ONLINE.md)); ardından Faz 4
 
 ## Faz 3 — Meta ve ekonomi
 - [x] Lobi (2026-11-12): harita üstünde üst bar (can ve sayaç, altın, elmas), altta mağaza, büyük "Seviye N" butonu ve ayarlar, solda hediye ve görev butonları, bildirim rozetleri
@@ -102,14 +107,16 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 
 ## Faz 4 — Backend ve sosyal
 - [ ] Hesap + bulut kayıt
-- [ ] Haftalık sıralama (v1)
-- [ ] Takımlar/klanlar: kur, katıl, ara; takım sohbeti; can isteme/gönderme (lansmandan sonra)
+- [ ] Haftalık sıralama (v1): Köy Ligi'nin gerçek oyuncularla, 30 kişilik gruplarda oynanması (ekran ve kurallar hazır)
+- [ ] Takımlar/klanlar: kur, katıl, ara; takım sohbeti; can isteme/gönderme gerçek oyuncularla (ekran ve can kuralları hazır)
 - [ ] Liderlik tabloları, takım etkinlikleri (ortak hedefe birlikte oynama), turnuvalar
 - [ ] Sunucu doğrulama: deterministik motorla hamle tekrarı (hile koruması)
 - Sunucu: Unity Gaming Services, Pong'daki gibi (2026-11-06 kararı)
 
 ## Faz 5 — LiveOps
-- [ ] Etkinlik altyapısı (başlangıç/bitiş sunucudan), sezon kartı, sınırlı süreli etkinlikler
+- [x] Aylık etkinlikler (2026-11-12, LIVEOPS-001): on iki aylık takvim, iki tip. Puan merdiveni (ay boyu; kazanç, engel ve booster kor verir, beş kademe ödül) ve sprint (3–7 gün, tek hedef, ilk yarıda bitirene +%20 altın). Ana ekranda etkinlik butonu, geri sayım ve ödül rozeti. Cihazda çalışır, takvim koddaki veridir
+- [ ] Etkinlikleri telefonda dene; puan ve ödül dengesini oynayarak ayarla
+- [ ] Etkinlik takvimi sunucudan (remote config), sezon kartı, etkinliğe özel görseller
 - [ ] Teklifler, remote config, A/B test, analitik hunileri, push bildirim
 
 ## Faz 6 — Yayın

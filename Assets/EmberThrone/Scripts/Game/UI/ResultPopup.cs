@@ -12,6 +12,7 @@ namespace EmberThrone.Game
         public string Title { get; private set; }
         public int Coins { get; private set; }
         public int Packs { get; private set; }
+        public int Trophies { get; private set; }
         public VisualElement Root { get; private set; }
         public IReadOnlyList<Button> Buttons => _buttons;
 
@@ -25,9 +26,9 @@ namespace EmberThrone.Game
             public Choice(string label, ButtonKind kind, Action run) { Label = label; Kind = kind; Run = run; }
         }
 
-        public static ResultPopup Show(VisualElement parent, string title, string message, int stars, int coins, int packs, params Choice[] buttons)
+        public static ResultPopup Show(VisualElement parent, string title, string message, int stars, int coins, int packs, int trophies, params Choice[] buttons)
         {
-            var popup = new ResultPopup { Title = title, Coins = coins, Packs = packs };
+            var popup = new ResultPopup { Title = title, Coins = coins, Packs = packs, Trophies = trophies };
             popup.Build(parent, message, stars, buttons);
             return popup;
         }
@@ -58,6 +59,11 @@ namespace EmberThrone.Game
                 {
                     Ui.El("et-icon et-result__reward-icon et-result__reward-icon--next et-ic--cards", reward);
                     Ui.Text("+" + Packs, "et-ink et-result__reward-text", reward, "Packs");
+                }
+                if (Trophies > 0)
+                {
+                    Ui.El("et-icon et-result__reward-icon et-result__reward-icon--next et-ic--trophy", reward);
+                    Ui.Text("+" + Trophies, "et-ink et-result__reward-text", reward, "Trophies");
                 }
             }
             foreach (var c in choices)

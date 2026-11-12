@@ -48,6 +48,7 @@ namespace EmberThrone.Game
         public bool IsBusy { get; private set; }
         public int WinCoins { get; private set; }
         public int WinPacks { get; private set; }
+        public int WinTrophies { get; private set; }
         public string LastMismatch { get; private set; }
 
         public static GameController Create(GameApp app, Transform parent, LevelDefinition level, int levelIndex, int seed)
@@ -253,6 +254,7 @@ namespace EmberThrone.Game
                 return;
             }
             BoosterInventory.Spend(type);
+            Meta.Event.Report(EventMetric.Boosters, 1, Meta.Now);
             Arm(null);
             RefreshBoosters();
             Run(outcome);
@@ -432,6 +434,8 @@ namespace EmberThrone.Game
             var economy = Meta.Economy;
             WinCoins = economy.RewardWin(stars, first);
             WinPacks = first ? Meta.Rules.PacksOnFirstWin : 0;
+            WinTrophies = Meta.Race.AddWin(stars, first, now);
+            Meta.Event.ReportWin(stars, _level.Difficulty == "hard", now);
             economy.Report(QuestKind.WinLevels, 1, now);
             economy.Report(QuestKind.EarnStars, stars, now);
             Meta.Save();
@@ -467,6 +471,7 @@ namespace EmberThrone.Game
             economy.Report(QuestKind.CollectGems, gems, now);
             economy.Report(QuestKind.FireSpecials, specials, now);
             economy.Report(QuestKind.BreakObstacles, obstacles, now);
+            Meta.Event.Report(EventMetric.Obstacles, obstacles, now);
         }
 
         IEnumerator EndLevel() => Session.State == GameState.Won ? ShowWin() : ShowLose();
@@ -486,7 +491,7 @@ namespace EmberThrone.Game
             var next = _app.HasLevel(_levelIndex + 1)
                 ? new ResultPopup.Choice("Sonraki seviye", ButtonKind.Cta, AfterAd(() => _app.StartLevel(_levelIndex + 1)))
                 : new ResultPopup.Choice("Tekrar oyna", ButtonKind.Cta, AfterAd(() => _app.StartLevel(_levelIndex)));
-            Popup = ResultPopup.Show(_app.Ui.Popups, "Kazandın!", Session.MovesLeft + " hamle arttı", stars, WinCoins, WinPacks,
+            Popup = ResultPopup.Show(_app.Ui.Popups, "Kazandın!", Session.MovesLeft + " hamle arttı", stars, WinCoins, WinPacks, WinTrophies,
                 next,
                 new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, AfterAd(_app.ShowLevelSelect)));
         }
@@ -510,7 +515,7 @@ namespace EmberThrone.Game
             if (coins) choices.Add(new ResultPopup.Choice(CoinContinueLabel(moves, price), ad ? ButtonKind.Secondary : ButtonKind.Cta, BuyExtraMoves));
             choices.Add(new ResultPopup.Choice("Tekrar dene", ad || coins ? ButtonKind.Secondary : ButtonKind.Cta, Retry));
             choices.Add(new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, Leave));
-            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", RemainingText(), -1, 0, 0, choices.ToArray());
+            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", RemainingText(), -1, 0, 0, 0, choices.ToArray());
         }
 
         public static string ContinueLabel(int moves) => "İzle: +" + moves + " hamle";

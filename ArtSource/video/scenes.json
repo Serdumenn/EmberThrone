@@ -1,0 +1,27 @@
+{
+  "scenes": [
+    {
+      "file": "village_loop.mp4",
+      "length": 4.5,
+      "audio": false,
+      "clip": "Assets/EmberThrone/Resources/Video/scene_loading.webm",
+      "poster": "Assets/EmberThrone/Resources/UI/Art/scene_loading.jpg"
+    },
+    {
+      "file": "village_story.mp4",
+      "start": 10.1,
+      "clip": "Assets/EmberThrone/Resources/Video/scene_1.webm",
+      "poster": "Assets/EmberThrone/Resources/UI/Art/scene_1.jpg"
+    },
+    {
+      "file": "bakery_story.mp4",
+      "clip": "Assets/EmberThrone/Resources/Video/scene_2.webm",
+      "poster": "Assets/EmberThrone/Resources/UI/Art/scene_2.jpg"
+    },
+    {
+      "file": "forge_story.mp4",
+      "clip": "Assets/EmberThrone/Resources/Video/scene_3.webm",
+      "poster": "Assets/EmberThrone/Resources/UI/Art/scene_3.jpg"
+    }
+  ]
+}

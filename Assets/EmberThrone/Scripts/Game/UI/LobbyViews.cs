@@ -74,20 +74,22 @@ namespace EmberThrone.Game
         public Button WorldButton { get; private set; }
         public Button GiftButton { get; private set; }
         public Button QuestsButton { get; private set; }
+        public EventButton Event { get; private set; }
         public bool GiftBadgeShown => !_giftBadge.ClassListContains(Ui.Hidden);
         public string QuestBadgeText => _questBadge.ClassListContains(Ui.Hidden) ? "" : _questBadge.text;
 
-        public static LobbyBar Create(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests)
+        public static LobbyBar Create(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent)
         {
             var bar = new LobbyBar();
-            bar.Build(parent, playLabel, onPlay, onWorld, onGift, onQuests);
+            bar.Build(parent, playLabel, onPlay, onWorld, onGift, onQuests, onEvent);
             return bar;
         }
 
-        void Build(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests)
+        void Build(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent)
         {
             Side = Ui.El("et-side", parent, "Side");
             GiftButton = Ring(Side, "Gift", "et-ic--gift", "et-side__button", null, onGift, out _giftBadge);
+            Event = EventButton.Create(Side, onEvent);
 
             Root = Ui.El("et-lobby", parent, "Lobby");
             WorldButton = Ring(Root, "World", "et-ic--world", "et-lobby__ring", "Dünya", onWorld, out _);
@@ -123,14 +125,18 @@ namespace EmberThrone.Game
             int claimable = economy.ClaimableQuests(now);
             _questBadge.text = claimable.ToString();
             _questBadge.EnableInClassList(Ui.Hidden, claimable <= 0);
+            Event.Refresh();
         }
     }
 
     public sealed class TabBar
     {
         const string Active = "et-tab--active";
+        const int RefreshMs = 5000;
 
         Label _cardsBadge;
+        Label _rankBadge;
+        Label _teamBadge;
 
         public VisualElement Root { get; private set; }
         public Button ShopTab { get; private set; }
@@ -142,29 +148,33 @@ namespace EmberThrone.Game
         public static TabBar Create(VisualElement parent, Action onShop, Action onRank, Action onHome, Action onTeam, Action onCards)
         {
             var bar = new TabBar { Root = Ui.El("et-tabbar", parent, "Tabs") };
-            bar.ShopTab = Tab(bar.Root, "Shop", "et-ic--shop", "Mağaza", false, onShop);
-            bar.RankTab = Tab(bar.Root, "Rank", "et-ic--trophy", "Sıralama", true, onRank);
-            bar.HomeTab = Tab(bar.Root, "Home", "et-ic--home", "Ana Ekran", false, onHome);
-            bar.TeamTab = Tab(bar.Root, "Team", "et-ic--team", "Takım", true, onTeam);
-            bar.CardsTab = Tab(bar.Root, "Cards", "et-ic--cards", "Koleksiyon", false, onCards);
+            bar.ShopTab = Tab(bar.Root, "Shop", "et-ic--shop", "Mağaza", onShop);
+            bar.RankTab = Tab(bar.Root, "Rank", "et-ic--trophy", "Sıralama", onRank);
+            bar.HomeTab = Tab(bar.Root, "Home", "et-ic--home", "Ana Ekran", onHome);
+            bar.TeamTab = Tab(bar.Root, "Team", "et-ic--team", "Takım", onTeam);
+            bar.CardsTab = Tab(bar.Root, "Cards", "et-ic--cards", "Koleksiyon", onCards);
             bar._cardsBadge = Ui.Text("", "et-badge et-tab__badge " + Ui.Hidden, bar.CardsTab, "Badge");
+            bar._rankBadge = Ui.Text("!", "et-badge et-tab__badge " + Ui.Hidden, bar.RankTab, "Badge");
+            bar._teamBadge = Ui.Text("", "et-badge et-tab__badge " + Ui.Hidden, bar.TeamTab, "Badge");
             bar.SetActive(bar.HomeTab);
             bar.Refresh();
             Meta.Changed += bar.Refresh;
             bar.Root.RegisterCallback<DetachFromPanelEvent>(_ => Meta.Changed -= bar.Refresh);
+            bar.Root.schedule.Execute(bar.Refresh).Every(RefreshMs);
             return bar;
         }
 
-        static Button Tab(VisualElement parent, string name, string icon, string label, bool locked, Action onTap)
+        static Button Tab(VisualElement parent, string name, string icon, string label, Action onTap)
         {
             var tab = Ui.Button(null, "et-pressable et-tab", onTap, parent, name);
             Ui.El("et-icon et-tab__icon " + icon, tab);
             Ui.Text(label, "et-outlined et-tab__label", tab, "Label");
-            if (locked) Ui.El("et-icon et-tab__lock et-ic--lock", tab, "Lock");
             return tab;
         }
 
         public string CardsBadgeText => _cardsBadge.ClassListContains(Ui.Hidden) ? "" : _cardsBadge.text;
+        public string TeamBadgeText => _teamBadge.ClassListContains(Ui.Hidden) ? "" : _teamBadge.text;
+        public bool RankBadgeShown => !_rankBadge.ClassListContains(Ui.Hidden);
 
         public void SetActive(Button tab)
         {
@@ -176,6 +186,10 @@ namespace EmberThrone.Game
             int waiting = Meta.Cards.Packs + Meta.Cards.Claimable;
             _cardsBadge.text = waiting.ToString();
             _cardsBadge.EnableInClassList(Ui.Hidden, waiting <= 0);
+            _rankBadge.EnableInClassList(Ui.Hidden, !Meta.Race.ResultReady);
+            int asks = Meta.Team.OpenAsks(Meta.Now);
+            _teamBadge.text = asks.ToString();
+            _teamBadge.EnableInClassList(Ui.Hidden, asks <= 0);
         }
     }
 
@@ -187,10 +201,13 @@ namespace EmberThrone.Game
         public VisualElement Root { get; private set; }
         public bool IsOpen => Root != null && Root.parent != null;
 
-        public static LoadingScreen Show(VisualElement parent, Action done)
+        public VideoView Video { get; private set; }
+
+        public static LoadingScreen Show(VisualElement parent, Transform owner, Action done)
         {
             var screen = new LoadingScreen { Root = Ui.El("et-fill et-loading", parent, "Loading") };
             screen.Root.pickingMode = PickingMode.Position;
+            screen.Video = VideoView.Create(screen.Root, owner, "scene_loading", true, false);
             Ui.Text("EmberThrone", "et-title et-title--display et-loading__logo", screen.Root, "Logo");
             var bar = Ui.El("et-progress et-loading__bar", screen.Root, "Bar");
             var fill = Ui.El("et-progress__fill", bar, "Fill");

@@ -29,7 +29,7 @@ Kral, kraliçe, taç ya da saray yok (brief, kopyalanmayacaklar).
 
 ## Bölge yapısı
 
-Her bölge bir mahalledir (fırın sokağı, demirci çarşısı, liman, kütüphane…). Bölge açılışında 20–40 saniyelik bir sahne oynar; sahneler oyunun içinde, karakter modelleriyle kurgulanır (video dosyası değil).
+Her bölge bir mahalledir (fırın sokağı, demirci çarşısı, liman, kütüphane…). Bölge açılışında kısa bir sahne oynar. 2026-11-12'den beri bu sahneler 10 saniyelik videolardır (görsel üretim aracıyla, Emby'li; kaynaklar `ArtSource/video/`). Karakter modelleriyle kurgulanan 20–40 saniyelik sahneler sonraya kaldı.
 
 Sahne kalıbı:
 

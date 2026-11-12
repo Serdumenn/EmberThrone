@@ -46,6 +46,7 @@ namespace EmberThrone.Game.Tests
             UiRoot.SafeAreaOverride = null;
             Time.timeScale = 1f;
             GameApp.ShowLoading = false;
+            GameApp.ShowStories = false;
             _app = GameApp.Create();
             yield return null;
         }
@@ -55,6 +56,7 @@ namespace EmberThrone.Game.Tests
         {
             Time.timeScale = 1f;
             GameApp.ShowLoading = true;
+            GameApp.ShowStories = true;
             UiRoot.SafeAreaOverride = null;
             InputSystem.RemoveDevice(_mouse);
             InputSystem.settings.backgroundBehavior = _background;
@@ -778,7 +780,241 @@ namespace EmberThrone.Game.Tests
             Assert.IsFalse(select.MapShown, "the home tab leads back");
 
             yield return TapUi(select.Tabs.TeamTab);
-            Assert.IsTrue(_app.Modal is InfoPopup, "a tab that is not ready says so");
+            Assert.AreEqual(LobbyPage.Team, select.Page);
+            Assert.IsNull(_app.Modal);
+            yield return TapUi(select.Tabs.RankTab);
+            Assert.AreEqual(LobbyPage.Rank, select.Page);
+            yield return TapUi(select.Tabs.HomeTab);
+            Assert.AreEqual(LobbyPage.Home, select.Page);
+        }
+
+        [UnityTest]
+        public IEnumerator Race_ListsTheVillage_CountsWins_AndPaysLastWeeksPrize()
+        {
+            FreezeClock();
+            yield return null;
+            var select = _app.LevelSelect;
+            yield return TapUi(select.Tabs.RankTab);
+            Assert.AreEqual(Meta.RaceRules.Rivals + 1, select.Race.RowCount);
+            Assert.AreEqual("Sıran: " + select.Race.MyRank, select.Race.MineText);
+            Assert.IsTrue(select.Race.LeftText.StartsWith("Kalan: "));
+            Assert.IsFalse(select.Tabs.RankBadgeShown);
+
+            var level = Level(10, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even);
+            level.Id = 4242;
+            yield return Begin(level);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            int stars = LevelProgress.GetStars(4242);
+            Assert.AreEqual(stars * Meta.RaceRules.FirstWinFactor, Game.WinTrophies, "a first win counts double");
+            Assert.AreEqual(Game.WinTrophies, Meta.Race.Points);
+            Assert.AreEqual(Game.WinTrophies, Game.Popup.Trophies, "the window shows the trophies");
+
+            _now += RaceRules.SecondsPerWeek;
+            _app.ShowLevelSelect();
+            yield return null;
+            select = _app.LevelSelect;
+            Assert.IsTrue(select.Tabs.RankBadgeShown, "last week's prize waits");
+            int coins = Meta.Economy.Coins;
+            yield return TapUi(select.Tabs.RankTab);
+            Assert.IsNotNull(_app.Rewards, "the prize is shown");
+            Assert.Greater(Meta.Economy.Coins, coins);
+            Assert.IsFalse(Meta.Race.ResultReady);
+            Assert.AreEqual(0, Meta.Race.Points, "a new week starts from zero");
+            Assert.IsFalse(select.Tabs.RankBadgeShown);
+        }
+
+        static long At(int year, int month, int day) =>
+            (long)(new System.DateTime(year, month, day, 12, 0, 0) - new System.DateTime(1970, 1, 1)).TotalSeconds;
+
+        [UnityTest]
+        public IEnumerator Event_CollectsEmbersFromWins_AndPaysTheFirstTier()
+        {
+            _now = At(2026, 11, 12);
+            Meta.Clock = () => _now;
+            _app.ShowLevelSelect();
+            yield return null;
+            var button = _app.LevelSelect.Lobby.Event;
+            Assert.IsTrue(button.Shown, "November has an event");
+            Assert.AreEqual("", button.BadgeText);
+            Assert.AreEqual(Meta.Span(Meta.Event.SecondsLeft(_now)), button.LeftText);
+
+            var level = Level(10, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even);
+            level.Id = 4242;
+            yield return Begin(level);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            int stars = LevelProgress.GetStars(4242);
+            Assert.AreEqual(Meta.EventRules.WinPoints(stars, false), Meta.Event.Points, "a win brings embers");
+
+            Meta.Event.Report(EventMetric.Obstacles, 50, _now);
+            Meta.Save();
+            _app.ShowLevelSelect();
+            yield return null;
+            button = _app.LevelSelect.Lobby.Event;
+            Assert.AreEqual("1", button.BadgeText, "the first tier waits");
+            yield return TapUi(button.Root);
+            var popup = _app.Modal as EventPopup;
+            Assert.IsNotNull(popup);
+            Assert.AreEqual(EventKind.Ladder, popup.Kind);
+            Assert.AreEqual(5, popup.TierRows);
+            Assert.AreEqual(Meta.Event.Points.ToString(), popup.PointsText);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            int coins = Meta.Economy.Coins;
+            yield return TapUi(popup.ClaimButton);
+            Assert.AreEqual(coins + 100, Meta.Economy.Coins);
+            Assert.IsNotNull(_app.Rewards, "the prize is shown");
+            Assert.IsNull(popup.ClaimButton, "the next tier is still shut");
+        }
+
+        [UnityTest]
+        public IEnumerator Event_HidesBetweenEvents_AndASprintPaysItsGoal()
+        {
+            _now = At(2027, 2, 5);
+            Meta.Clock = () => _now;
+            _app.ShowLevelSelect();
+            yield return null;
+            var lobby = _app.LevelSelect.Lobby;
+            Assert.IsFalse(lobby.Event.Shown, "nothing runs before the tenth");
+            _app.OpenEvent();
+            Assert.IsNull(_app.Modal);
+
+            _now = At(2027, 2, 10);
+            lobby.Refresh();
+            Assert.IsTrue(lobby.Event.Shown);
+            yield return null;
+            yield return TapUi(lobby.Event.Root);
+            var popup = _app.Modal as EventPopup;
+            Assert.IsNotNull(popup);
+            Assert.AreEqual(EventKind.Sprint, popup.Kind);
+            Assert.AreEqual("0/40", popup.PointsText);
+            Assert.IsNull(popup.ClaimButton);
+
+            for (int i = 0; i < 14; i++) Meta.Event.ReportWin(3, false, _now);
+            Meta.Save();
+            Assert.AreEqual("40/40", popup.PointsText);
+            Assert.IsNotNull(popup.ClaimButton);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            int coins = Meta.Economy.Coins;
+            yield return TapUi(popup.ClaimButton);
+            Assert.AreEqual(coins + 960, Meta.Economy.Coins, "finished in the first half");
+            Assert.IsNull(popup.ClaimButton);
+        }
+
+        [UnityTest]
+        public IEnumerator Team_IsJoined_SendsLives_AndHelpingPaysCoins()
+        {
+            FreezeClock();
+            yield return null;
+            var select = _app.LevelSelect;
+            yield return TapUi(select.Tabs.TeamTab);
+            Assert.AreEqual(Meta.TeamRules.Teams.Length, select.Team.JoinButtons.Count);
+            yield return TapUi(select.Team.JoinButtons[1]);
+            Assert.IsTrue(Meta.Team.Joined);
+            Assert.AreEqual(1, Meta.Team.Index);
+            Assert.AreEqual(Meta.TeamRules.Teams[1].Size + 1, select.Team.MemberRows);
+            Assert.IsFalse(select.Team.RequestButton.enabledSelf, "lives are full");
+            Assert.AreEqual("Canın dolu", select.Team.StatusText);
+
+            Meta.Economy.LoseLife(_now);
+            Meta.Economy.LoseLife(_now);
+            Meta.Save();
+            yield return null;
+            Assert.IsTrue(select.Team.RequestButton.enabledSelf);
+            yield return TapUi(select.Team.RequestButton);
+            Assert.IsTrue(Meta.Team.RequestOpen(_now));
+            Assert.AreEqual(3, Meta.Economy.Lives);
+            Assert.IsFalse(select.Team.RequestButton.enabledSelf, "one request at a time");
+
+            _now += 1100;
+            Assert.AreEqual(5, Meta.Economy.Lives, "teammates fill the lives");
+            select.Team.Refresh();
+            Assert.IsTrue(select.Team.StatusText.StartsWith("Yeni istek: "), select.Team.StatusText);
+
+            int guard = 0;
+            while (Meta.Team.OpenAsks(_now) == 0 && guard++ < 600) _now += 300;
+            Assert.AreEqual(1, Meta.Team.OpenAsks(_now), "a teammate asks for lives");
+            select.Team.Refresh();
+            select.Tabs.Refresh();
+            Assert.AreEqual("1", select.Tabs.TeamBadgeText);
+            yield return null;
+            Assert.AreEqual(1, select.Team.HelpButtons.Count);
+            int coins = Meta.Economy.Coins;
+            yield return TapUi(select.Team.HelpButtons[0]);
+            Assert.AreEqual(coins + Meta.TeamRules.HelpCoins, Meta.Economy.Coins);
+            Assert.AreEqual(0, select.Team.HelpButtons.Count, "one help per ask");
+            Assert.AreEqual("", select.Tabs.TeamBadgeText);
+
+            yield return TapUi(select.Team.LeaveButton);
+            var confirm = _app.Modal as ConfirmPopup;
+            Assert.IsNotNull(confirm);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(confirm.YesButton);
+            Assert.IsFalse(Meta.Team.Joined);
+            Assert.AreEqual(Meta.TeamRules.Teams.Length, select.Team.JoinButtons.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator Story_PlaysBeforeADistrictsFirstLevel_OnlyOnce()
+        {
+            GameApp.ShowStories = true;
+            yield return null;
+            yield return TapUi(_app.LevelSelect.Lobby.PlayButton);
+            var story = _app.Story;
+            Assert.IsNotNull(story, "the village story comes before level 1");
+            Assert.IsNull(_app.LevelStart);
+            Assert.AreEqual(0, story.Chapter);
+            Assert.IsTrue(Meta.Economy.SceneSeen(0));
+            Assert.IsTrue(story.Video.HasClip, "the clip ships with the game");
+            if (VideoView.Supported)
+            {
+                float limit = Time.realtimeSinceStartup + 8f;
+                while (!story.Video.Started && !story.Video.Failed && Time.realtimeSinceStartup < limit) yield return null;
+                Assert.IsTrue(story.Video.Started, "the video plays");
+            }
+
+            yield return TapUi(story.SkipButton);
+            Assert.IsNull(_app.Story);
+            Assert.IsFalse(story.IsOpen);
+            Assert.IsNotNull(_app.LevelStart, "then the level window opens");
+            _app.LevelStart.Close();
+            yield return null;
+
+            yield return TapUi(_app.LevelSelect.Lobby.PlayButton);
+            Assert.IsNull(_app.Story, "a story plays once");
+            Assert.IsNotNull(_app.LevelStart);
+            _app.LevelStart.Close();
+            yield return null;
+
+            yield return OpenWorld();
+            Assert.AreEqual(1, _app.LevelSelect.StoryButtons.Count, "only open districts can be replayed");
+            yield return TapUi(_app.LevelSelect.StoryButtons[0]);
+            Assert.IsNotNull(_app.Story, "the district picture replays its story");
+            _app.Story.Close();
+            Assert.IsNull(_app.Story);
+            Assert.IsNull(_app.LevelStart, "a replay opens no level");
+
+            _app.PlayStory(1);
+            _app.Story.Close(false);
+            Assert.IsNull(_app.Story, "a scene closed without going on is gone too");
+            _app.PlayStory(2);
+            Assert.IsNotNull(_app.Story, "so the next one can play");
+            _app.Story.Close(false);
+        }
+
+        [UnityTest]
+        public IEnumerator Story_ClosesByItself_WhenItEnds()
+        {
+            yield return null;
+            _app.PlayStory(2);
+            var story = _app.Story;
+            Assert.IsNotNull(story);
+            float limit = Time.realtimeSinceStartup + 40f;
+            while (story.IsOpen && Time.realtimeSinceStartup < limit) yield return null;
+            Assert.IsFalse(story.IsOpen, "the story closes when it ends");
+            Assert.IsNull(_app.Story);
         }
 
         [UnityTest]

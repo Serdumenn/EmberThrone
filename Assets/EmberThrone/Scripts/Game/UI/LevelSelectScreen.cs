@@ -11,6 +11,8 @@ namespace EmberThrone.Game
         Home,
         World,
         Cards,
+        Rank,
+        Team,
     }
 
     public sealed class LevelSelectScreen
@@ -27,16 +29,21 @@ namespace EmberThrone.Game
         public LobbyBar Lobby { get; private set; }
         public TabBar Tabs { get; private set; }
         public CollectionView Cards { get; private set; }
+        public RaceView Race { get; private set; }
+        public IReadOnlyList<Button> StoryButtons => _stories;
+        public TeamView Team { get; private set; }
         public LobbyPage Page { get; private set; }
         public bool MapShown => Page == LobbyPage.World;
 
         UiRoot _ui;
+        GameApp _app;
         public SettingsPopup Settings { get; private set; }
         public int CurrentIndex { get; private set; }
         public ScrollView Scroll { get; private set; }
 
         readonly List<Button> _buttons = new List<Button>();
         readonly List<bool> _locked = new List<bool>();
+        readonly List<Button> _stories = new List<Button>();
 
         public bool IsLocked(int index) => _locked[index];
 
@@ -50,6 +57,7 @@ namespace EmberThrone.Game
         void Build(UiRoot ui, IReadOnlyList<LevelDefinition> levels, Func<LevelDefinition, int> starsOf, Action<int> onPick, GameApp app)
         {
             _ui = ui;
+            _app = app;
             Root = Ui.El("et-map", ui.Content, "LevelSelect");
 
             Scroll = new ScrollView(ScrollViewMode.Vertical) { name = "Scroll" };
@@ -76,13 +84,15 @@ namespace EmberThrone.Game
             int current = CurrentIndex;
             Top = TopBar.Create(Root, app.OpenLives, app.OpenShop, () => OpenSettings(ui));
             SettingsButton = Top.SettingsButton;
-            Lobby = LobbyBar.Create(Root, "Seviye " + levels[current].Id, () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests);
+            Lobby = LobbyBar.Create(Root, "Seviye " + levels[current].Id, () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests, app.OpenEvent);
             Tabs = TabBar.Create(Root, app.OpenShop,
-                () => app.OpenInfo("Sıralama", "Haftalık yarış hazırlanıyor."),
+                () => Show(LobbyPage.Rank),
                 () => ShowMap(false),
-                () => app.OpenInfo("Takım", "Takımlar hazırlanıyor."),
+                () => Show(LobbyPage.Team),
                 () => Show(LobbyPage.Cards));
             Cards = CollectionView.Create(Root, app);
+            Race = RaceView.Create(Root);
+            Team = TeamView.Create(Root, app);
             Tabs.Root.BringToFront();
             ShowMap(false);
 
@@ -105,9 +115,21 @@ namespace EmberThrone.Game
             }
 
             var card = Ui.El(_locked[first] ? "et-panel et-district et-district--locked" : "et-panel et-district", Scroll, "Chapter" + (chapterIndex + 1));
-            var art = Ui.El("et-district__art " + chapter.Style, card, "Art");
+            VisualElement art;
+            if (_locked[first])
+            {
+                art = Ui.El("et-district__art " + chapter.Style, card, "Art");
+                Ui.El("et-icon et-district__lock et-ic--lock", art, "Lock");
+            }
+            else
+            {
+                int index = chapterIndex;
+                var story = Ui.Button(null, "et-pressable et-district__art " + chapter.Style, () => _app.PlayStory(index), card, "Art");
+                Ui.El("et-icon et-district__play et-ic--video", story, "Play");
+                _stories.Add(story);
+                art = story;
+            }
             Ui.Text(chapter.Title, "et-chip et-district__title", art, "Title");
-            if (_locked[first]) Ui.El("et-icon et-district__lock et-ic--lock", art, "Lock");
 
             var progress = Ui.El("et-district__progress", card, "Progress");
             var bar = Ui.El("et-progress et-district__bar", progress, "Bar");
@@ -154,12 +176,32 @@ namespace EmberThrone.Game
             bool home = page == LobbyPage.Home;
             Scroll.EnableInClassList(Ui.Hidden, page != LobbyPage.World);
             Cards.Root.EnableInClassList(Ui.Hidden, page != LobbyPage.Cards);
+            Race.Root.EnableInClassList(Ui.Hidden, page != LobbyPage.Rank);
+            Team.Root.EnableInClassList(Ui.Hidden, page != LobbyPage.Team);
             Lobby.SetShown(home);
-            Tabs.SetActive(page == LobbyPage.Cards ? Tabs.CardsTab : Tabs.HomeTab);
+            Tabs.SetActive(TabOf(page));
             _ui.Backdrop.EnableInClassList("et-backdrop--map", !home);
             _ui.Backdrop.EnableInClassList("et-backdrop--home", home);
             if (page == LobbyPage.Cards) Cards.Refresh();
+            if (page == LobbyPage.Team) Team.Refresh();
+            if (page == LobbyPage.Rank)
+            {
+                _app.ShowRaceResult();
+                Race.Refresh();
+                Race.ShowMine();
+            }
             if (page == LobbyPage.World && CurrentIndex >= 0) Scroll.schedule.Execute(() => Center(_buttons[CurrentIndex]));
+        }
+
+        Button TabOf(LobbyPage page)
+        {
+            switch (page)
+            {
+                case LobbyPage.Cards: return Tabs.CardsTab;
+                case LobbyPage.Rank: return Tabs.RankTab;
+                case LobbyPage.Team: return Tabs.TeamTab;
+                default: return Tabs.HomeTab;
+            }
         }
 
         void CenterWhenLaidOut(VisualElement node)

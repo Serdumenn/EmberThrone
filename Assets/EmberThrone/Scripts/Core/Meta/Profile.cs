@@ -34,6 +34,25 @@ namespace EmberThrone.Core
         public bool[] SetsClaimed = new bool[0];
         public bool GrandClaimed;
 
+        public int RaceWeek = -1;
+        public int RacePoints;
+        public int RaceResultWeek = -1;
+        public int RaceResultPoints;
+
+        public int Team = -1;
+        public long TeamRequestAt;
+        public int TeamGifts;
+        public int[] TeamHelped = new int[0];
+        public int TeamHelps;
+        public int TeamHelpsWeek = -1;
+
+        public int EventId = -1;
+        public int EventPoints;
+        public int EventClaimed;
+        public long EventDoneAt;
+
+        public int ScenesSeen;
+
         public static Profile New(EconomyRules rules, long seed)
         {
             var p = new Profile
@@ -73,6 +92,21 @@ namespace EmberThrone.Core
                 ["cards"] = ToList(Cards),
                 ["setsClaimed"] = ToList(Array.ConvertAll(SetsClaimed, c => c ? 1 : 0)),
                 ["grandClaimed"] = GrandClaimed,
+                ["raceWeek"] = RaceWeek,
+                ["racePoints"] = RacePoints,
+                ["raceResultWeek"] = RaceResultWeek,
+                ["raceResultPoints"] = RaceResultPoints,
+                ["team"] = Team,
+                ["teamRequestAt"] = TeamRequestAt.ToString(),
+                ["teamGifts"] = TeamGifts,
+                ["teamHelped"] = ToList(TeamHelped),
+                ["teamHelps"] = TeamHelps,
+                ["teamHelpsWeek"] = TeamHelpsWeek,
+                ["eventId"] = EventId,
+                ["eventPoints"] = EventPoints,
+                ["eventClaimed"] = EventClaimed,
+                ["eventDoneAt"] = EventDoneAt.ToString(),
+                ["scenesSeen"] = ScenesSeen,
             };
             return MiniJson.Serialize(o);
         }
@@ -98,7 +132,22 @@ namespace EmberThrone.Core
                 Packs = MiniJson.GetInt(o, "packs", rules.StartPacks),
                 PacksOpened = MiniJson.GetInt(o, "packsOpened", 0),
                 GrandClaimed = MiniJson.GetBool(o, "grandClaimed", false),
+                RaceWeek = MiniJson.GetInt(o, "raceWeek", -1),
+                RacePoints = MiniJson.GetInt(o, "racePoints", 0),
+                RaceResultWeek = MiniJson.GetInt(o, "raceResultWeek", -1),
+                RaceResultPoints = MiniJson.GetInt(o, "raceResultPoints", 0),
+                Team = MiniJson.GetInt(o, "team", -1),
+                TeamRequestAt = ParseLong(MiniJson.GetString(o, "teamRequestAt", "0")),
+                TeamGifts = MiniJson.GetInt(o, "teamGifts", 0),
+                TeamHelps = MiniJson.GetInt(o, "teamHelps", 0),
+                TeamHelpsWeek = MiniJson.GetInt(o, "teamHelpsWeek", -1),
+                EventId = MiniJson.GetInt(o, "eventId", -1),
+                EventPoints = MiniJson.GetInt(o, "eventPoints", 0),
+                EventClaimed = MiniJson.GetInt(o, "eventClaimed", 0),
+                EventDoneAt = ParseLong(MiniJson.GetString(o, "eventDoneAt", "0")),
+                ScenesSeen = MiniJson.GetInt(o, "scenesSeen", 0),
             };
+            p.TeamHelped = ReadInts(o, "teamHelped");
             p.Cards = ReadInts(o, "cards");
             p.SetsClaimed = Array.ConvertAll(ReadInts(o, "setsClaimed"), v => v != 0);
             var boosters = ReadInts(o, "boosters");

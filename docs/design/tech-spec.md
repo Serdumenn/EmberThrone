@@ -64,6 +64,11 @@
 | Profil | `Scripts/Core/Meta/Profile.cs` | Oyuncunun durumu ve JSON'a yazılıp okunması |
 | İşlemler | `Scripts/Core/Meta/Economy.cs` | Can yenilenmesi, satın alma, ödül, günlük hediye, sandık, günlük görevler. Saat dışarıdan verilir (`now`, yerel saatle saniye); motor saate bakmaz. Sandık `Pcg32` ile, profil tohumu ve açılan sandık sayısından üretilir |
 | Koleksiyon | `Scripts/Core/Meta/Collection.cs`, `Scripts/Game/UI/CollectionViews.cs` | Kurallar ve setler (`CollectionRules`), paket açma, set ve büyük ödül (`CardCollection`); paket `Pcg32` ile profil tohumu ve açılan paket sayısından üretilir. Ekran: set karoları, set penceresi, paket penceresi. Kart çizimi `Resources/UI/Cards/<set>_<kart>.png` (256 piksel); eksik kart aynı çizimin koyu silueti olarak görünür, dosya yoksa kart destesi ikonu gösterilir. `ThemeTests.EveryCard_HasAnIllustration` 36 dosyayı arar |
+| Köy Ligi | `Scripts/Core/Meta/Race.cs`, `Village.cs` | Haftalık yarış. Hafta pazartesi başlar (`RaceRules.WeekOf`); kazanç `AddWin` ile yazılır. Rakip puanı `Village.PointsBy` ile profil tohumu, hafta ve geçen saatten üretilir, saat ilerledikçe azalmaz. Hafta dönünce sonuç saklanır, ödül `ClaimResult` ile alınır |
+| Takım | `Scripts/Core/Meta/Team.cs` | Hazır takımlar (`TeamRules.Teams`), üyeleri köy halkından. Can isteği ve gelen canlar (`Request`, `Tick`), üyelerin istekleri (`Asks`: iki saatlik dilim başına bir istek), yardım (`Help`) |
+| Videolar | `Scripts/Game/UI/VideoViews.cs`, `Resources/Video/`, `tools/video/make_scenes.py` | `VideoView` bir klibi `VideoPlayer` ile bir render texture'a oynatır ve arayüzde gösterir; hazırlanana kadar ilk kare (`Resources/UI/Art/scene_*.jpg`) görünür, grafik aygıtı yoksa (ör. `-nographics`) yalnız ilk kare kalır. `StoryScene` bölge sahnesidir: başlık, metin, "Geç" butonu; video bitince ya da oynatılamazsa kendisi kapanır. Yükleme ekranı `scene_loading` klibini döngüyle, sessiz oynatır. Klipler VP8 WebM'dir, çünkü Unity'nin Linux sürümü MP4 açamaz ([ArtSource/video/README.md](../../ArtSource/video/README.md)) |
+| Etkinlikler | `Scripts/Core/Meta/LiveEvent.cs`, `Scripts/Game/UI/EventViews.cs` | Aylık takvim (`EventRules.Calendar`, ay sırasıyla 12 tanım). İki tip: merdiven (`EventKind.Ladder`: kazanç 10/15/25 kor, zor seviye +20, engel başına 2, booster başına 5; beş kademe) ve sprint (`EventKind.Sprint`: gün sayısı, tek hedef, ödül). İlerleme `ReportWin` ve `Report` ile yazılır, ödül `Claim` ile alınır; ay dönünce kazanılmış ödüller verilir ve puan sıfırlanır. Ekran: ana ekrandaki `EventButton` (geri sayım, rozet) ve `EventPopup` |
+| Sıralama ve takım ekranları | `Scripts/Game/UI/SocialViews.cs` | `RaceView`, `TeamView`, `Avatar` (kart çizimini yuvarlak çerçevede gösterir; oyuncu için Emby). Gerçek oyunculara geçiş: [ONLINE.md](../ONLINE.md) |
 | Servis | `Scripts/Game/Meta/Meta.cs` | Profili yükler, kaydeder, `Changed` olayını yayar; `Meta.Clock` testlerde sahte saatle değişir |
 | Lobi | `Scripts/Game/UI/LobbyViews.cs` | Üst bar (can ve sayaç, altın, elmas, ayarlar), alt sıra (Dünya, büyük "Seviye N" butonu, Görevler), solda hediye butonu, beş sekmeli alt bar (`TabBar`), yükleme ekranı (`LoadingScreen`) |
 | Ana ekran ve dünya | `Scripts/Game/UI/LevelSelectScreen.cs` | Tek ekran, iki görünüm: ana ekran (köy manzarası, `et-backdrop--home`) ve dünya (bölge kartları). `ShowMap(true/false)` geçirir; Dünya butonuyla açılır, Ana Ekran sekmesiyle kapanır |
@@ -72,12 +77,16 @@
 Akış kuralları:
 - Can, oyuncu vazgeçince düşer: kaybettikten sonra "Tekrar dene" ya da "Seviyeler", ya da hamle yaptıktan sonra seviyeden çıkmak (önce onay sorulur). Kazanmak can harcamaz. Can yokken seviye başlamaz, "Canlar" penceresi açılır.
 - Kazanınca altın verilir (1 yıldız 100, 2 yıldız +40, 3 yıldız +80). Daha önce geçilmiş seviyeyi yeniden kazanmak 25 altın verir.
+- Kazanınca ayrıca kupa verilir (Köy Ligi): yıldız sayısı kadar, ilk kazanışta iki katı.
+- Sıralama sekmesi açılınca bekleyen hafta sonucu varsa ödül penceresi gösterilir.
+- Etkinlik yokken ana ekrandaki etkinlik butonu görünmez. Aynı anda tek etkinlik vardır.
+- Bir bölgenin ilk seviyesine (1, 11, 21) basılınca bölge sahnesi önce oynar, sonra "Seviye başı" penceresi açılır. Her sahne bir kez kendiliğinden oynar (`Profile.ScenesSeen`); dünya ekranında açık bölgenin resmine dokununca yeniden oynar.
 - Kaybedince "+5 hamle": bir kez ödüllü reklamla, ayrıca altınla (900, her alışta 1,5 katı). Altın seçeneği yalnız para yetiyorsa görünür.
 - Boş booster'a dokunmak mağazayı açar.
 - Günlük görevler: her gün aynı üç görev (gün numarasından üretilir, üçü farklı türde); hepsi alınınca elmas ödülü.
 - Yükleme ekranı açılışta 1,4 sn görünür, sonra solar; arayüz zamanlayıcısıyla (gerçek zaman) çalışır. Testler `GameApp.ShowLoading = false` ile kapatır.
-- Hazır olmayan sekmeler (Sıralama, Takım) kilit rozeti taşır ve bilgi penceresi açar. Koleksiyon sekmesindeki rozet, açılmamış paket ve alınmamış ödül sayısını gösterir.
-- Ana ekranın üç sayfası vardır (`LobbyPage`): ana ekran, dünya, koleksiyon. Etkin sekme alt barda büyür ve adını gösterir.
+- Sekme rozetleri: Koleksiyon'da açılmamış paket ve alınmamış ödül sayısı, Sıralama'da bekleyen hafta ödülü, Takım'da yardım bekleyen istek sayısı.
+- Ana ekranın beş sayfası vardır (`LobbyPage`): ana ekran, dünya, koleksiyon, sıralama, takım. Etkin sekme alt barda büyür ve adını gösterir.
 - Gün değişince canlar dolar ve günlük reklam hakları sıfırlanır. Saat şimdilik cihazın saati; geri alınan saat can ya da hediye kazandırmaz. Sunucu saati Faz 4'te.
 
 ## Cihazda saklananlar (PlayerPrefs)
@@ -85,7 +94,7 @@ Akış kuralları:
 | Anahtar | İçerik |
 |---|---|
 | `et.stars.<id>` | Seviyenin en iyi yıldızı |
-| `et.profile` | Oyuncu profili, tek JSON: altın, elmas, can ve can saati, booster hakları, günlük hediye serisi, günlük reklam sayaçları, günlük görev ilerlemesi, açılan sandık sayısı, kart sayıları, bekleyen ve açılmış paketler, alınmış set ödülleri |
+| `et.profile` | Oyuncu profili, tek JSON: altın, elmas, can ve can saati, booster hakları, günlük hediye serisi, günlük reklam sayaçları, günlük görev ilerlemesi, açılan sandık sayısı, kart sayıları, bekleyen ve açılmış paketler, alınmış set ödülleri, yarış haftası ve kupaları, bekleyen hafta sonucu, takım, son can isteğinin saati, yardım edilen istekler, etkinlik ayı, puanı ve alınan kademeler, izlenmiş bölge sahneleri |
 | `et.booster.<Hammer\|RowBlast\|ColumnBlast\|Shuffle>` | Eski booster anahtarları. Profil ilk kez oluşurken bir kez okunur, sonra kullanılmaz |
 | `et.sound`, `et.haptics`, `et.shake` | Ayarlar (ses, titreşim, ekran sarsıntısı): 1 açık, 0 kapalı |
 | `et.ads.lastInterstitial` | Son geçiş reklamının kapandığı an (Unix saniyesi) |

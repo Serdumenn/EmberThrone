@@ -22,7 +22,7 @@ BY_EXT = {
     ".json": TEXT, ".txt": TEXT, ".md": TEXT, ".csv": TEXT, ".xml": TEXT, ".bytes": TEXT, ".yaml": TEXT,
 }
 
-IMPORTED = {".png", ".jpg", ".jpeg", ".tga", ".psd", ".exr", ".wav", ".ogg", ".mp3", ".ttf", ".otf", ".fbx", ".mp4"}
+IMPORTED = {".png", ".jpg", ".jpeg", ".tga", ".psd", ".exr", ".wav", ".ogg", ".mp3", ".ttf", ".otf", ".fbx", ".mp4", ".webm", ".ogv"}
 
 def skip(name):
     return name.startswith(".") or name.endswith("~") or name.endswith(".meta")

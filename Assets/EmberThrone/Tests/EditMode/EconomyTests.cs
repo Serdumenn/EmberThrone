@@ -286,6 +286,22 @@ namespace EmberThrone.Core.Tests
             Assert.AreEqual(3, empty.Boosters[0]);
         }
 
+        [Test]
+        public void Scenes_AreMarkedOnce_AndKept()
+        {
+            var e = Fresh();
+            Assert.IsFalse(e.SceneSeen(1));
+            Assert.IsTrue(e.MarkSceneSeen(1));
+            Assert.IsFalse(e.MarkSceneSeen(1), "a scene plays once");
+            Assert.IsTrue(e.SceneSeen(1));
+            Assert.IsFalse(e.SceneSeen(0));
+            Assert.IsFalse(e.MarkSceneSeen(-1));
+            Assert.IsFalse(e.MarkSceneSeen(40));
+            var loaded = Profile.FromJson(e.Profile.ToJson(), e.Rules);
+            Assert.AreEqual(2, loaded.ScenesSeen);
+            Assert.AreEqual(0, Profile.FromJson("{\"coins\":10}", e.Rules).ScenesSeen);
+        }
+
         static CardCollection Cards(Economy e) => new CardCollection(new CollectionRules(), e);
 
         [Test]

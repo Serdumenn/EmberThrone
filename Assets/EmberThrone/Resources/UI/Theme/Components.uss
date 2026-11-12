@@ -339,6 +339,14 @@
     background-image: url("../Art/ic_medal.png");
 }
 
+.et-ic--medal-2 {
+    background-image: url("../Art/ic_medal_2.png");
+}
+
+.et-ic--medal-3 {
+    background-image: url("../Art/ic_medal_3.png");
+}
+
 .et-ic--gear {
     background-image: url("../Art/ic_gear.png");
 }

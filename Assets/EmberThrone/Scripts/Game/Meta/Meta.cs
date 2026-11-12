@@ -13,9 +13,15 @@ namespace EmberThrone.Game
 
         static Economy _economy;
         static CardCollection _cards;
+        static Race _race;
+        static Team _team;
+        static LiveEvent _event;
 
         public static readonly EconomyRules Rules = new EconomyRules();
         public static readonly CollectionRules CardRules = new CollectionRules();
+        public static readonly RaceRules RaceRules = new RaceRules();
+        public static readonly TeamRules TeamRules = new TeamRules();
+        public static readonly EventRules EventRules = new EventRules();
 
         public static Func<long> Clock = WallClock;
 
@@ -28,9 +34,48 @@ namespace EmberThrone.Game
             get
             {
                 if (_economy == null) Load();
-                _economy.Tick(Now);
+                Tick();
                 return _economy;
             }
+        }
+
+        public static Race Race
+        {
+            get
+            {
+                if (_economy == null) Load();
+                Tick();
+                return _race;
+            }
+        }
+
+        public static Team Team
+        {
+            get
+            {
+                if (_economy == null) Load();
+                Tick();
+                return _team;
+            }
+        }
+
+        public static LiveEvent Event
+        {
+            get
+            {
+                if (_economy == null) Load();
+                Tick();
+                return _event;
+            }
+        }
+
+        static void Tick()
+        {
+            long now = Now;
+            _economy.Tick(now);
+            _race.Tick(now);
+            _team.Tick(now);
+            _event.Tick(now);
         }
 
         public static CardCollection Cards
@@ -67,7 +112,10 @@ namespace EmberThrone.Game
             }
             _economy = new Economy(Rules, profile);
             _cards = new CardCollection(CardRules, _economy);
-            _economy.Tick(Now);
+            _race = new Race(RaceRules, _economy);
+            _team = new Team(TeamRules, _economy, _race);
+            _event = new LiveEvent(EventRules, _economy);
+            Tick();
         }
 
         public static void Save()
@@ -82,6 +130,18 @@ namespace EmberThrone.Game
         {
             _economy = null;
             _cards = null;
+            _race = null;
+            _team = null;
+            _event = null;
+        }
+
+        public static string Span(int seconds)
+        {
+            seconds = Mathf.Max(0, seconds);
+            int days = seconds / 86400, hours = seconds / 3600 % 24, minutes = seconds / 60 % 60;
+            if (days > 0) return days + "g " + hours + "s";
+            if (hours > 0) return hours + "s " + minutes + "dk";
+            return Mathf.Max(1, minutes) + "dk";
         }
 
         public static string Countdown(int seconds)
