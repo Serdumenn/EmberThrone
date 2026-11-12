@@ -176,63 +176,85 @@
     flex-basis: 0;
 }
 
-.et-map__chapter {
-    width: 100%;
+.et-district {
     flex-shrink: 0;
-    -unity-background-scale-mode: stretch-to-fill;
+    margin: 0 26px 30px 26px;
+    padding: 18px 18px 26px 18px;
 }
 
-.et-map__chapter--1 {
-    padding-top: 93.57%;
-    background-image: url("../Art/map_1.jpg");
+.et-district__art {
+    height: 330px;
+    border-radius: 34px;
+    -unity-background-scale-mode: scale-and-crop;
 }
 
-.et-map__chapter--2 {
-    padding-top: 86.72%;
-    background-image: url("../Art/map_2.jpg");
+.et-district__art--1 {
+    background-image: url("../Art/district_1.jpg");
 }
 
-.et-map__chapter--3 {
-    padding-top: 179.17%;
-    background-image: url("../Art/map_3.jpg");
+.et-district__art--2 {
+    background-image: url("../Art/district_2.jpg");
 }
 
-.et-map__banner {
+.et-district__art--3 {
+    background-image: url("../Art/district_3.jpg");
+}
+
+.et-district--locked > .et-district__art {
+    -unity-background-image-tint-color: var(--color-locked);
+}
+
+.et-district__title {
     position: absolute;
-    left: 20px;
-    top: -39px;
+    left: 18px;
+    bottom: 16px;
     height: 78px;
     padding: 0 var(--space-6) 6px var(--space-6);
     font-size: var(--font-size-body);
 }
 
-.et-map__banner--right {
-    left: auto;
-    right: 20px;
-}
-
-.et-map__banner--first {
-    top: auto;
-    bottom: 20px;
-}
-
-.et-map__settings {
+.et-district__lock {
     position: absolute;
-    right: var(--space-4);
-    bottom: var(--space-4);
+    right: 24px;
+    top: 20px;
+    width: 110px;
+    height: 110px;
 }
 
-.et-map__settings-icon {
-    width: 140px;
-    height: 140px;
-    background-image: url("../Art/ic_gear.png");
+.et-district__progress {
+    flex-direction: row;
+    align-items: center;
+    margin: 18px 10px 4px 10px;
+}
+
+.et-district__bar {
+    flex-grow: 1;
+    margin: 0 20px 0 0;
+}
+
+.et-district__star {
+    width: 66px;
+    height: 66px;
+    margin-right: 8px;
+}
+
+.et-district__stars {
+    min-width: 70px;
+    font-size: var(--font-size-body);
+    -unity-text-align: middle-left;
+}
+
+.et-district__grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 26px;
 }
 
 .et-map-node {
-    position: absolute;
     width: 140px;
     height: 140px;
-    translate: -50% -50%;
+    margin: 14px 18px 40px 18px;
     align-items: center;
     justify-content: center;
     background-color: var(--color-none);
@@ -388,4 +410,360 @@
 
 .et-booster--empty {
     opacity: 0.55;
+}
+
+.et-map__pad--top {
+    height: 170px;
+}
+
+.et-map__pad--bottom {
+    height: 260px;
+}
+
+.et-topbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 150px;
+    padding: 0 22px 0 56px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.et-lobby {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 204px;
+    height: 250px;
+    padding: 0 30px 0 30px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.et-lobby__play {
+    width: 530px;
+    height: 196px;
+    font-size: 82px;
+}
+
+.et-side {
+    position: absolute;
+    left: 26px;
+    top: 190px;
+}
+
+.et-side__button {
+    width: 164px;
+    height: 170px;
+    margin-bottom: var(--space-3);
+}
+
+.et-side__button > .et-ring__icon {
+    width: 110px;
+    height: 110px;
+}
+
+.et-balance {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-3);
+}
+
+.et-balance__icon {
+    width: 84px;
+    height: 84px;
+    margin-right: var(--space-2);
+}
+
+.et-balance__text {
+    font-size: var(--font-size-button);
+}
+
+.et-lives__heart {
+    align-self: center;
+    width: 300px;
+    height: 300px;
+    align-items: center;
+    justify-content: center;
+}
+
+.et-lives__count {
+    font-size: var(--font-size-number);
+    margin-bottom: 20px;
+}
+
+.et-lives__buttons {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+}
+
+.et-lives__buttons > .et-btn--small {
+    min-width: 388px;
+}
+
+.et-days {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: var(--space-3);
+}
+
+.et-day {
+    width: 176px;
+    height: 216px;
+    margin: 8px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 28px;
+    border-width: 5px;
+    border-color: var(--color-gold-deep);
+    background-color: var(--color-face-deep);
+}
+
+.et-day--wide {
+    width: 368px;
+}
+
+.et-day--today {
+    border-color: var(--color-cta);
+    background-color: var(--color-gold-light);
+}
+
+.et-day--claimed {
+    opacity: 0.55;
+}
+
+.et-day__title {
+    color: var(--color-ink-muted);
+    -unity-text-align: middle-center;
+}
+
+.et-day__icons {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.et-day__icon {
+    width: 88px;
+    height: 88px;
+}
+
+.et-day__amount {
+    font-size: 44px;
+}
+
+.et-day__check {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+}
+
+.et-quests__resets {
+    margin-bottom: var(--space-3);
+}
+
+.et-rewards {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    min-height: 320px;
+    margin-bottom: var(--space-3);
+}
+
+.et-reward__chest {
+    width: 300px;
+    height: 300px;
+}
+
+.et-reward__rays {
+    left: -310px;
+    top: -420px;
+    width: 1520px;
+    height: 1520px;
+}
+
+.et-result__reward {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: -16px 0 30px 0;
+}
+
+.et-result__reward-icon {
+    width: 96px;
+    height: 96px;
+    margin-right: var(--space-2);
+}
+
+.et-result__reward-text {
+    font-size: var(--font-size-button);
+}
+
+.et-backdrop--home {
+    background-image: url("../Art/bg_home.jpg");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.et-topbar__gear {
+    width: 108px;
+    height: 112px;
+    margin-top: 22px;
+    padding-bottom: 4px;
+}
+
+.et-topbar__gear-icon {
+    width: 72px;
+    height: 72px;
+}
+
+.et-loading {
+    align-items: center;
+    background-image: url("../Art/bg_loading.jpg");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.et-loading__logo {
+    margin-top: 240px;
+    font-size: 132px;
+    -unity-text-outline-width: 9px;
+}
+
+.et-loading__bar {
+    position: absolute;
+    left: 150px;
+    right: 150px;
+    bottom: 230px;
+    height: 60px;
+    margin: 0;
+}
+
+.et-loading__label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 124px;
+    font-size: var(--font-size-label);
+}
+
+.et-cards {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 150px;
+    bottom: 176px;
+    padding: 0 24px;
+}
+
+.et-cards__header {
+    flex-shrink: 0;
+    margin-bottom: 14px;
+    padding: 18px 26px 30px 26px;
+}
+
+.et-cards__total {
+    flex-direction: row;
+    align-items: center;
+    margin: 6px 0 16px 0;
+}
+
+.et-cards__bar {
+    flex-grow: 1;
+    margin: 0 18px 0 0;
+}
+
+.et-cards__pack {
+    height: 150px;
+    font-size: 64px;
+}
+
+.et-cards__scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+}
+
+.et-cards__grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 8px 0 70px 0;
+}
+
+.et-set {
+    width: 500px;
+    height: 318px;
+    margin-bottom: 18px;
+    padding: 14px 16px 26px 16px;
+    align-items: center;
+    background-image: url("../Chrome/row.png");
+    -unity-slice-left: 40;
+    -unity-slice-top: 40;
+    -unity-slice-right: 40;
+    -unity-slice-bottom: 48;
+}
+
+.et-set__art {
+    width: 158px;
+    height: 158px;
+}
+
+.et-set__name {
+    font-size: 44px;
+    white-space: nowrap;
+}
+
+.et-set__bar {
+    align-self: stretch;
+    margin: 6px 24px 0 24px;
+}
+
+.et-set__check {
+    position: absolute;
+    right: 16px;
+    top: 14px;
+}
+
+.et-rewards--small {
+    min-height: 190px;
+    margin-bottom: var(--space-2);
+}
+
+.et-pack__slot {
+    align-items: center;
+}
+
+.et-pack__tag {
+    position: relative;
+    top: 0;
+    left: 0;
+    translate: 0 0;
+    height: 64px;
+    font-size: 38px;
+}
+
+.et-pack__coins {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 64px;
+}
+
+.et-pack__coin {
+    width: 52px;
+    height: 52px;
+    margin-right: 8px;
+}
+
+.et-pack__amount {
+    font-size: var(--font-size-body);
+}
+
+.et-result__reward-icon--next {
+    margin-left: var(--space-4);
 }

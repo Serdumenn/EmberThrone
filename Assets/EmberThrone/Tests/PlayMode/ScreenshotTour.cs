@@ -20,6 +20,7 @@ namespace EmberThrone.Game.Tests
         RenderTexture _target;
         RenderTexture _uiTarget;
         System.Collections.Generic.Dictionary<int, int> _savedStars;
+        string _savedProfile;
         GameController Game => _app.Game;
 
         [UnitySetUp]
@@ -28,7 +29,16 @@ namespace EmberThrone.Game.Tests
             Directory.CreateDirectory(Folder);
             _savedStars = StarsBackup.Snapshot();
             StarsBackup.Restore(new System.Collections.Generic.Dictionary<int, int>());
+            _savedProfile = StarsBackup.SnapshotProfile();
+            StarsBackup.FreshProfile();
+            Meta.Economy.AddCoins(1500);
+            Meta.Economy.LoseLife(Meta.Now);
+            var quests = Meta.Economy.Quests(Meta.Now);
+            Meta.Economy.Report(quests[0].Kind, quests[0].Target, Meta.Now);
+            Meta.Economy.Report(quests[1].Kind, quests[1].Target / 2, Meta.Now);
+            Meta.Save();
             Time.timeScale = 1f;
+            GameApp.ShowLoading = false;
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = new Vector2Int(1080, 1920);
             _app = GameApp.Create();
@@ -40,12 +50,14 @@ namespace EmberThrone.Game.Tests
         public IEnumerator TearDown()
         {
             Time.timeScale = 1f;
+            GameApp.ShowLoading = true;
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = null;
             Object.Destroy(_app.gameObject);
             Object.Destroy(_target);
             Object.Destroy(_uiTarget);
             StarsBackup.Restore(_savedStars);
+            StarsBackup.RestoreProfile(_savedProfile);
             yield return null;
         }
 
@@ -131,6 +143,7 @@ namespace EmberThrone.Game.Tests
             _app.StartLevel(level, 0, seed);
             _app.Game.HintDelay = float.MaxValue;
             for (int i = 0; i < 3; i++) yield return null;
+            yield return GameTime(_app.Game.View.IntroLength + 0.05f);
         }
 
         IEnumerator WaitIdle()
@@ -148,7 +161,56 @@ namespace EmberThrone.Game.Tests
         [UnityTest]
         public IEnumerator TakeAll()
         {
+            _app.ShowLoadingScreen();
+            for (int i = 0; i < 20; i++) yield return null;
+            yield return Shot("00_yukleme");
+            _app.Loading?.Close();
             yield return Shot("01_seviye_secimi");
+            _app.LevelSelect.ShowMap(true);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01a_dunya");
+            _app.LevelSelect.ShowMap(false);
+            yield return null;
+            for (int c = 0; c < 4; c++) Meta.Economy.Profile.Cards[Meta.CardRules.IndexOf(0, c)] = 1;
+            for (int c = 0; c < Meta.CardRules.Sets[2].Cards.Length; c++) Meta.Economy.Profile.Cards[Meta.CardRules.IndexOf(2, c)] = c == 0 ? 2 : 1;
+            Meta.Save();
+            _app.LevelSelect.Show(LobbyPage.Cards);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01h_koleksiyon");
+            _app.OpenCardSet(2);
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01i_kart_seti");
+            _app.Modal.Close();
+            _app.OpenCardSet(0);
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01i_kart_seti_eksik");
+            _app.Modal.Close();
+            _app.OpenPack();
+            yield return GameTime(Timing.ModalIn + Timing.StarFill * 4f);
+            yield return Shot("01j_kart_paketi");
+            _app.Modal.Close();
+            _app.LevelSelect.ShowMap(false);
+            yield return null;
+            _app.OpenShop();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01c_magaza");
+            _app.Modal.Close();
+            _app.OpenLives();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01d_canlar");
+            _app.Modal.Close();
+            _app.OpenQuests();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01e_gorevler");
+            _app.Modal.Close();
+            _app.OpenDaily();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01f_gunluk_hediye");
+            _app.Modal.Close();
+            _app.ShowRewards("Hediye", Meta.Rules.DailyGifts[6], false);
+            yield return GameTime(Timing.ModalIn + Timing.StarFill * 4f);
+            yield return Shot("01g_odul");
+            _app.Rewards.Close();
             _app.ShowLevelStart(8);
             yield return GameTime(Timing.ModalIn + 0.1f);
             yield return Shot("01b_seviye_basi");
@@ -229,6 +291,8 @@ namespace EmberThrone.Game.Tests
             Game.OnTap(p);
             yield return GameTime(0.13f);
             yield return Shot(shot);
+            yield return GameTime(0.12f);
+            yield return Shot(shot + "_sonra");
             Time.timeScale = 1f;
             yield return WaitIdle();
             Assert.IsNull(Game.LastMismatch);

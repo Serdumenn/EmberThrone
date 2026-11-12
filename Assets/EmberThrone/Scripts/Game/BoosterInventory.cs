@@ -5,8 +5,6 @@ namespace EmberThrone.Game
 {
     public static class BoosterInventory
     {
-        public const string Key = "et.booster.";
-
         public static readonly BoosterType[] All =
         {
             BoosterType.Hammer,
@@ -15,21 +13,41 @@ namespace EmberThrone.Game
             BoosterType.Shuffle,
         };
 
-        public static int Count(BoosterType type, GameRules rules) => PlayerPrefs.GetInt(Key + type, rules.StartingBoosters);
+        public static int Count(BoosterType type) => Meta.Economy.Boosters(type);
 
-        public static bool Spend(BoosterType type, GameRules rules)
+        public static bool Spend(BoosterType type)
         {
-            int count = Count(type, rules);
-            if (count <= 0) return false;
-            PlayerPrefs.SetInt(Key + type, count - 1);
-            PlayerPrefs.Save();
+            if (!Meta.Economy.SpendBooster(type)) return false;
+            Meta.Save();
             return true;
         }
 
         public static void Set(BoosterType type, int count)
         {
-            PlayerPrefs.SetInt(Key + type, Mathf.Max(0, count));
-            PlayerPrefs.Save();
+            Meta.Economy.Profile.Boosters[(int)type] = Mathf.Clamp(count, 0, Meta.Rules.BoosterCap);
+            Meta.Save();
+        }
+
+        public static string Slug(BoosterType type)
+        {
+            switch (type)
+            {
+                case BoosterType.Hammer: return "hammer";
+                case BoosterType.RowBlast: return "row";
+                case BoosterType.ColumnBlast: return "column";
+                default: return "shuffle";
+            }
+        }
+
+        public static string Name(BoosterType type)
+        {
+            switch (type)
+            {
+                case BoosterType.Hammer: return "Çekiç";
+                case BoosterType.RowBlast: return "Satır";
+                case BoosterType.ColumnBlast: return "Sütun";
+                default: return "Karıştır";
+            }
         }
     }
 }

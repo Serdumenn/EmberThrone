@@ -42,19 +42,23 @@ namespace EmberThrone.Game.Tests
             PlayerPrefs.Save();
         }
 
-        public static Dictionary<EmberThrone.Core.BoosterType, int> SnapshotBoosters()
+        public static string SnapshotProfile() => PlayerPrefs.HasKey(Meta.ProfileKey) ? PlayerPrefs.GetString(Meta.ProfileKey) : null;
+
+        public static void FreshProfile()
         {
-            var counts = new Dictionary<EmberThrone.Core.BoosterType, int>();
-            foreach (var type in BoosterInventory.All)
-                if (PlayerPrefs.HasKey(BoosterInventory.Key + type)) counts[type] = PlayerPrefs.GetInt(BoosterInventory.Key + type);
-            return counts;
+            PlayerPrefs.DeleteKey(Meta.ProfileKey);
+            Meta.Clock = Meta.WallClock;
+            Meta.Forget();
+            foreach (var type in BoosterInventory.All) BoosterInventory.Set(type, Meta.Rules.StartBoosters);
         }
 
-        public static void RestoreBoosters(Dictionary<EmberThrone.Core.BoosterType, int> counts)
+        public static void RestoreProfile(string profile)
         {
-            foreach (var type in BoosterInventory.All) PlayerPrefs.DeleteKey(BoosterInventory.Key + type);
-            foreach (var pair in counts) PlayerPrefs.SetInt(BoosterInventory.Key + pair.Key, pair.Value);
+            if (profile == null) PlayerPrefs.DeleteKey(Meta.ProfileKey);
+            else PlayerPrefs.SetString(Meta.ProfileKey, profile);
             PlayerPrefs.Save();
+            Meta.Clock = Meta.WallClock;
+            Meta.Forget();
         }
     }
 }

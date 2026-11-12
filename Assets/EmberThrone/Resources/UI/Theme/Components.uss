@@ -226,6 +226,12 @@
     border-radius: 4px;
 }
 
+.et-flyer {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
 .et-confetti--square {
     width: 26px;
     height: 26px;
@@ -267,4 +273,448 @@
 
 .et-star--on {
     background-image: url("../Art/ui_star.png");
+}
+
+.et-ic--coin {
+    background-image: url("../Art/ic_coin.png");
+}
+
+.et-ic--gem {
+    background-image: url("../Art/ic_gem.png");
+}
+
+.et-ic--heart {
+    background-image: url("../Art/ic_heart.png");
+}
+
+.et-ic--chest {
+    background-image: url("../Art/ic_chest.png");
+}
+
+.et-ic--chest-premium {
+    background-image: url("../Art/ic_chest_premium.png");
+}
+
+.et-ic--trophy {
+    background-image: url("../Art/ic_trophy.png");
+}
+
+.et-ic--gift {
+    background-image: url("../Art/ic_gift.png");
+}
+
+.et-ic--quests {
+    background-image: url("../Art/ic_quests.png");
+}
+
+.et-ic--shop {
+    background-image: url("../Art/ic_shop.png");
+}
+
+.et-ic--team {
+    background-image: url("../Art/ic_team.png");
+}
+
+.et-ic--plus {
+    background-image: url("../Art/ic_plus.png");
+}
+
+.et-ic--clock {
+    background-image: url("../Art/ic_clock.png");
+}
+
+.et-ic--lock {
+    background-image: url("../Art/ic_lock.png");
+}
+
+.et-ic--calendar {
+    background-image: url("../Art/ic_calendar.png");
+}
+
+.et-ic--video {
+    background-image: url("../Art/ic_video.png");
+}
+
+.et-ic--medal {
+    background-image: url("../Art/ic_medal.png");
+}
+
+.et-ic--gear {
+    background-image: url("../Art/ic_gear.png");
+}
+
+.et-ic--home {
+    background-image: url("../Art/ic_home.png");
+}
+
+.et-ic--hammer {
+    background-image: url("../Art/bo_hammer.png");
+}
+
+.et-ic--row {
+    background-image: url("../Art/bo_row.png");
+}
+
+.et-ic--column {
+    background-image: url("../Art/bo_col.png");
+}
+
+.et-ic--shuffle {
+    background-image: url("../Art/bo_shuffle.png");
+}
+
+.et-ic--star {
+    background-image: url("../Art/ui_star.png");
+}
+
+.et-ic--piece {
+    background-image: url("../../Board/piece_R.png");
+}
+
+.et-ic--rocket {
+    background-image: url("../../Board/sp_rocket.png");
+}
+
+.et-ic--box {
+    background-image: url("../../Board/ob_box1.png");
+}
+
+.et-pill {
+    height: 100px;
+    min-width: 236px;
+    margin-top: 28px;
+    padding: 0 56px 10px 92px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-image: url("../Chrome/pill.png");
+    -unity-slice-left: 50;
+    -unity-slice-top: 44;
+    -unity-slice-right: 50;
+    -unity-slice-bottom: 52;
+}
+
+.et-pill__icon {
+    position: absolute;
+    left: -20px;
+    top: -18px;
+    width: 124px;
+    height: 124px;
+}
+
+.et-pill__count {
+    position: absolute;
+    left: -20px;
+    top: -22px;
+    width: 124px;
+    height: 124px;
+    font-size: 58px;
+}
+
+.et-pill__text {
+    font-size: 46px;
+}
+
+.et-pill__plus {
+    position: absolute;
+    right: -6px;
+    top: 10px;
+    width: 72px;
+    height: 72px;
+}
+
+.et-ring__icon {
+    width: 132px;
+    height: 132px;
+}
+
+.et-badge {
+    position: absolute;
+    right: -6px;
+    top: -6px;
+    width: 70px;
+    height: 70px;
+    padding-bottom: 6px;
+    background-image: url("../Chrome/badge.png");
+    color: var(--color-white);
+    font-size: 38px;
+    -unity-text-align: middle-center;
+}
+
+.et-row {
+    flex-direction: row;
+    align-items: center;
+    height: 148px;
+    margin-bottom: 10px;
+    padding: 0 16px 10px 20px;
+    background-image: url("../Chrome/row.png");
+    -unity-slice-left: 40;
+    -unity-slice-top: 40;
+    -unity-slice-right: 40;
+    -unity-slice-bottom: 48;
+}
+
+.et-row--tall {
+    height: 170px;
+}
+
+.et-row__icon {
+    width: 112px;
+    height: 112px;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.et-row__texts {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    justify-content: center;
+}
+
+.et-row__title {
+    font-size: var(--font-size-body);
+    color: var(--color-ink);
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+}
+
+.et-row__sub {
+    color: var(--color-ink-muted);
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+}
+
+.et-row__check {
+    margin: 0 90px 0 88px;
+    flex-shrink: 0;
+}
+
+.et-btn--small {
+    height: 112px;
+    min-width: 250px;
+    padding: 0 28px 10px 28px;
+    flex-direction: row;
+    flex-shrink: 0;
+    font-size: 50px;
+    -unity-slice-scale: 0.62px;
+}
+
+.et-btn__icon {
+    width: 66px;
+    height: 66px;
+    margin-left: 12px;
+}
+
+.et-progress {
+    height: 52px;
+    margin: 6px 16px 0 0;
+    background-image: url("../Chrome/trough.png");
+    -unity-slice-left: 34;
+    -unity-slice-top: 24;
+    -unity-slice-right: 34;
+    -unity-slice-bottom: 24;
+}
+
+.et-progress__fill {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    bottom: 7px;
+    min-width: 58px;
+    background-image: url("../Chrome/fill.png");
+    -unity-slice-left: 28;
+    -unity-slice-top: 18;
+    -unity-slice-right: 28;
+    -unity-slice-bottom: 18;
+}
+
+.et-progress__text {
+    flex-grow: 1;
+    font-size: 32px;
+    color: var(--color-white);
+    -unity-text-align: middle-center;
+}
+
+.et-reward {
+    align-items: center;
+    margin: 0 var(--space-3);
+}
+
+.et-reward__icon {
+    width: 210px;
+    height: 210px;
+}
+
+.et-reward__amount {
+    font-size: var(--font-size-button);
+}
+
+.et-ic--cards {
+    background-image: url("../Art/ic_cards.png");
+}
+
+.et-ic--world {
+    background-image: url("../Art/ic_world.png");
+}
+
+.et-ring__caption {
+    position: absolute;
+    left: -40px;
+    right: -40px;
+    bottom: -28px;
+    font-size: 40px;
+}
+
+.et-tabbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 176px;
+    flex-direction: row;
+    align-items: flex-end;
+    background-image: url("../Chrome/nav.png");
+    -unity-slice-left: 2;
+    -unity-slice-top: 12;
+    -unity-slice-right: 2;
+    -unity-slice-bottom: 2;
+}
+
+.et-tab {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: 176px;
+    align-items: center;
+    justify-content: center;
+}
+
+.et-tab__icon {
+    width: 128px;
+    height: 128px;
+}
+
+.et-tab--active {
+    height: 240px;
+    padding-bottom: 8px;
+    background-image: url("../Chrome/nav_tab_on.png");
+    -unity-slice-left: 46;
+    -unity-slice-top: 46;
+    -unity-slice-right: 46;
+    -unity-slice-bottom: 6;
+}
+
+.et-tab--active > .et-tab__icon {
+    width: 150px;
+    height: 150px;
+}
+
+.et-tab__label {
+    margin-top: -8px;
+    font-size: 38px;
+}
+
+.et-tab__lock {
+    position: absolute;
+    right: 24px;
+    top: 12px;
+    width: 58px;
+    height: 58px;
+}
+
+.et-title--small {
+    font-size: 72px;
+    -unity-text-outline-width: 6px;
+    text-shadow: 0 4px 0 var(--color-outline);
+}
+
+.et-tab__label {
+    display: none;
+}
+
+.et-tab--active > .et-tab__label {
+    display: flex;
+}
+
+.et-tab__badge {
+    right: 22px;
+    top: 4px;
+}
+
+.et-card-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: var(--space-2);
+}
+
+.et-card {
+    width: 236px;
+    height: 318px;
+    margin: 8px;
+    padding: 10px 6px 6px 6px;
+    align-items: center;
+    border-radius: 26px;
+    border-width: 6px;
+    border-color: var(--color-gold-deep);
+    background-color: var(--color-face);
+}
+
+.et-card--s2 {
+    border-color: var(--color-accent);
+    background-color: var(--color-face-deep);
+}
+
+.et-card--s3 {
+    border-color: var(--color-gold);
+    background-color: var(--color-gold-light);
+}
+
+.et-card--missing {
+    border-color: var(--color-locked);
+}
+
+.et-card__art {
+    width: 176px;
+    height: 176px;
+}
+
+.et-card--missing > .et-card__art {
+    opacity: 0.5;
+    -unity-background-image-tint-color: var(--color-outline);
+}
+
+.et-card__name {
+    font-size: 32px;
+    color: var(--color-ink);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+.et-card__stars {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.et-card__star {
+    width: 40px;
+    height: 40px;
+    margin: 0 -2px;
+}
+
+.et-card__count {
+    position: absolute;
+    right: -12px;
+    top: -14px;
+    height: 56px;
+    padding: 0 16px 4px 16px;
+}
+
+.et-reward--small > .et-reward__icon {
+    width: 120px;
+    height: 120px;
+}
+
+.et-reward--small > .et-reward__amount {
+    font-size: var(--font-size-body);
 }

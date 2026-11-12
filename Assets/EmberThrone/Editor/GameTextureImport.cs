@@ -27,7 +27,7 @@ namespace EmberThrone.EditorTools
             importer.npotScale = TextureImporterNPOTScale.None;
             importer.alphaIsTransparency = true;
             importer.wrapMode = TextureWrapMode.Clamp;
-            importer.mipmapEnabled = board || assetPath.StartsWith(Ui + "Art/");
+            importer.mipmapEnabled = board || assetPath.StartsWith(Ui + "Art/") || assetPath.StartsWith(Ui + "Cards/");
             importer.filterMode = importer.mipmapEnabled ? FilterMode.Trilinear : FilterMode.Bilinear;
             importer.maxTextureSize = maxSize;
             importer.textureCompression = TextureImporterCompression.Uncompressed;

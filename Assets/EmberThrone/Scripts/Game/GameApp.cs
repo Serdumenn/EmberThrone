@@ -11,6 +11,8 @@ namespace EmberThrone.Game
     {
         public const string BootstrapScene = "Bootstrap";
 
+        public static bool ShowLoading = true;
+
         public static GameApp Instance { get; private set; }
 
         public Camera Camera { get; private set; }
@@ -20,6 +22,9 @@ namespace EmberThrone.Game
         public GameController Game { get; private set; }
         public LevelSelectScreen LevelSelect { get; private set; }
         public LevelStartPopup LevelStart { get; private set; }
+        public Popup Modal { get; private set; }
+        public RewardPopup Rewards { get; private set; }
+        public LoadingScreen Loading { get; private set; }
         public bool ScreenStaysOn { get; private set; }
         public IReadOnlyList<LevelDefinition> Levels => _levels;
 
@@ -44,6 +49,7 @@ namespace EmberThrone.Game
 
             Art.Preload();
             gameObject.AddComponent<Tweens>();
+            gameObject.AddComponent<HitStop>();
             Sound.Init(gameObject);
             Ads = gameObject.AddComponent<AdService>();
             Camera = BuildCamera();
@@ -52,6 +58,18 @@ namespace EmberThrone.Game
             Ui = UiRoot.Create(transform);
             _levels = LevelProgress.LoadLevels();
             ShowLevelSelect();
+            if (ShowLoading) ShowLoadingScreen();
+        }
+
+        public void ShowLoadingScreen()
+        {
+            Loading?.Close();
+            LoadingScreen screen = null;
+            screen = LoadingScreen.Show(Ui.Popups, () =>
+            {
+                if (Loading == screen) Loading = null;
+            });
+            Loading = screen;
         }
 
         void OnDestroy()
@@ -80,6 +98,16 @@ namespace EmberThrone.Game
         {
             var keyboard = Keyboard.current;
             if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+            if (Rewards != null)
+            {
+                Rewards.Close();
+                return;
+            }
+            if (Modal != null)
+            {
+                Modal.Close();
+                return;
+            }
             if (LevelStart != null)
             {
                 LevelStart.Close();
@@ -90,7 +118,8 @@ namespace EmberThrone.Game
                 LevelSelect.Settings.Close();
                 return;
             }
-            if (Game != null) ShowLevelSelect();
+            if (Game != null) Game.OnHome();
+            else if (LevelSelect != null && LevelSelect.Page != LobbyPage.Home) LevelSelect.ShowMap(false);
             else Application.Quit();
         }
 
@@ -99,16 +128,78 @@ namespace EmberThrone.Game
         public void ShowLevelSelect()
         {
             CloseCurrent();
-            LevelSelect = LevelSelectScreen.Create(Ui, _levels, l => LevelProgress.GetStars(l.Id), ShowLevelStart);
+            LevelSelect = LevelSelectScreen.Create(Ui, _levels, l => LevelProgress.GetStars(l.Id), ShowLevelStart, this);
         }
 
         public void ShowLevelStart(int index)
         {
-            if (LevelStart != null || !HasLevel(index)) return;
+            if (LevelStart != null || Modal != null || !HasLevel(index)) return;
+            if (Meta.Economy.Lives <= 0)
+            {
+                OpenLives();
+                return;
+            }
             LevelStart = LevelStartPopup.Show(Ui.Popups, _levels[index], () => StartLevel(index), () => LevelStart = null);
         }
 
-        public void StartLevel(int index) => StartLevel(_levels[index], index, Environment.TickCount);
+        public void StartLevel(int index)
+        {
+            if (Meta.Economy.Lives <= 0)
+            {
+                ShowLevelSelect();
+                OpenLives();
+                return;
+            }
+            StartLevel(_levels[index], index, Environment.TickCount);
+        }
+
+        public void OpenShop() => OpenModal(closed => ShopPopup.Show(Ui.Popups, Ads, ShowRewards, closed));
+
+        public void OpenLives() => OpenModal(closed => LivesPopup.Show(Ui.Popups, Ads, closed));
+
+        public void OpenDaily() => OpenModal(closed => DailyPopup.Show(Ui.Popups, ShowRewards, closed));
+
+        public void OpenQuests() => OpenModal(closed => QuestsPopup.Show(Ui.Popups, closed));
+
+        public void OpenCardSet(int set) => OpenModal(closed => SetPopup.Show(Ui.Popups, set, ShowRewards, closed));
+
+        public void OpenPack()
+        {
+            if (Modal != null) return;
+            var draws = Meta.Cards.OpenPack();
+            if (draws == null) return;
+            Meta.Save();
+            OpenModal(closed => PackPopup.Show(Ui.Popups, draws, Meta.Cards.Packs > 0, OpenPack, closed));
+        }
+
+        public void OpenInfo(string title, string message) => OpenModal(closed => InfoPopup.Show(Ui.Popups, title, message, closed));
+
+        public void Confirm(string title, string message, string yes, string no, Action confirmed)
+        {
+            OpenModal(closed => ConfirmPopup.Show(Ui.Popups, title, message, yes, no, confirmed, closed));
+        }
+
+        void OpenModal(Func<Action, Popup> open)
+        {
+            if (Modal != null) return;
+            Popup popup = null;
+            popup = open(() =>
+            {
+                if (Modal == popup) Modal = null;
+            });
+            if (popup.IsOpen) Modal = popup;
+        }
+
+        public void ShowRewards(string title, Reward[] rewards, bool chest)
+        {
+            Rewards?.Close();
+            RewardPopup popup = null;
+            popup = RewardPopup.Show(Ui.Popups, title, rewards, chest, () =>
+            {
+                if (Rewards == popup) Rewards = null;
+            });
+            Rewards = popup;
+        }
 
         public void StartLevel(LevelDefinition level, int index, int seed)
         {
@@ -133,6 +224,8 @@ namespace EmberThrone.Game
                 Game = null;
             }
             LevelStart?.Close();
+            Rewards?.Close();
+            Modal?.Close();
             LevelSelect?.Settings?.Close();
             LevelSelect = null;
             Ui.ClearContent();

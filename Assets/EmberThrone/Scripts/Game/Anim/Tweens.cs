@@ -17,6 +17,13 @@ namespace EmberThrone.Game
             float u = t - 1f;
             return 1f + (c + 1f) * u * u * u + c * u * u;
         }
+
+        public static float OutBackSoft(float t)
+        {
+            const float c = 0.9f;
+            float u = t - 1f;
+            return 1f + (c + 1f) * u * u * u + c * u * u;
+        }
     }
 
     public sealed class Tweens : MonoBehaviour

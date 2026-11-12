@@ -29,7 +29,8 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] Pong'daki repo düzeni: etiketle imzalı AAB akışı, Git LFS, tescilli lisans, README, `docs/` (CI, yayın, tasarım kararları, QA), tek branch `main`
 - [x] Kod denetimi ve 10 düzeltme ([docs/qa/audit-2026-11-05.md](docs/qa/audit-2026-11-05.md))
 - [x] Unity secret'ları bu repoya eklendi (2026-11-11)
-- [ ] İlk bulut APK'sını al. İlk koşuda testler Linux'ta düştü (`Screen.sleepTimeout` orada saklanmıyor); test düzeltildi, APK aşaması henüz hiç çalışmadı
+- [x] İlk bulut APK'sı alındı (2026-11-12): 94,8 MB, önbelleksiz derleme 50 dakika. İlk koşuda testler Linux'ta düşmüştü (`Screen.sleepTimeout` orada saklanmıyor); test düzeltildi
+- [ ] APK boyutunu küçült (94,8 MB): kullanılmayan paketler ve görsel boyutları gözden geçirilecek
 - [ ] Gerçek telefonda dene: his, dokunma, performans (henüz hiç cihazda çalışmadı)
 - [ ] Bulutta test edilecek: `Sprites/Default`, UI Toolkit paneli ve Baloo 2 yazı tipi Android build'inde sorunsuz mu
 
@@ -56,6 +57,10 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [ ] Bölge açılış sahneleri: oyunun içinde, karakter modelleriyle, bölge başına 20–40 sn
 - [ ] Sprite hattını genişlet: patlama ve parçacık kareleri, harita mahalleleri, yeni engeller
 - [x] Efektler ve his (2026-11-06): eşleşmede savrulan renkli kırıntılar ve ışıltılar; kutuda kıymık, buzda kristal, külde duman ve kor; roket, bomba ve kombolarda ekran sarsıntısı; "Harika!", "Muhteşem!", "İnanılmaz!" yazıları; Android titreşimi (3 seviye); kazanma penceresinde konfeti
+- [x] Efekt yenilemesi (2026-11-12): parçacık sistemi (kıvılcım, kırıntı, duman, kor, konfeti), iki shader (toplamalı ışık; taşta parlama ve parıltı şeridi), şimşekli renk bombası, alev izli roket, şok halkalı bomba, vuruş duraklaması, çevredeki taşların itilmesi, hedefe uçan taşlar, seviye başı giriş animasyonu, nefes alan özel taşlar, arka planda korlar; tahta koyu lacivert
+  - öğrenilen: toplamalı ışık açık karelerde görünmez; önce tahtanın rengi değişmeliydi
+  - öğrenilen: sahibi ilk telefondaki sürümü prototip gibi buldu; efekt ve oyun dışı sistemler (lobi, etkinlik, takım) olmadan oyun bitmiş sayılmıyor
+- [ ] Yeni efektleri telefonda dene: akıcılık (eski cihazda parçacık sayısı), parlaklık, duraklama süresi
 - [x] Seviye sonu kutlaması: kalan her hamle tahtada havai fişeğe dönüşür, sayaç sıfıra iner (yalnız gösteri; coin ödülü Faz 3'te ekonomiyle gelecek)
 - [x] Ses efektleri (2026-11-11): 18 sentezlenmiş ses (`tools/audio/`), zincirleme eşleşmede yükselen perde; seviye listesinde Ayarlar penceresi (ses, titreşim, ekran sarsıntısı)
   - öğrenilen: koddan kurulan kamerada `AudioListener` yoktu; testte yakalandı, ses telefonda hiç duyulmayacaktı
@@ -67,10 +72,30 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [x] Ocean Forge logolu açılış ekranı, Unity logosu kapalı (Pong'daki gibi; 2026-11-07, `Editor/Branding.cs`)
 - [ ] Uygulama ikonu (3B render; adaptive, eski boy ve mağaza boyları). Geçici ikon hazır (2026-11-11, `tools/icon/`); kalıcısı maskot yenilenince
 
+## Faz 2b — Yumuşak 3B görünüm (2026-11-12'de başladı)
+- [x] İlk dilim: yükleme ekranı, köy maketi ana ekran, beş sekmeli alt bar, Dünya ve Görevler butonları, yeni taşlar, özel taşlar, engeller, ödül ve sekme ikonları, oyun arka planı
+- [ ] Sahibi yeni görünümü onaylasın (telefonda)
+- [x] Kalan parçalar da çevrildi (2026-11-12): buton takımı, kurdele, halka, booster ikonları, dişli, artı, yıldız, kilit, saat, takvim, madalya, Emby'nin üç pozu; pencere zemini `tools/ui_chrome`'dan
+- [x] Dünya ekranı bölge kartları oldu (görsel, ilerleme, yıldız, düğüm ızgarası); eski yol haritaları kaldırıldı
+- [x] Bölge görselleri (2026-11-12): Fırın Sokağı ve Demirci Çarşısı kendi çizimlerini aldı; Kıvılcım Köyü oyun arka planından kırpılır
+- [ ] Mor sandık hâlâ eski tarzda (henüz kullanılmıyor)
+- [ ] Hareketli yükleme ekranı ve bölge açılış sahneleri (video üretimiyle)
+- [x] Koleksiyon sekmesi (2026-11-12): 6 set, 36 kart, kart paketleri, set ödülleri, büyük ödül; motor tarafında testli
+- [x] Koleksiyonun 36 kart çizimi (2026-11-12): set başına bir sayfa, altı nesne; eksik kart aynı çizimin koyu silueti olarak görünür
+- [ ] Sıralama sekmesi (haftalık yarış) ve Takım sekmesi (can isteme, sohbet): Faz 4'te; önce proje Unity Cloud'a bağlanacak (sahibi yapacak)
+
 ## Faz 3 — Meta ve ekonomi
+- [x] Lobi (2026-11-12): harita üstünde üst bar (can ve sayaç, altın, elmas), altta mağaza, büyük "Seviye N" butonu ve ayarlar, solda hediye ve görev butonları, bildirim rozetleri
+- [x] Ekonomi çekirdeği (2026-11-12): motor tarafında saf C# (`Core/Meta`), 15 test; sayılar META-001'den
+- [x] Mağaza (2026-11-12): altınla booster, sandık (sürpriz ödül), reklamla bedava altın
+- [x] Günlük görevler (2026-11-12): her gün üç görev, ilerleme oynarken dolar, hepsi bitince elmas
+- [ ] Lobiyi ve ekonomiyi telefonda dene; fiyat ve ödül dengesini oynayarak ayarla
+- [ ] Kazanınca altınların üst bara uçması, sandık açılış animasyonu, altın sınırına yaklaşınca "harca" işareti
+- [ ] Elmasla alınanlar: mor sandık, booster paketi; elmas satışı (IAP, Faz 6)
 - [ ] Harita / ilerleme, bölge inşa-dekor meta oyunu (yıldızlarla görevler)
-- [ ] Canlar (5 can, 30 dk yenilenme, sunucu saati), coin, booster envanteri
-- [ ] Günlük ödül, seri bonusları, kumbara
+- [x] Canlar (5 can, 30 dk yenilenme), altın, booster envanteri (2026-11-12). Saat şimdilik cihazın saati; sunucu saati Faz 4'te
+- [x] Günlük hediye ve seri (2026-11-12): 7 günlük takvim, kaçırılan gün seriyi sıfırlar
+- [ ] Kumbara, 14 ve 30 günlük seri ödülleri, seri koruma
 - [x] 30 seviye (2026-11-11): 11–20 Fırın Sokağı, 21–30 Demirci Çarşısı; her 5. seviye zor, ardından nefes seviyesi; hamleler `--tune` ile ayarlı
 - [ ] Seviye üretimi: prosedürel üretici + bot ile ayar → 100, sonra 500+ seviye
 - [ ] Yeni engeller (önce ateş kutusu: yayılan engel), renk fırçası booster'ı

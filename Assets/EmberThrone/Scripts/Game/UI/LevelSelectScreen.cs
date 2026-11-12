@@ -6,6 +6,13 @@ using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
 {
+    public enum LobbyPage
+    {
+        Home,
+        World,
+        Cards,
+    }
+
     public sealed class LevelSelectScreen
     {
         const string Locked = "et-map-node--locked";
@@ -16,6 +23,14 @@ namespace EmberThrone.Game
         public int ButtonCount => _buttons.Count;
         public IReadOnlyList<Button> Buttons => _buttons;
         public Button SettingsButton { get; private set; }
+        public TopBar Top { get; private set; }
+        public LobbyBar Lobby { get; private set; }
+        public TabBar Tabs { get; private set; }
+        public CollectionView Cards { get; private set; }
+        public LobbyPage Page { get; private set; }
+        public bool MapShown => Page == LobbyPage.World;
+
+        UiRoot _ui;
         public SettingsPopup Settings { get; private set; }
         public int CurrentIndex { get; private set; }
         public ScrollView Scroll { get; private set; }
@@ -25,16 +40,16 @@ namespace EmberThrone.Game
 
         public bool IsLocked(int index) => _locked[index];
 
-        public static LevelSelectScreen Create(UiRoot ui, IReadOnlyList<LevelDefinition> levels, Func<LevelDefinition, int> starsOf, Action<int> onPick)
+        public static LevelSelectScreen Create(UiRoot ui, IReadOnlyList<LevelDefinition> levels, Func<LevelDefinition, int> starsOf, Action<int> onPick, GameApp app)
         {
             var screen = new LevelSelectScreen();
-            screen.Build(ui, levels, starsOf, onPick);
+            screen.Build(ui, levels, starsOf, onPick, app);
             return screen;
         }
 
-        void Build(UiRoot ui, IReadOnlyList<LevelDefinition> levels, Func<LevelDefinition, int> starsOf, Action<int> onPick)
+        void Build(UiRoot ui, IReadOnlyList<LevelDefinition> levels, Func<LevelDefinition, int> starsOf, Action<int> onPick, GameApp app)
         {
-            ui.Backdrop.AddToClassList("et-backdrop--map");
+            _ui = ui;
             Root = Ui.El("et-map", ui.Content, "LevelSelect");
 
             Scroll = new ScrollView(ScrollViewMode.Vertical) { name = "Scroll" };
@@ -53,11 +68,23 @@ namespace EmberThrone.Game
             }
             if (CurrentIndex < 0) CurrentIndex = levels.Count - 1;
 
-            for (int c = LevelMap.Chapters.Length - 1; c >= 0; c--)
+            Ui.El("et-map__pad et-map__pad--top", Scroll, "TopPad");
+            for (int c = 0; c < LevelMap.Chapters.Length; c++)
                 BuildChapter(c, levels, starsOf, onPick);
+            Ui.El("et-map__pad et-map__pad--bottom", Scroll, "BottomPad");
 
-            SettingsButton = Ui.Button(null, "et-ring et-pressable et-map__settings", () => OpenSettings(ui), Root, "SettingsButton");
-            Ui.El("et-icon et-map__settings-icon", SettingsButton);
+            int current = CurrentIndex;
+            Top = TopBar.Create(Root, app.OpenLives, app.OpenShop, () => OpenSettings(ui));
+            SettingsButton = Top.SettingsButton;
+            Lobby = LobbyBar.Create(Root, "Seviye " + levels[current].Id, () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests);
+            Tabs = TabBar.Create(Root, app.OpenShop,
+                () => app.OpenInfo("Sıralama", "Haftalık yarış hazırlanıyor."),
+                () => ShowMap(false),
+                () => app.OpenInfo("Takım", "Takımlar hazırlanıyor."),
+                () => Show(LobbyPage.Cards));
+            Cards = CollectionView.Create(Root, app);
+            Tabs.Root.BringToFront();
+            ShowMap(false);
 
             if (CurrentIndex >= 0) CenterWhenLaidOut(_buttons[CurrentIndex]);
         }
@@ -65,28 +92,38 @@ namespace EmberThrone.Game
         void BuildChapter(int chapterIndex, IReadOnlyList<LevelDefinition> levels, Func<LevelDefinition, int> starsOf, Action<int> onPick)
         {
             var chapter = LevelMap.Chapters[chapterIndex];
-            var area = Ui.El("et-map__chapter " + chapter.Style, Scroll, "Chapter" + (chapterIndex + 1));
-
             int first = chapterIndex * LevelMap.LevelsPerChapter;
             int last = chapterIndex == LevelMap.Chapters.Length - 1 ? levels.Count : Mathf.Min(levels.Count, first + LevelMap.LevelsPerChapter);
-            if (last > first)
+            if (last <= first) return;
+
+            int done = 0, stars = 0;
+            for (int i = first; i < last; i++)
             {
-                var spots = chapter.Spots(last - first);
-                for (int i = first; i < last; i++)
-                    _buttons[i] = BuildNode(area, levels[i], i, spots[i - first], starsOf(levels[i]), onPick);
+                int s = starsOf(levels[i]);
+                if (s > 0) done++;
+                stars += s;
             }
 
-            if (chapterIndex == 0)
-                Ui.Text(chapter.Title, "et-chip et-map__banner et-map__banner--first", area, "Banner");
-            if (chapterIndex + 1 < LevelMap.Chapters.Length)
-            {
-                var next = LevelMap.Chapters[chapterIndex + 1];
-                Ui.Text(next.Title, next.BannerRight ? "et-chip et-map__banner et-map__banner--right" : "et-chip et-map__banner", area, "NextBanner");
-            }
-            if (CurrentIndex >= first && CurrentIndex < last) _buttons[CurrentIndex].BringToFront();
+            var card = Ui.El(_locked[first] ? "et-panel et-district et-district--locked" : "et-panel et-district", Scroll, "Chapter" + (chapterIndex + 1));
+            var art = Ui.El("et-district__art " + chapter.Style, card, "Art");
+            Ui.Text(chapter.Title, "et-chip et-district__title", art, "Title");
+            if (_locked[first]) Ui.El("et-icon et-district__lock et-ic--lock", art, "Lock");
+
+            var progress = Ui.El("et-district__progress", card, "Progress");
+            var bar = Ui.El("et-progress et-district__bar", progress, "Bar");
+            var fill = Ui.El("et-progress__fill", bar, "Fill");
+            fill.style.width = Length.Percent(100f * done / (last - first));
+            fill.EnableInClassList(Ui.Hidden, done == 0);
+            Ui.Text(done + "/" + (last - first), "et-progress__text", bar, "Text");
+            Ui.El("et-icon et-district__star et-ic--star", progress);
+            Ui.Text(stars.ToString(), "et-ink et-district__stars", progress, "Stars");
+
+            var grid = Ui.El("et-district__grid", card, "Grid");
+            for (int i = first; i < last; i++)
+                _buttons[i] = BuildNode(grid, levels[i], i, starsOf(levels[i]), onPick);
         }
 
-        Button BuildNode(VisualElement area, LevelDefinition level, int index, Vector2 spot, int stars, Action<int> onPick)
+        Button BuildNode(VisualElement area, LevelDefinition level, int index, int stars, Action<int> onPick)
         {
             bool locked = _locked[index];
             Button node = null;
@@ -95,8 +132,6 @@ namespace EmberThrone.Game
                 if (_locked[index]) Shake(node);
                 else onPick(index);
             }, area, "Level" + level.Id);
-            node.style.left = Length.Percent(spot.x);
-            node.style.top = Length.Percent(spot.y);
             node.EnableInClassList(Locked, locked);
             node.EnableInClassList(Current, index == CurrentIndex);
             node.EnableInClassList(Done, stars > 0 && !locked);
@@ -109,6 +144,22 @@ namespace EmberThrone.Game
                 Ui.El(i < stars && !locked ? "et-star et-star--on et-map-node__star" : "et-star et-map-node__star", row, "Star").pickingMode = PickingMode.Ignore;
             if (index == CurrentIndex) Ui.El("et-icon et-map-node__mascot", node, "Mascot").pickingMode = PickingMode.Ignore;
             return node;
+        }
+
+        public void ShowMap(bool show) => Show(show ? LobbyPage.World : LobbyPage.Home);
+
+        public void Show(LobbyPage page)
+        {
+            Page = page;
+            bool home = page == LobbyPage.Home;
+            Scroll.EnableInClassList(Ui.Hidden, page != LobbyPage.World);
+            Cards.Root.EnableInClassList(Ui.Hidden, page != LobbyPage.Cards);
+            Lobby.SetShown(home);
+            Tabs.SetActive(page == LobbyPage.Cards ? Tabs.CardsTab : Tabs.HomeTab);
+            _ui.Backdrop.EnableInClassList("et-backdrop--map", !home);
+            _ui.Backdrop.EnableInClassList("et-backdrop--home", home);
+            if (page == LobbyPage.Cards) Cards.Refresh();
+            if (page == LobbyPage.World && CurrentIndex >= 0) Scroll.schedule.Execute(() => Center(_buttons[CurrentIndex]));
         }
 
         void CenterWhenLaidOut(VisualElement node)
@@ -129,7 +180,7 @@ namespace EmberThrone.Game
             float view = Scroll.contentViewport.layout.height;
             float content = Scroll.contentContainer.layout.height;
             if (float.IsNaN(view) || float.IsNaN(content) || view <= 0f || content <= view) return;
-            float y = node.parent.layout.y + node.layout.y;
+            float y = node.worldBound.center.y - Scroll.contentContainer.worldBound.yMin;
             Scroll.scrollOffset = new Vector2(0f, Mathf.Clamp(y - view * 0.5f, 0f, content - view));
         }
 

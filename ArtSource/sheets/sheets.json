@@ -7,57 +7,12 @@
         2
       ],
       "cells": [
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/piece_R.png",
-              "fill": 0.78
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/piece_G.png",
-              "fill": 0.8
-            }
-          ]
-        },
-        {
-          "hue": 0.035,
-          "saturation": 1.7,
-          "value": 0.88,
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/piece_B.png",
-              "fill": 0.84
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/piece_Y.png",
-              "fill": 0.82
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/piece_P.png",
-              "fill": 0.72
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/piece_O.png",
-              "fill": 0.78
-            }
-          ]
-        }
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -67,66 +22,12 @@
         2
       ],
       "cells": [
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/sp_rocket.png",
-              "fill": 0.9,
-              "align": "horizontal"
-            },
-            {
-              "path": "Assets/EmberThrone/Resources/Board/sp_rocket_v.png",
-              "fill": 0.9,
-              "align": "vertical"
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/sp_bomb.png",
-              "fill": 0.82
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/sp_orb.png",
-              "fill": 0.76
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/sp_homing.png",
-              "fill": 0.88
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/ob_lantern.png",
-              "fill": 0.92
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/UI/Art/ui_star.png",
-              "fill": 0.92
-            },
-            {
-              "path": "Assets/EmberThrone/Resources/UI/Art/ui_star_empty.png",
-              "fill": 0.92,
-              "saturation": 0.22,
-              "value": 0.5
-            }
-          ]
-        }
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -136,39 +37,10 @@
         2
       ],
       "cells": [
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/ob_box1.png",
-              "fill": 0.84
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/ob_box2.png",
-              "fill": 0.84
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/ob_box3.png",
-              "fill": 0.86
-            }
-          ]
-        },
-        {
-          "glass": 0.62,
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/ob_ice.png",
-              "fill": 0.86
-            }
-          ]
-        },
+        null,
+        null,
+        null,
+        null,
         null,
         null
       ]
@@ -180,70 +52,12 @@
         2
       ],
       "cells": [
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/UI/Art/bo_hammer.png",
-              "fill": 0.84
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/UI/Art/bo_row.png",
-              "fill": 0.86
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/UI/Art/bo_col.png",
-              "fill": 0.86
-            }
-          ]
-        },
-        {
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/UI/Art/bo_shuffle.png",
-              "fill": 0.82
-            }
-          ]
-        },
-        {
-          "keepHoles": true,
-          "seeds": [
-            [
-              0.5,
-              0.47
-            ]
-          ],
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/UI/Art/ic_gear.png",
-              "fill": 0.84
-            }
-          ]
-        },
-        {
-          "keepHoles": true,
-          "erase": [
-            [
-              0.58,
-              0.0,
-              0.86,
-              0.185
-            ]
-          ],
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/UI/Art/ic_home.png",
-              "fill": 0.86
-            }
-          ]
-        }
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
       ]
     },
     {
@@ -253,7 +67,236 @@
         2
       ],
       "cells": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "file": "emby.png",
+      "grid": [
+        3,
+        1
+      ],
+      "cells": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "file": "lobby_a.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "file": "lobby_b.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
         {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_chest_premium.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "file": "soft_pieces.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/piece_R.png",
+              "fill": 0.8
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/piece_G.png",
+              "fill": 0.8
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/piece_B.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/piece_Y.png",
+              "fill": 0.84
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/piece_P.png",
+              "fill": 0.76
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/piece_O.png",
+              "fill": 0.8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_specials.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/sp_rocket.png",
+              "fill": 0.92
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/sp_rocket_v.png",
+              "fill": 0.92
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/sp_bomb.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/sp_homing.png",
+              "fill": 0.9
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/sp_orb.png",
+              "fill": 0.78
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_lantern.png",
+              "fill": 0.92
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_obstacles.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_box1.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "loose": 11,
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_box2.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_box3.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "glass": 0.62,
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_ice.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "loose": 11,
           "keepHoles": true,
           "out": [
             {
@@ -270,30 +313,286 @@
               "fill": 0.91
             }
           ]
-        },
-        null,
-        null,
-        null,
-        null
+        }
       ]
     },
     {
-      "file": "emby.png",
+      "file": "soft_rewards.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_coin.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_heart.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_gem.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_gift.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_quests.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_chest.png",
+              "fill": 0.86
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_tabs.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_shop.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_trophy.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_home.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_team.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_cards.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_world.png",
+              "fill": 0.88
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_boosters.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "loose": 11,
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/bo_hammer.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/bo_row.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/bo_col.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/bo_shuffle.png",
+              "fill": 0.84
+            }
+          ]
+        },
+        {
+          "loose": 11,
+          "seeds": [
+            [
+              0.5,
+              0.5
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_gear.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_plus.png",
+              "fill": 0.88
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_icons.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ui_star.png",
+              "fill": 0.92
+            },
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ui_star_empty.png",
+              "fill": 0.92,
+              "saturation": 0.22,
+              "value": 0.5
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_lock.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_clock.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_calendar.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_video.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_medal.png",
+              "fill": 0.88
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_emby.png",
       "grid": [
         3,
         1
       ],
       "cells": [
         {
+          "keepHoles": true,
           "out": [
             {
               "path": "Assets/EmberThrone/Resources/UI/Art/mascot.png",
-              "fill": 0.86
+              "fill": 0.88
             }
           ]
         },
         {
-          "loose": 80,
+          "loose": 60,
+          "keepHoles": true,
           "out": [
             {
               "path": "Assets/EmberThrone/Resources/UI/Art/mascot_joy.png",
@@ -302,6 +601,7 @@
           ]
         },
         {
+          "keepHoles": true,
           "out": [
             {
               "path": "Assets/EmberThrone/Resources/UI/Art/mascot_sad.png",
@@ -310,11 +610,704 @@
           ]
         }
       ]
+    },
+    {
+      "file": "cards_sofra.png",
+      "grid": [
+        3,
+        2
+      ],
+      "size": 256,
+      "fill": 0.92,
+      "cells": [
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/sofra_ekmek.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/sofra_simit.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/sofra_kurabiye.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/sofra_recel.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/sofra_borek.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/sofra_caydanlik.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "cards_demirci.png",
+      "grid": [
+        3,
+        2
+      ],
+      "size": 256,
+      "fill": 0.92,
+      "cells": [
+        {
+          "loose": 11,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/demirci_nal.png"
+            }
+          ]
+        },
+        {
+          "loose": 11,
+          "keepHoles": true,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/demirci_tokmak.png"
+            }
+          ]
+        },
+        {
+          "loose": 11,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/demirci_masa.png"
+            }
+          ]
+        },
+        {
+          "loose": 11,
+          "keepHoles": true,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/demirci_koruk.png"
+            }
+          ]
+        },
+        {
+          "loose": 11,
+          "keepHoles": true,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/demirci_ors.png"
+            }
+          ]
+        },
+        {
+          "loose": 11,
+          "keepHoles": true,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/demirci_migfer.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "cards_fenerci.png",
+      "grid": [
+        3,
+        2
+      ],
+      "size": 256,
+      "fill": 0.92,
+      "cells": [
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/fenerci_kibrit.png"
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "loose": 14,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/fenerci_fitil.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/fenerci_atki.png"
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/fenerci_yag.png"
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/fenerci_pusula.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/fenerci_fener.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "cards_bahce.png",
+      "grid": [
+        3,
+        2
+      ],
+      "size": 256,
+      "fill": 0.92,
+      "cells": [
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/bahce_aycicegi.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/bahce_kova.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/bahce_elma.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/bahce_balkabagi.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/bahce_kovan.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/bahce_korkuluk.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "cards_ayaz.png",
+      "grid": [
+        3,
+        2
+      ],
+      "size": 256,
+      "fill": 0.92,
+      "cells": [
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/ayaz_kartopu.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/ayaz_sarkit.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/ayaz_eldiven.png"
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "loose": 14,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/ayaz_kure.png"
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/ayaz_can.png"
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "loose": 14,
+          "soft": {
+            "to": 110,
+            "boxes": [
+              [
+                0.15,
+                0.0,
+                0.9,
+                0.45
+              ]
+            ]
+          },
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/ayaz_asa.png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "cards_kor.png",
+      "grid": [
+        3,
+        2
+      ],
+      "size": 256,
+      "fill": 0.92,
+      "cells": [
+        {
+          "loose": 14,
+          "soft": {
+            "to": 110,
+            "boxes": [
+              [
+                0.28,
+                0.02,
+                0.72,
+                0.36
+              ]
+            ]
+          },
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/kor_mum.png"
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "loose": 14,
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/kor_komur.png"
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "loose": 14,
+          "soft": {
+            "to": 110,
+            "boxes": [
+              [
+                0.36,
+                0.6,
+                0.95,
+                0.95
+              ],
+              [
+                0.5,
+                0.15,
+                0.95,
+                0.6
+              ]
+            ]
+          },
+          "erase": [
+            [
+              0,
+              0,
+              0.025,
+              1
+            ],
+            [
+              0.975,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.025
+            ],
+            [
+              0,
+              0.975,
+              1,
+              1
+            ]
+          ],
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/kor_atesbocegi.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/kor_kolye.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/kor_kupa.png"
+            }
+          ]
+        },
+        {
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Cards/kor_kalp.png"
+            }
+          ]
+        }
+      ]
     }
   ],
   "images": [
     {
-      "file": "bg_game.png",
+      "file": "soft_bg_game.png",
       "out": [
         {
           "path": "Assets/EmberThrone/Resources/Board/bg_game.jpg",
@@ -324,91 +1317,83 @@
           "path": "Assets/EmberThrone/Resources/UI/Art/bg_map.jpg",
           "width": 576,
           "blur": 6
+        },
+        {
+          "path": "Assets/EmberThrone/Resources/UI/Art/district_1.jpg",
+          "width": 1152,
+          "crop": [
+            0.0,
+            0.05,
+            1.0,
+            0.27
+          ]
         }
       ]
     },
     {
-      "file": "map_3.png",
+      "file": "soft_home.png",
       "out": [
         {
-          "path": "Assets/EmberThrone/Resources/UI/Art/map_3.jpg",
+          "path": "Assets/EmberThrone/Resources/UI/Art/bg_home.jpg",
           "width": 1152
         }
       ]
-    }
-  ],
-  "maps": [
+    },
     {
-      "path": "Assets/EmberThrone/Resources/UI/Art/map_1.jpg",
-      "width": 1152,
-      "blend": 28,
-      "strips": [
+      "file": "soft_loading.png",
+      "out": [
         {
-          "file": "map_1b.png",
-          "top": 136,
-          "bottom": 114
-        },
-        {
-          "file": "map_1a.png",
-          "top": 136,
-          "bottom": 0
+          "path": "Assets/EmberThrone/Resources/UI/Art/bg_loading.jpg",
+          "width": 1152
         }
       ]
     },
     {
-      "path": "Assets/EmberThrone/Resources/UI/Art/map_2.jpg",
-      "width": 1152,
-      "blend": 28,
-      "strips": [
+      "file": "soft_district_firin.png",
+      "out": [
         {
-          "file": "map_2b.png",
-          "top": 114,
-          "bottom": 114
-        },
+          "path": "Assets/EmberThrone/Resources/UI/Art/district_2.jpg",
+          "width": 1152,
+          "crop": [
+            0.0,
+            0.2,
+            1.0,
+            0.9
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_district_demirci.png",
+      "out": [
         {
-          "file": "map_2a.png",
-          "top": 114,
-          "bottom": 114
+          "path": "Assets/EmberThrone/Resources/UI/Art/district_3.jpg",
+          "width": 1152,
+          "crop": [
+            0.0,
+            0.2,
+            1.0,
+            0.9
+          ]
         }
       ]
     }
   ],
+  "maps": [],
   "chrome": [
     {
-      "file": "ui_kit.png",
+      "file": "soft_ui_kit.png",
       "items": [
-        {
-          "path": "Assets/EmberThrone/Resources/UI/Chrome/panel.png",
-          "kind": "nine",
-          "box": [
-            0.02,
-            0.05,
-            0.5,
-            0.53
-          ],
-          "scale": 0.545,
-          "slice": [
-            60,
-            60,
-            60,
-            60
-          ],
-          "size": [
-            360,
-            360
-          ],
-          "fade": 26
-        },
         {
           "path": "Assets/EmberThrone/Resources/UI/Chrome/btn_green.png",
           "kind": "three",
           "box": [
-            0.02,
-            0.66,
+            0.005,
+            0.69,
             0.275,
-            0.84
+            0.92
           ],
-          "scale": 0.917,
+          "scale": 0.67,
           "slice": [
             100,
             0,
@@ -424,12 +1409,12 @@
           "path": "Assets/EmberThrone/Resources/UI/Chrome/btn_orange.png",
           "kind": "three",
           "box": [
-            0.275,
-            0.66,
-            0.52,
-            0.84
+            0.28,
+            0.69,
+            0.545,
+            0.92
           ],
-          "scale": 0.917,
+          "scale": 0.67,
           "slice": [
             100,
             0,
@@ -445,10 +1430,10 @@
           "path": "Assets/EmberThrone/Resources/UI/Chrome/ring.png",
           "kind": "fit",
           "box": [
-            0.52,
-            0.58,
-            0.75,
-            0.92
+            0.55,
+            0.65,
+            0.755,
+            0.97
           ],
           "size": [
             220,
@@ -459,12 +1444,12 @@
           "path": "Assets/EmberThrone/Resources/UI/Chrome/chip.png",
           "kind": "three",
           "box": [
-            0.74,
-            0.66,
-            0.98,
-            0.84
+            0.76,
+            0.72,
+            0.995,
+            0.9
           ],
-          "scale": 0.361,
+          "scale": 0.345,
           "slice": [
             34,
             0,
@@ -480,12 +1465,12 @@
           "path": "Assets/EmberThrone/Resources/UI/Chrome/tag.png",
           "kind": "three",
           "box": [
-            0.275,
-            0.66,
-            0.52,
-            0.84
+            0.28,
+            0.69,
+            0.545,
+            0.92
           ],
-          "scale": 0.347,
+          "scale": 0.255,
           "slice": [
             38,
             0,
@@ -502,11 +1487,11 @@
           "kind": "three",
           "box": [
             0.5,
-            0.14,
-            0.98,
-            0.4
+            0.17,
+            0.995,
+            0.47
           ],
-          "scale": 0.8,
+          "scale": 0.66,
           "slice": [
             250,
             0,
@@ -525,10 +1510,10 @@
           "path": "Assets/EmberThrone/Resources/UI/Chrome/ring_locked.png",
           "kind": "fit",
           "box": [
-            0.52,
-            0.58,
-            0.75,
-            0.92
+            0.55,
+            0.65,
+            0.755,
+            0.97
           ],
           "size": [
             220,

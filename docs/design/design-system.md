@@ -34,8 +34,8 @@ Tüm ölçüler **referans pikseldir** (1080×1920 tuval, UI Toolkit `PanelSetti
 | `--color-white` | `#FFFFFF` | Renkli zemin ve koyu hap üstündeki yazı |
 | `--color-highlight` | `rgba(255,255,255,.9)` | Krem panelde sayının altındaki ışık (hamle sayısı) |
 | `--color-scrim` | `rgba(10,5,25,.78)` | Pencere arkası perde |
-| `--color-board-back` | `rgba(26,16,58,.72)` | Tahta zemini |
-| `--color-tile`, `--color-tile-alt` | `rgba(236,244,255,.93)`, `rgba(208,224,255,.93)` | Tahta kareleri (dama) |
+| `--color-board-back` | `#131A4A` | Tahta zemini |
+| `--color-tile`, `--color-tile-alt` | `#34459A`, `#2B3A88` | Tahta kareleri (dama). Koyu lacivert: taşlar öne çıkar, ışık efektleri görünür. Tahtanın dış kenarı altın (`Palette.BoardGlow`) |
 | `--color-select` | `#7AD83A` | Sıralamada oyuncunun satırı |
 | `--color-pressed` | `#EBEBEB` | Basılı bileşenin görsel tonu (%8 koyulaşma) |
 | `--color-none` | şeffaf | Unity'nin varsayılan buton zeminini silmek için |
@@ -162,6 +162,23 @@ Uygulama (2026-11-06):
 - Her olayın sarsıntı ve titreşim gücü tek tabloda: `Scripts/Game/Feel/Feel.cs`. Sarsıntı kameradadır (`CameraShake`), tahtaya dokunmaz. Titreşim Android'in Vibrator servisiyle üç seviyedir (`Haptics`): hafif 12 ms, orta 24 ms, güçlü 45 ms.
 - Övgü: bir hamlede 3 dalga "Harika!", 4 dalga ya da kombo "Muhteşem!", 6 dalga ya da iki renk bombası "İnanılmaz!". Hamle başına en büyüğü bir kez gösterilir.
 - Seviye sonu: kalan her hamle (en fazla 10) sayaçtan çıkan bir kıvılcım olur, tahtada havai fişek gibi patlar; sonra konfetili pencere açılır. Yalnız gösteridir, oyunun durumu değişmez.
+
+Lobi bileşenleri (2026-11-12):
+- **Hap** (`et-pill`): koyu hap üstünde solda taşan büyük ikon, ortada sayı, sağda yeşil artı. Can hapında sayı kalbin üstünde, yanında "Dolu" ya da geri sayım.
+- **Halka buton**: altın halka içinde ikon (mağaza, ayarlar, hediye, görevler). Bildirim varsa sağ üstte kırmızı rozet (`et-badge`).
+- **Satır** (`et-row`): ikon, başlık, alt yazı ve küçük buton (`et-btn--small`, içinde fiyat ve para ikonu). Yetmeyen fiyat butonu soluk ve basılmaz.
+- **İlerleme çubuğu** (`et-progress`): kahverengi zemin, yeşil dolgu, ortada "10/20".
+- **Gün kutusu** (`et-day`): günlük hediye takvimi; bugünkü yeşil çerçeveli, alınmış olan soluk ve onay işaretli, 7. gün geniş.
+- Ana buton her ekranda tektir ve yeşildir: lobide "Seviye N".
+
+Efekt yenilemesi (2026-11-12, telefondaki ilk denemeden sonra):
+- Tahta koyu laciverte döndü. Açık karelerde toplamalı (additive) ışık görünmüyordu.
+- Eşleşme: taş şişer ve parlar, sonra kendi renginde kırıntılar, kıvılcımlar, ışıltı ve küçük bir şok halkasıyla patlar. Hedef taşları tahtadan hedef paneline uçar; sayaç taş varınca düşer.
+- Roket: iki yöne alev izi ve duman bırakarak uçar, yolunda ışık şeridi kalır. Bomba: parlama, iki şok halkası, kıvılcım, kor ve duman; çevredeki taşlar dışarı itilip geri gelir, görüntü 50 ms durur. Renk bombası: her hedefe titreyen şimşek. Güdümlü: kavisli uçuş ve kıvılcım izi.
+- Özel taş oluşurken arkasında dönen ışık hüzmesi çıkar. Tahtadaki özel taşlar nefes alır gibi hareket eder ve arkalarında renkli hale yanıp söner. Taşların üstünden ara sıra çapraz bir parıltı geçer, rastgele taşlarda ışıltı belirir.
+- Düşen taşlar hızlanarak iner, uzar, yere değince ezilip zıplar. Seviye başında taşlar sırayla yukarıdan gelir.
+- Kazanınca tahtanın iki alt köşesinden konfeti fışkırır. Arka planda yavaşça yükselen korlar vardır.
+- Olay güçleri yine tek tabloda (`Feel.cs`): sarsıntı, titreşim, ses ve duraklama süresi. "Ekran sarsıntısı" ayarı kapalıyken duraklama da olmaz.
 
 ## Ses ve titreşim paleti
 

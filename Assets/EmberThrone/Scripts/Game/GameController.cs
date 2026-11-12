@@ -12,11 +12,15 @@ namespace EmberThrone.Game
         const float BoardMargin = 0.32f;
         const int BackdropOrder = -100;
         const float BackdropOverscan = 1.04f;
+        const float AmbientWarmUp = 8f;
 
         GameApp _app;
         BoardInput _input;
         SpriteRenderer _backdrop;
+        ParticleSystem _ambient;
         HudView _hud;
+        GoalFlyers _flyers;
+        int[] _goalShown;
         PraiseView _praise;
         BoosterBar _boosters;
         int _praiseLevel;
@@ -27,17 +31,23 @@ namespace EmberThrone.Game
         BoosterType? _armed;
         float _idle;
         bool _hintShown;
-        bool _continued;
+        bool _adContinueUsed;
+        int _continues;
+        bool _rewarded;
+        bool _lifeTaken;
 
         public GameSession Session { get; private set; }
         public BoardView View { get; private set; }
         public HudView Hud => _hud;
         public PraiseView Praise => _praise;
+        public GoalFlyers Flyers => _flyers;
         public BoosterBar Boosters => _boosters;
         public BoosterType? Armed => _armed;
         public float HintDelay { get; set; } = Timing.HintDelay;
         public ResultPopup Popup { get; private set; }
         public bool IsBusy { get; private set; }
+        public int WinCoins { get; private set; }
+        public int WinPacks { get; private set; }
         public string LastMismatch { get; private set; }
 
         public static GameController Create(GameApp app, Transform parent, LevelDefinition level, int levelIndex, int seed)
@@ -59,10 +69,14 @@ namespace EmberThrone.Game
             BuildBackdrop();
             BuildView();
 
-            _hud = HudView.Create(app.Ui.Content, Session, "Seviye " + level.Id, app.ShowLevelSelect);
+            _hud = HudView.Create(app.Ui.Content, Session, "Seviye " + level.Id, OnHome);
+            _flyers = GoalFlyers.Create(app.Ui.Content);
+            _goalShown = new int[Session.Goals.Count];
+            for (int i = 0; i < _goalShown.Length; i++) _goalShown[i] = Session.Goals[i].Remaining;
             _praise = PraiseView.Create(app.Ui.Content);
             _boosters = BoosterBar.Create(app.Ui.Content, PickBooster);
             RefreshBoosters();
+            Meta.Changed += RefreshBoosters;
 
             _input = gameObject.AddComponent<BoardInput>();
             _input.Init(app.Camera, View);
@@ -89,11 +103,7 @@ namespace EmberThrone.Game
             boardObject.transform.SetParent(transform, false);
             View = boardObject.AddComponent<BoardView>();
             View.Build(Session);
-            View.GoalProgressed += e =>
-            {
-                Sound.Play(Sfx.Collect);
-                _hud.SetGoal(e.GoalIndex, e.Remaining);
-            };
+            View.GoalProgressed += OnGoalProgress;
             View.Impacted += OnImpact;
             View.WaveStarted += OnWave;
             View.ComboFired += OnCombo;
@@ -106,6 +116,32 @@ namespace EmberThrone.Game
             _backdrop.sprite = Art.Backdrop();
             _backdrop.sharedMaterial = Art.SpriteMaterial;
             _backdrop.sortingOrder = BackdropOrder;
+            _ambient = FxParticles.Ambient(transform);
+        }
+
+        void OnGoalProgress(GoalProgressEvent e)
+        {
+            int index = e.GoalIndex;
+            int remaining = e.Remaining;
+            var at = View.World(e.Source);
+            float size = (PanelPoint(at + Vector3.right) - PanelPoint(at)).x;
+            bool flying = _flyers.Fly(HudView.GoalSprite(Session.Goals[index]), PanelPoint(at), size, _hud.GoalSlotOf(index),
+                () => ShowGoal(index, remaining));
+            if (!flying) ShowGoal(index, remaining);
+        }
+
+        void ShowGoal(int index, int remaining)
+        {
+            if (remaining >= _goalShown[index]) return;
+            _goalShown[index] = remaining;
+            Sound.Play(Sfx.Collect);
+            _hud.SetGoal(index, remaining);
+        }
+
+        Vector2 PanelPoint(Vector3 world)
+        {
+            var screen = _app.Camera.WorldToScreenPoint(View.transform.TransformPoint(world));
+            return UiRoot.ScreenToPanel(screen);
         }
 
         void RebuildView()
@@ -115,11 +151,18 @@ namespace EmberThrone.Game
             BuildView();
             _input.Init(_app.Camera, View);
             _hud.SetMoves(Session.MovesLeft, false);
-            for (int i = 0; i < Session.Goals.Count; i++) _hud.SetGoal(i, Session.Goals[i].Remaining, false);
+            _flyers.Clear();
+            for (int i = 0; i < Session.Goals.Count; i++)
+            {
+                _goalShown[i] = Session.Goals[i].Remaining;
+                _hud.SetGoal(i, _goalShown[i], false);
+            }
         }
 
         void OnDestroy()
         {
+            Meta.Changed -= RefreshBoosters;
+            Meta.Save();
             if (_app != null && _app.Ui != null) _app.Ui.LayoutChanged -= FitCamera;
             _hud?.Remove();
             _boosters?.Remove();
@@ -147,16 +190,41 @@ namespace EmberThrone.Game
 
         void RefreshBoosters()
         {
-            foreach (var type in BoosterInventory.All) _boosters.SetCount(type, BoosterInventory.Count(type, Session.Rules));
+            foreach (var type in BoosterInventory.All) _boosters.SetCount(type, BoosterInventory.Count(type));
+        }
+
+        public void OnHome()
+        {
+            if (Session.State == GameState.Lost) GiveUp();
+            bool played = Session.State == GameState.Playing && Session.MovesLeft < _level.Moves;
+            if (!played)
+            {
+                _app.ShowLevelSelect();
+                return;
+            }
+            _app.Confirm("Çıkış", "Çıkarsan bir can kaybedersin.", "Çık", "Devam et", () =>
+            {
+                GiveUp();
+                _app.ShowLevelSelect();
+            });
+        }
+
+        void GiveUp()
+        {
+            if (_lifeTaken || Session.State == GameState.Won) return;
+            _lifeTaken = true;
+            Meta.Economy.LoseLife(Meta.Now);
+            Meta.Save();
         }
 
         public void PickBooster(BoosterType type)
         {
             ResetIdle();
             if (IsBusy || Session.State != GameState.Playing) return;
-            if (BoosterInventory.Count(type, Session.Rules) <= 0)
+            if (BoosterInventory.Count(type) <= 0)
             {
                 _boosters.Shake(type);
+                _app.OpenShop();
                 return;
             }
             Select(GridPos.Invalid);
@@ -184,7 +252,7 @@ namespace EmberThrone.Game
                 else _boosters.Shake(type);
                 return;
             }
-            BoosterInventory.Spend(type, Session.Rules);
+            BoosterInventory.Spend(type);
             Arm(null);
             RefreshBoosters();
             Run(outcome);
@@ -216,6 +284,12 @@ namespace EmberThrone.Game
             var size = _backdrop.sprite.bounds.size;
             _backdrop.transform.position = new Vector3(rest.x, rest.y, 0f);
             _backdrop.transform.localScale = Vector3.one * (Mathf.Max(viewWidth / size.x, viewHeight / size.y) * BackdropOverscan);
+
+            _ambient.transform.position = new Vector3(rest.x, rest.y, 0f);
+            var shape = _ambient.shape;
+            shape.scale = new Vector3(viewWidth, viewHeight, 0.01f);
+            _ambient.Simulate(AmbientWarmUp, true, true);
+            _ambient.Play();
         }
 
         public void OnTap(GridPos p)
@@ -277,6 +351,7 @@ namespace EmberThrone.Game
             _wave = 0;
             _input.SetEnabled(false);
             _hud.SetMoves(outcome.MovesLeft);
+            ReportQuests(outcome);
             SaveIfWon();
 
             yield return PlayGuarded(outcome);
@@ -326,6 +401,7 @@ namespace EmberThrone.Game
         void OnImpact(Impact impact)
         {
             _app.Shake.Add(Feel.TraumaOf(impact));
+            HitStop.Play(Feel.HitStopOf(impact));
             Haptics.Play(Feel.HapticOf(impact));
             Sound.Play(Feel.SoundOf(impact), impact == Impact.Match ? Sound.CascadeStep(_wave) : 0f);
         }
@@ -347,7 +423,50 @@ namespace EmberThrone.Game
 
         void SaveIfWon()
         {
-            if (Session.State == GameState.Won) LevelProgress.SaveStars(_level.Id, Session.Rules.StarsFor(Session.MovesLeft));
+            if (Session.State != GameState.Won || _rewarded) return;
+            _rewarded = true;
+            int stars = Session.Rules.StarsFor(Session.MovesLeft);
+            bool first = LevelProgress.GetStars(_level.Id) <= 0;
+            LevelProgress.SaveStars(_level.Id, stars);
+            long now = Meta.Now;
+            var economy = Meta.Economy;
+            WinCoins = economy.RewardWin(stars, first);
+            WinPacks = first ? Meta.Rules.PacksOnFirstWin : 0;
+            economy.Report(QuestKind.WinLevels, 1, now);
+            economy.Report(QuestKind.EarnStars, stars, now);
+            Meta.Save();
+        }
+
+        void ReportQuests(MoveOutcome outcome)
+        {
+            int gems = 0, specials = 0, obstacles = 0;
+            foreach (var step in outcome.Steps)
+            {
+                foreach (var ev in step.Events)
+                {
+                    switch (ev)
+                    {
+                        case PieceClearedEvent piece:
+                            if (piece.Kind == PieceKind.Gem) gems++;
+                            else if (piece.Kind == PieceKind.Box) obstacles++;
+                            break;
+                        case SpecialActivatedEvent _:
+                            specials++;
+                            break;
+                        case CoverDamagedEvent cover:
+                            if (cover.HpLeft <= 0) obstacles++;
+                            break;
+                        case FloorDamagedEvent floor:
+                            if (floor.HpLeft <= 0) obstacles++;
+                            break;
+                    }
+                }
+            }
+            long now = Meta.Now;
+            var economy = Meta.Economy;
+            economy.Report(QuestKind.CollectGems, gems, now);
+            economy.Report(QuestKind.FireSpecials, specials, now);
+            economy.Report(QuestKind.BreakObstacles, obstacles, now);
         }
 
         IEnumerator EndLevel() => Session.State == GameState.Won ? ShowWin() : ShowLose();
@@ -367,7 +486,7 @@ namespace EmberThrone.Game
             var next = _app.HasLevel(_levelIndex + 1)
                 ? new ResultPopup.Choice("Sonraki seviye", ButtonKind.Cta, AfterAd(() => _app.StartLevel(_levelIndex + 1)))
                 : new ResultPopup.Choice("Tekrar oyna", ButtonKind.Cta, AfterAd(() => _app.StartLevel(_levelIndex)));
-            Popup = ResultPopup.Show(_app.Ui.Popups, "Kazandın!", Session.MovesLeft + " hamle arttı", stars,
+            Popup = ResultPopup.Show(_app.Ui.Popups, "Kazandın!", Session.MovesLeft + " hamle arttı", stars, WinCoins, WinPacks,
                 next,
                 new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, AfterAd(_app.ShowLevelSelect)));
         }
@@ -383,26 +502,56 @@ namespace EmberThrone.Game
             yield return new WaitForSeconds(Timing.LoseDelay);
             OnImpact(Impact.Lose);
             var choices = new List<ResultPopup.Choice>();
-            bool offer = !_continued && _app.Ads.IsRewardedReady;
-            if (offer)
-                choices.Add(new ResultPopup.Choice(ContinueLabel(Session.Rules.ContinueMoves), ButtonKind.Cta, WatchForExtraMoves));
-            choices.Add(new ResultPopup.Choice("Tekrar dene", offer ? ButtonKind.Secondary : ButtonKind.Cta, () => _app.StartLevel(_levelIndex)));
-            choices.Add(new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, _app.ShowLevelSelect));
-            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", RemainingText(), -1, choices.ToArray());
+            int moves = Session.Rules.ContinueMoves;
+            bool ad = !_adContinueUsed && _app.Ads.IsRewardedReady;
+            if (ad) choices.Add(new ResultPopup.Choice(ContinueLabel(moves), ButtonKind.Cta, WatchForExtraMoves));
+            int price = Meta.Rules.ExtraMovesCost(_continues);
+            bool coins = Meta.Economy.Coins >= price;
+            if (coins) choices.Add(new ResultPopup.Choice(CoinContinueLabel(moves, price), ad ? ButtonKind.Secondary : ButtonKind.Cta, BuyExtraMoves));
+            choices.Add(new ResultPopup.Choice("Tekrar dene", ad || coins ? ButtonKind.Secondary : ButtonKind.Cta, Retry));
+            choices.Add(new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, Leave));
+            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", RemainingText(), -1, 0, 0, choices.ToArray());
         }
 
         public static string ContinueLabel(int moves) => "İzle: +" + moves + " hamle";
 
+        public static string CoinContinueLabel(int moves, int price) => "+" + moves + " hamle: " + price + " altın";
+
+        void Retry()
+        {
+            GiveUp();
+            _app.StartLevel(_levelIndex);
+        }
+
+        void Leave()
+        {
+            GiveUp();
+            _app.ShowLevelSelect();
+        }
+
         void WatchForExtraMoves()
         {
-            if (_continued || Session.State != GameState.Lost) return;
+            if (_adContinueUsed || Session.State != GameState.Lost) return;
             _app.Ads.ShowRewarded(ContinueWithExtraMoves, null);
+        }
+
+        void BuyExtraMoves()
+        {
+            if (Session.State != GameState.Lost || !Meta.Economy.BuyExtraMoves(_continues)) return;
+            _continues++;
+            Meta.Save();
+            Resume();
         }
 
         void ContinueWithExtraMoves()
         {
-            if (_continued || Session.State != GameState.Lost) return;
-            _continued = true;
+            if (_adContinueUsed || Session.State != GameState.Lost) return;
+            _adContinueUsed = true;
+            Resume();
+        }
+
+        void Resume()
+        {
             Popup?.Close();
             Popup = null;
             Session.AddMoves(Session.Rules.ContinueMoves);

@@ -128,6 +128,21 @@ namespace EmberThrone.Core.Tests
         }
 
         [Test]
+        public void EveryCard_HasAnIllustration()
+        {
+            var rules = new CollectionRules();
+            int count = 0;
+            foreach (var set in rules.Sets)
+                foreach (var card in set.Cards)
+                {
+                    string file = set.Id + "_" + card.Id + ".png";
+                    Assert.IsTrue(File.Exists(Path.Combine(UiFolder, "Cards", file)), "missing Cards/" + file);
+                    count++;
+                }
+            Assert.AreEqual(rules.CardCount, count);
+        }
+
+        [Test]
         public void EveryFont_HasTheTurkishLetters()
         {
             var fonts = Directory.GetFiles(Path.Combine(UiFolder, "Fonts"), "*.ttf");

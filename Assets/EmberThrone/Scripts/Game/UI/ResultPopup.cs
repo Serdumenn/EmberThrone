@@ -10,6 +10,8 @@ namespace EmberThrone.Game
         const float RaySpin = 6f;
 
         public string Title { get; private set; }
+        public int Coins { get; private set; }
+        public int Packs { get; private set; }
         public VisualElement Root { get; private set; }
         public IReadOnlyList<Button> Buttons => _buttons;
 
@@ -23,9 +25,9 @@ namespace EmberThrone.Game
             public Choice(string label, ButtonKind kind, Action run) { Label = label; Kind = kind; Run = run; }
         }
 
-        public static ResultPopup Show(VisualElement parent, string title, string message, int stars, params Choice[] buttons)
+        public static ResultPopup Show(VisualElement parent, string title, string message, int stars, int coins, int packs, params Choice[] buttons)
         {
-            var popup = new ResultPopup { Title = title };
+            var popup = new ResultPopup { Title = title, Coins = coins, Packs = packs };
             popup.Build(parent, message, stars, buttons);
             return popup;
         }
@@ -47,6 +49,17 @@ namespace EmberThrone.Game
             var ribbon = Ui.El("et-ribbon", panel);
             Ui.Text(Title, "et-title", ribbon, "Title");
             Ui.Text(message, "et-ink et-result__message", panel, "Message");
+            if (Coins > 0)
+            {
+                var reward = Ui.El("et-result__reward", panel, "Reward");
+                Ui.El("et-icon et-result__reward-icon et-ic--coin", reward);
+                Ui.Text("+" + Coins, "et-ink et-result__reward-text", reward, "Coins");
+                if (Packs > 0)
+                {
+                    Ui.El("et-icon et-result__reward-icon et-result__reward-icon--next et-ic--cards", reward);
+                    Ui.Text("+" + Packs, "et-ink et-result__reward-text", reward, "Packs");
+                }
+            }
             foreach (var c in choices)
                 _buttons.Add(Ui.Button(c.Label, Ui.ClassOf(c.Kind) + " et-result__button", c.Run, panel));
 

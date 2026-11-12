@@ -36,20 +36,9 @@ namespace EmberThrone.Game
             {
                 var t = type;
                 var button = Ui.Button(null, "et-ring et-pressable et-booster", () => onPick(t), Root, type.ToString());
-                Ui.El("et-icon et-booster__icon et-booster__icon--" + Slug(type), button);
+                Ui.El("et-icon et-booster__icon et-booster__icon--" + BoosterInventory.Slug(type), button);
                 _counts[type] = Ui.Text("0", "et-chip et-caption et-outlined et-booster__count", button, "Count");
                 _buttons[type] = button;
-            }
-        }
-
-        static string Slug(BoosterType type)
-        {
-            switch (type)
-            {
-                case BoosterType.Hammer: return "hammer";
-                case BoosterType.RowBlast: return "row";
-                case BoosterType.ColumnBlast: return "column";
-                default: return "shuffle";
             }
         }
 

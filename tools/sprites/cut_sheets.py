@@ -11,6 +11,7 @@ MANIFEST = os.path.join(SHEETS, "sheets.json")
 LOOSE = 30
 TIGHT = 9
 MIN_HOLE = 120
+SOFT_DARKER = 4
 
 
 def background_of(rgb):
@@ -55,7 +56,7 @@ def enclosed_holes(dist, outside):
     return holes
 
 
-def matte(rgb, keep_holes, seeds=(), loose=LOOSE):
+def matte(rgb, keep_holes, seeds=(), loose=LOOSE, soft=None):
     bg = background_of(rgb)
     dist = np.abs(rgb.astype(np.float32) - bg).max(axis=2)
     h, w = dist.shape
@@ -68,6 +69,15 @@ def matte(rgb, keep_holes, seeds=(), loose=LOOSE):
     alpha = np.clip((alpha - 0.35) / 0.5, 0.0, 1.0)
 
     color = rgb.astype(np.float32)
+    if soft:
+        region = np.zeros((h, w), dtype=bool)
+        for x0, y0, x1, y1 in soft.get("boxes", [[0, 0, 1, 1]]):
+            region[int(y0 * h):int(y1 * h), int(x0 * w):int(x1 * w)] = True
+        region &= rgb.max(axis=2) >= bg.max() - SOFT_DARKER
+        glow = np.where(region, np.clip((dist - loose) / (soft["to"] - loose), 0.0, 1.0), 1.0)
+        unmixed = bg + (color - bg) / np.maximum(glow[..., None], 0.08)
+        color = np.where(glow[..., None] < 1.0, np.clip(unmixed, 0, 255), color)
+        alpha = alpha * glow
     known = np.asarray(solid).astype(np.float32) / 255.0
     for _ in range(6):
         weight = np.asarray(Image.fromarray((known * 255).astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(2))).astype(np.float32) / 255.0
@@ -146,7 +156,7 @@ def cut(sheet):
         else:
             cx, cy = index % cols, index // cols
             x0, y0, x1, y1 = cx * w // cols, cy * h // rows, (cx + 1) * w // cols, (cy + 1) * h // rows
-        rgba = matte(np.asarray(image.crop((x0, y0, x1, y1))), cell.get("keepHoles", False), cell.get("seeds", ()), cell.get("loose", LOOSE))
+        rgba = matte(np.asarray(image.crop((x0, y0, x1, y1))), cell.get("keepHoles", False), cell.get("seeds", ()), cell.get("loose", LOOSE), cell.get("soft"))
         for ex0, ey0, ex1, ey1 in cell.get("erase", ()):
             ch, cw = rgba.shape[:2]
             rgba[int(ey0 * ch):int(ey1 * ch), int(ex0 * cw):int(ex1 * cw), 3] = 0
@@ -167,8 +177,11 @@ def export(image):
     source = Image.open(os.path.join(SHEETS, image["file"])).convert("RGB")
     written = []
     for out in image["out"]:
-        width = out.get("width", source.width)
-        picture = source.resize((width, round(source.height * width / source.width)), Image.LANCZOS)
+        part = source
+        if "crop" in out:
+            part = source.crop(tuple(round(v * s) for v, s in zip(out["crop"], (source.width, source.height, source.width, source.height))))
+        width = out.get("width", part.width)
+        picture = part.resize((width, round(part.height * width / part.width)), Image.LANCZOS)
         if out.get("blur"):
             picture = picture.filter(ImageFilter.GaussianBlur(out["blur"]))
         path = os.path.normpath(os.path.join(ROOT, out["path"]))

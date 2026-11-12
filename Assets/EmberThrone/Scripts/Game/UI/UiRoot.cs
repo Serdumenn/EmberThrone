@@ -32,6 +32,8 @@ namespace EmberThrone.Game
 
         public static Vector2 PanelToScreen(Vector2 panel) => new Vector2(panel.x * Scale, ScreenHeight - panel.y * Scale);
 
+        public static Vector2 ScreenToPanel(Vector2 screen) => new Vector2(screen.x / Scale, (ScreenHeight - screen.y) / Scale);
+
         public event Action LayoutChanged;
 
         public PanelSettings Settings { get; private set; }

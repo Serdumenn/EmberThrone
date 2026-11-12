@@ -7,10 +7,10 @@ namespace EmberThrone.Game
     public static class Palette
     {
         public static readonly Color Background = Hex("1A1220");
-        public static readonly Color BoardBack = Hex("221650");
-        public static readonly Color BoardGlow = new Color(1f, 1f, 1f, 0.85f);
-        public static readonly Color TileLight = new Color(236f / 255f, 244f / 255f, 1f, 0.93f);
-        public static readonly Color TileDark = new Color(208f / 255f, 224f / 255f, 1f, 0.93f);
+        public static readonly Color BoardBack = Hex("131A4A");
+        public static readonly Color BoardGlow = new Color(1f, 0.84f, 0.48f, 0.95f);
+        public static readonly Color TileLight = Hex("34459A");
+        public static readonly Color TileDark = Hex("2B3A88");
         public static readonly Color Gold = Hex("FFD24A");
         public static readonly Color Select = Hex("7AD83A");
         public const float CoverAlpha = 0.82f;
@@ -31,7 +31,7 @@ namespace EmberThrone.Game
 
     public static class Art
     {
-        const int HelperSize = 128;
+        internal const int HelperSize = 128;
         const string BoardFolder = "Board/";
 
         const float PieceCells = 1.1f;
@@ -41,8 +41,7 @@ namespace EmberThrone.Game
 
         static readonly string[] GemFiles = { "piece_R", "piece_G", "piece_B", "piece_Y", "piece_P", "piece_O" };
 
-        delegate float Sdf(Vector2 p);
-        delegate Color PixelFn(Vector2 p);
+        internal delegate Color PixelFn(Vector2 p);
 
         static readonly Dictionary<string, Sprite> Cache = new Dictionary<string, Sprite>();
         static Material _material;
@@ -75,6 +74,7 @@ namespace EmberThrone.Game
             Sparkle();
             Shard();
             Splinter();
+            FxArt.Preload();
         }
 
         public static Sprite Gem(int color) => Render(GemFiles[Mathf.Clamp(color, 0, GemFiles.Length - 1)]);
@@ -254,7 +254,7 @@ namespace EmberThrone.Game
             }, 64));
         }
 
-        static Vector2[] Star(int points, float outer, float inner)
+        internal static Vector2[] Star(int points, float outer, float inner)
         {
             var v = new Vector2[points * 2];
             for (int i = 0; i < v.Length; i++)
@@ -265,7 +265,7 @@ namespace EmberThrone.Game
             return v;
         }
 
-        static float SdRoundBox(Vector2 p, float hx, float hy, float r)
+        internal static float SdRoundBox(Vector2 p, float hx, float hy, float r)
         {
             float qx = Mathf.Abs(p.x) - hx + r;
             float qy = Mathf.Abs(p.y) - hy + r;
@@ -273,7 +273,7 @@ namespace EmberThrone.Game
             return Mathf.Sqrt(ox * ox + oy * oy) + Mathf.Min(Mathf.Max(qx, qy), 0f) - r;
         }
 
-        static float SdPolygon(Vector2 p, Vector2[] v)
+        internal static float SdPolygon(Vector2 p, Vector2[] v)
         {
             float d = Vector2.Dot(p - v[0], p - v[0]);
             float s = 1f;
@@ -290,19 +290,19 @@ namespace EmberThrone.Game
             return s * Mathf.Sqrt(d);
         }
 
-        static float Smooth(float a, float b, float x)
+        internal static float Smooth(float a, float b, float x)
         {
             float t = Mathf.Clamp01((x - a) / (b - a));
             return t * t * (3f - 2f * t);
         }
 
-        static float Coverage(float d, int size = HelperSize)
+        internal static float Coverage(float d, int size = HelperSize)
         {
             float aa = 2.4f / size;
             return 1f - Smooth(-aa, aa, d);
         }
 
-        static Sprite Get(string key, System.Func<Sprite> make)
+        internal static Sprite Get(string key, System.Func<Sprite> make)
         {
             if (Cache.TryGetValue(key, out var s) && s != null) return s;
             s = make();
@@ -310,7 +310,7 @@ namespace EmberThrone.Game
             return s;
         }
 
-        static Sprite Bake(string name, PixelFn fn, int size = HelperSize)
+        internal static Sprite Bake(string name, PixelFn fn, int size = HelperSize)
         {
             var tex = new Texture2D(size, size, TextureFormat.RGBA32, true)
             {

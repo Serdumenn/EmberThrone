@@ -20,7 +20,8 @@ namespace EmberThrone.Game.Tests
         GameApp _app;
         Mouse _mouse;
         System.Collections.Generic.Dictionary<int, int> _savedStars;
-        System.Collections.Generic.Dictionary<BoosterType, int> _savedBoosters;
+        string _savedProfile;
+        long _now;
         System.Collections.Generic.Dictionary<string, int> _savedSettings;
         InputSettings.BackgroundBehavior _background;
         InputSettings.EditorInputBehaviorInPlayMode _editorInput;
@@ -31,7 +32,8 @@ namespace EmberThrone.Game.Tests
         public IEnumerator SetUp()
         {
             _savedStars = StarsBackup.Snapshot();
-            _savedBoosters = StarsBackup.SnapshotBoosters();
+            _savedProfile = StarsBackup.SnapshotProfile();
+            StarsBackup.FreshProfile();
             _savedSettings = StarsBackup.SnapshotSettings();
             CameraShake.Enabled = true;
             AdService.SimulateRewardedInEditor = true;
@@ -43,6 +45,7 @@ namespace EmberThrone.Game.Tests
             _mouse.MakeCurrent();
             UiRoot.SafeAreaOverride = null;
             Time.timeScale = 1f;
+            GameApp.ShowLoading = false;
             _app = GameApp.Create();
             yield return null;
         }
@@ -51,13 +54,14 @@ namespace EmberThrone.Game.Tests
         public IEnumerator TearDown()
         {
             Time.timeScale = 1f;
+            GameApp.ShowLoading = true;
             UiRoot.SafeAreaOverride = null;
             InputSystem.RemoveDevice(_mouse);
             InputSystem.settings.backgroundBehavior = _background;
             InputSystem.settings.editorInputBehaviorInPlayMode = _editorInput;
             Object.Destroy(_app.gameObject);
             StarsBackup.Restore(_savedStars);
-            StarsBackup.RestoreBoosters(_savedBoosters);
+            StarsBackup.RestoreProfile(_savedProfile);
             StarsBackup.RestoreSettings(_savedSettings);
             yield return null;
         }
@@ -167,7 +171,7 @@ namespace EmberThrone.Game.Tests
         {
             LevelProgress.SaveStars(_app.Levels[0].Id, 1);
             _app.ShowLevelSelect();
-            yield return null;
+            yield return OpenWorld();
             Assert.IsFalse(_app.LevelSelect.IsLocked(1));
             yield return TapUi(_app.LevelSelect.Buttons[1]);
             Assert.IsNull(_app.Game, "a window comes first");
@@ -186,7 +190,7 @@ namespace EmberThrone.Game.Tests
         {
             StarsBackup.Restore(new System.Collections.Generic.Dictionary<int, int>());
             _app.ShowLevelSelect();
-            yield return null;
+            yield return OpenWorld();
             Assert.AreEqual(0, _app.LevelSelect.CurrentIndex);
             Assert.IsFalse(_app.LevelSelect.IsLocked(0));
             Assert.IsTrue(_app.LevelSelect.IsLocked(1));
@@ -488,7 +492,7 @@ namespace EmberThrone.Game.Tests
 
             Assert.IsNull(Game.Armed);
             Assert.AreEqual(moves, Game.Session.MovesLeft, "a booster is not a move");
-            Assert.AreEqual(1, BoosterInventory.Count(BoosterType.Hammer, Game.Session.Rules));
+            Assert.AreEqual(1, BoosterInventory.Count(BoosterType.Hammer));
             Assert.AreEqual("1", Game.Boosters.CountText(BoosterType.Hammer));
             var piece = Game.Session.Board.CellAt(target).Piece;
             Assert.IsTrue(piece == null || piece.Id != id, "the piece under the hammer is gone");
@@ -496,7 +500,7 @@ namespace EmberThrone.Game.Tests
         }
 
         [UnityTest]
-        public IEnumerator BoosterBar_TappingAgain_Disarms_AndAnEmptyBoosterDoesNothing()
+        public IEnumerator BoosterBar_TappingAgain_Disarms_AndAnEmptyBoosterOpensTheShop()
         {
             BoosterInventory.Set(BoosterType.RowBlast, 1);
             BoosterInventory.Set(BoosterType.ColumnBlast, 0);
@@ -507,7 +511,8 @@ namespace EmberThrone.Game.Tests
             Assert.IsNull(Game.Armed);
             yield return TapUi(Game.Boosters.ButtonOf(BoosterType.ColumnBlast));
             Assert.IsNull(Game.Armed, "no charges left");
-            Assert.AreEqual(1, BoosterInventory.Count(BoosterType.RowBlast, Game.Session.Rules));
+            Assert.IsTrue(_app.Modal is ShopPopup, "an empty booster leads to the shop");
+            Assert.AreEqual(1, BoosterInventory.Count(BoosterType.RowBlast));
         }
 
         [UnityTest]
@@ -702,6 +707,323 @@ namespace EmberThrone.Game.Tests
                 Assert.GreaterOrEqual(e.worldBound.xMin, -0.5f, e.name + " leaves the screen");
                 Assert.LessOrEqual(e.worldBound.xMax, panelWidth + 0.5f, e.name + " leaves the screen");
             }
+        }
+
+        [UnityTest]
+        public IEnumerator Effects_UseTheirOwnShaders_AndThrowParticles()
+        {
+            Assert.AreEqual("EmberThrone/Additive", FxArt.Additive.shader.name);
+            Assert.AreEqual("EmberThrone/Piece", FxArt.Piece.shader.name);
+            if (SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null)
+            {
+                Assert.IsTrue(FxArt.Additive.shader.isSupported);
+                Assert.IsTrue(FxArt.Piece.shader.isSupported);
+            }
+
+            yield return Begin(Level(10, null, Even, Odd, "YP*GY", Odd, Even));
+            yield return Click(new GridPos(2, 2));
+            float limit = Time.time + 2f;
+            while (Game.View.Fx.Particles.Alive < 20)
+            {
+                Assert.Less(Time.time, limit, "the bomb throws sparks, embers and smoke");
+                yield return null;
+            }
+            yield return WaitIdle();
+            Assert.IsNull(Game.LastMismatch);
+        }
+
+        [UnityTest]
+        public IEnumerator Bomb_FreezesTheFrame_ThenTimeRunsAgain()
+        {
+            yield return Begin(Level(10, null, Even, Odd, "YP*GY", Odd, Even));
+            int before = HitStop.Count;
+            yield return Click(new GridPos(2, 2));
+            yield return WaitIdle();
+            Assert.AreEqual(before + 1, HitStop.Count);
+            Assert.AreEqual(1f, Time.timeScale, "time runs again after the hit");
+        }
+
+        [UnityTest]
+        public IEnumerator Goal_PiecesFlyToTheHud_ThenCount()
+        {
+            yield return Begin(Level(10, new GoalDefinition(GoalType.Color, 30, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even));
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            Assert.Greater(Game.Flyers.Launched, 0, "cleared goal pieces fly to the goal panel");
+            yield return new WaitForSeconds(GoalFlyers.Flight + 0.3f);
+            Assert.Less(Game.Session.Goals[0].Remaining, 30);
+            Assert.AreEqual(Game.Session.Goals[0].Remaining.ToString(), Game.Hud.GoalText(0));
+        }
+
+        IEnumerator OpenWorld()
+        {
+            yield return null;
+            yield return TapUi(_app.LevelSelect.Lobby.WorldButton);
+            Assert.IsTrue(_app.LevelSelect.MapShown, "the world button opens the map");
+            yield return null;
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Home_HasFiveTabs_AndTheWorldMapOpensAndCloses()
+        {
+            yield return null;
+            var select = _app.LevelSelect;
+            Assert.IsFalse(select.MapShown, "the game opens on the home screen");
+            Assert.AreEqual(5, select.Tabs.Root.childCount);
+
+            yield return OpenWorld();
+            Assert.IsNotNull(select.Buttons[0].panel);
+            yield return TapUi(select.Tabs.HomeTab);
+            Assert.IsFalse(select.MapShown, "the home tab leads back");
+
+            yield return TapUi(select.Tabs.TeamTab);
+            Assert.IsTrue(_app.Modal is InfoPopup, "a tab that is not ready says so");
+        }
+
+        [UnityTest]
+        public IEnumerator LoadingScreen_ShowsFirst_ThenLeaves()
+        {
+            _app.ShowLoadingScreen();
+            Assert.IsNotNull(_app.Loading);
+            Assert.IsTrue(_app.Loading.IsOpen);
+            float limit = Time.realtimeSinceStartup + 6f;
+            while (_app.Loading != null)
+            {
+                Assert.Less(Time.realtimeSinceStartup, limit, "the loading screen never left");
+                yield return null;
+            }
+            Assert.IsNull(_app.Loading);
+        }
+
+        [UnityTest]
+        public IEnumerator Collection_OpensPacks_AndPaysForACompleteSet()
+        {
+            yield return null;
+            var select = _app.LevelSelect;
+            Assert.AreEqual("2", select.Tabs.CardsBadgeText, "two packs wait on the tab");
+            yield return TapUi(select.Tabs.CardsTab);
+            Assert.AreEqual(LobbyPage.Cards, select.Page);
+            Assert.AreEqual("0/" + Meta.CardRules.CardCount, select.Cards.TotalText);
+            Assert.AreEqual(Meta.CardRules.Sets.Length, select.Cards.SetTiles.Count);
+            for (int card = 0; card < Meta.CardRules.CardCount; card++)
+                Assert.IsTrue(CardArt.Has(Meta.CardRules, card), Meta.CardRules.Card(card).Id + " has its own picture");
+
+            yield return TapUi(select.Cards.PackButton);
+            var pack = _app.Modal as PackPopup;
+            Assert.IsNotNull(pack);
+            Assert.AreEqual(3, pack.Count);
+            Assert.GreaterOrEqual(pack.NewCount, 1);
+            Assert.AreEqual(1, Meta.Cards.Packs);
+            Assert.GreaterOrEqual(Meta.Cards.TotalOwned, 1);
+            Assert.IsNotNull(pack.AgainButton, "one more pack is waiting");
+            pack.Close();
+            Assert.AreEqual(Meta.Cards.TotalOwned + "/" + Meta.CardRules.CardCount, select.Cards.TotalText);
+
+            for (int c = 0; c < Meta.CardRules.Sets[1].Cards.Length; c++) Meta.Economy.Profile.Cards[Meta.CardRules.IndexOf(1, c)] = 1;
+            Meta.Save();
+            int coins = Meta.Economy.Coins;
+            yield return TapUi(select.Cards.SetTiles[1]);
+            var set = _app.Modal as SetPopup;
+            Assert.IsNotNull(set);
+            Assert.AreEqual(6, set.CardCount);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(set.ClaimButton);
+            Assert.AreEqual(coins + 400, Meta.Economy.Coins);
+            Assert.IsTrue(Meta.Cards.SetClaimed(1));
+            Assert.IsNotNull(_app.Rewards, "the set prize is shown");
+        }
+
+        [UnityTest]
+        public IEnumerator FirstWin_BringsACardPack()
+        {
+            var level = Level(10, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even);
+            level.Id = 4242;
+            int packs = Meta.Cards.Packs;
+            yield return Begin(level);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            Assert.AreEqual(packs + 1, Meta.Cards.Packs);
+            Assert.AreEqual(1, Game.Popup.Packs, "the window shows the pack");
+        }
+
+        void FreezeClock()
+        {
+            _now = Meta.WallClock();
+            Meta.Clock = () => _now;
+        }
+
+        [UnityTest]
+        public IEnumerator Lobby_ShowsLivesAndCoins_AndPlayOpensTheNextLevel()
+        {
+            yield return null;
+            var top = _app.LevelSelect.Top;
+            Assert.AreEqual("5", top.LivesText);
+            Assert.AreEqual("Dolu", top.LifeTimerText);
+            Assert.AreEqual("500", top.CoinsText);
+            Assert.AreEqual("50", top.GemsText);
+            Assert.AreEqual("Seviye " + _app.Levels[_app.LevelSelect.CurrentIndex].Id, _app.LevelSelect.Lobby.PlayButton.text);
+
+            yield return TapUi(_app.LevelSelect.Lobby.PlayButton);
+            Assert.IsNotNull(_app.LevelStart, "the big button opens the level the player is on");
+        }
+
+        [UnityTest]
+        public IEnumerator Losing_CostsALife_AndWithoutLivesTheLivesWindowOffersMore()
+        {
+            FreezeClock();
+            Meta.Economy.Profile.Lives = 1;
+            Meta.Economy.Profile.LifeAnchor = _now;
+            yield return Begin(Level(1, null, Even, Odd, "RRBRY", "OGRPO", Even));
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            Assert.AreEqual(1, Meta.Economy.Lives, "the life goes when the player gives up, not before");
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(Game.Popup.Buttons.First(b => b.text == "Tekrar dene"));
+
+            Assert.AreEqual(0, Meta.Economy.Lives);
+            Assert.IsNull(_app.Game, "no lives, no retry");
+            var lives = _app.Modal as LivesPopup;
+            Assert.IsNotNull(lives);
+            Assert.AreEqual("0", _app.LevelSelect.Top.LivesText);
+            Assert.AreNotEqual("Dolu", _app.LevelSelect.Top.LifeTimerText);
+
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(lives.BuyButton);
+            Assert.AreEqual(1, Meta.Economy.Lives);
+            Assert.AreEqual(500 - Meta.Rules.LifeCoinPrice, Meta.Economy.Coins);
+
+            _now += Meta.Rules.LifeSeconds;
+            Assert.AreEqual(2, Meta.Economy.Lives, "half an hour brings one back");
+        }
+
+        [UnityTest]
+        public IEnumerator Win_PaysCoinsOnce_AndAReplayPaysLittle()
+        {
+            var level = Level(10, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even);
+            level.Id = 4242;
+            yield return Begin(level);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            yield return WaitForPopup();
+            int stars = LevelProgress.GetStars(4242);
+            Assert.AreEqual(Meta.Rules.WinReward(stars), Game.WinCoins);
+            Assert.AreEqual(500 + Game.WinCoins, Meta.Economy.Coins);
+            Assert.AreEqual(Game.WinCoins, Game.Popup.Coins, "the window shows the prize");
+            Assert.AreEqual(5, Meta.Economy.Lives, "winning costs no life");
+
+            yield return Begin(level);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            Assert.AreEqual(Meta.Rules.ReplayCoins, Game.WinCoins);
+        }
+
+        [UnityTest]
+        public IEnumerator Shop_SellsBoosters_AndOpensChests()
+        {
+            Meta.Economy.AddCoins(800);
+            Meta.Save();
+            yield return TapUi(_app.LevelSelect.Tabs.ShopTab);
+            var shop = _app.Modal as ShopPopup;
+            Assert.IsNotNull(shop);
+            Assert.AreEqual("1300", shop.BalanceText);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+
+            yield return TapUi(shop.BuyButton(BoosterType.Hammer));
+            Assert.AreEqual(4, BoosterInventory.Count(BoosterType.Hammer));
+            Assert.AreEqual(400, Meta.Economy.Coins);
+            Assert.AreEqual("400", _app.LevelSelect.Top.CoinsText);
+            Assert.IsFalse(shop.BuyButton(BoosterType.Hammer).enabledSelf, "too dear now");
+            Assert.IsTrue(shop.ChestButton.enabledSelf);
+
+            int gems = Meta.Economy.Gems, packs = Meta.Cards.Packs, boosters = BoosterInventory.All.Sum(BoosterInventory.Count);
+            yield return TapUi(shop.ChestButton);
+            Assert.IsNotNull(_app.Rewards, "the chest shows what was inside");
+            Assert.AreEqual(1, _app.Rewards.Count);
+            Assert.AreEqual(1, Meta.Economy.Profile.ChestsOpened);
+            Assert.Greater(Meta.Economy.Coins + (Meta.Economy.Gems - gems) + (Meta.Cards.Packs - packs) + (BoosterInventory.All.Sum(BoosterInventory.Count) - boosters), 0);
+        }
+
+        [UnityTest]
+        public IEnumerator DailyGift_ComesOnceADay()
+        {
+            FreezeClock();
+            _app.ShowLevelSelect();
+            yield return null;
+            Assert.IsTrue(_app.LevelSelect.Lobby.GiftBadgeShown);
+            yield return TapUi(_app.LevelSelect.Lobby.GiftButton);
+            var daily = _app.Modal as DailyPopup;
+            Assert.IsNotNull(daily);
+            Assert.AreEqual(0, daily.Today);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(daily.ClaimButton);
+
+            Assert.AreEqual(650, Meta.Economy.Coins);
+            Assert.IsNull(_app.Modal);
+            Assert.IsNotNull(_app.Rewards);
+            _app.Rewards.Close();
+            Assert.IsFalse(_app.LevelSelect.Lobby.GiftBadgeShown);
+
+            _app.OpenDaily();
+            Assert.IsNull(((DailyPopup)_app.Modal).ClaimButton, "nothing more today");
+            _app.Modal.Close();
+
+            _now += EconomyRules.SecondsPerDay;
+            _app.LevelSelect.Lobby.Refresh();
+            Assert.IsTrue(_app.LevelSelect.Lobby.GiftBadgeShown, "a new day, a new gift");
+            _app.OpenDaily();
+            Assert.AreEqual(1, ((DailyPopup)_app.Modal).Today);
+        }
+
+        [UnityTest]
+        public IEnumerator Quests_FillWhilePlaying_AndPayWhenClaimed()
+        {
+            FreezeClock();
+            var before = Meta.Economy.Quests(_now);
+            var level = Level(10, new GoalDefinition(GoalType.Color, 3, GemColor.Red), Even, Odd, "RRBRY", "OGRPO", Even);
+            level.Id = 4242;
+            yield return Begin(level);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            yield return WaitIdle();
+            var after = Meta.Economy.Quests(_now);
+            Assert.Greater(after.Sum(q => q.Progress), before.Sum(q => q.Progress), "playing moves at least one quest forward");
+
+            Meta.Economy.Report(after[0].Kind, after[0].Target, _now);
+            Meta.Save();
+            _app.ShowLevelSelect();
+            yield return null;
+            Assert.AreEqual("1", _app.LevelSelect.Lobby.QuestBadgeText);
+
+            yield return TapUi(_app.LevelSelect.Lobby.QuestsButton);
+            var quests = _app.Modal as QuestsPopup;
+            Assert.IsNotNull(quests);
+            Assert.AreEqual(after[0].Target + "/" + after[0].Target, quests.ProgressText(0));
+            int coins = Meta.Economy.Coins;
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(quests.ClaimButtons[0]);
+            Assert.AreEqual(coins + after[0].Coins, Meta.Economy.Coins);
+            Assert.AreEqual("", _app.LevelSelect.Lobby.QuestBadgeText);
+        }
+
+        [UnityTest]
+        public IEnumerator LeavingMidLevel_AsksFirst_AndCostsALife()
+        {
+            _app.StartLevel(_app.Levels[0], 0, Seed);
+            yield return null;
+            var move = Game.Session.FindValidMoves().First(m => m.Type == MoveType.Swap);
+            Game.RequestSwap(move.A, move.B);
+            yield return WaitIdle();
+
+            yield return TapUi(Game.Hud.HomeButton);
+            var confirm = _app.Modal as ConfirmPopup;
+            Assert.IsNotNull(confirm, "leaving after a move asks first");
+            Assert.IsNotNull(_app.Game);
+            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
+            yield return TapUi(confirm.YesButton);
+            Assert.IsNull(_app.Game);
+            Assert.AreEqual(4, Meta.Economy.Lives);
         }
     }
 }

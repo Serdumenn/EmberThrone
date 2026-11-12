@@ -27,6 +27,7 @@ namespace EmberThrone.Game
         public VisualElement Root { get; private set; }
         public Button HomeButton { get; private set; }
         public VisualElement MovesPanel => _movesPanel;
+        public VisualElement GoalSlotOf(int index) => _slots[index].Root;
         public string MovesText => _moves.text;
         public string GoalText(int index) => _slots[index].Count.text;
         public bool GoalChecked(int index) => !_slots[index].Check.ClassListContains(Ui.Hidden);

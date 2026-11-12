@@ -30,6 +30,17 @@ namespace EmberThrone.Game
             }
         }
 
+        public static float HitStopOf(Impact impact)
+        {
+            switch (impact)
+            {
+                case Impact.Bomb: return 0.05f;
+                case Impact.Combo: return 0.07f;
+                case Impact.BigCombo: return 0.1f;
+                default: return 0f;
+            }
+        }
+
         public static Sfx SoundOf(Impact impact)
         {
             switch (impact)

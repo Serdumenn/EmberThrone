@@ -22,9 +22,9 @@
     --color-white: #FFFFFF;
     --color-highlight: rgba(255, 255, 255, 0.9);
     --color-scrim: rgba(10, 5, 25, 0.78);
-    --color-board-back: rgba(26, 16, 58, 0.72);
-    --color-tile: rgba(236, 244, 255, 0.93);
-    --color-tile-alt: rgba(208, 224, 255, 0.93);
+    --color-board-back: #131A4A;
+    --color-tile: #34459A;
+    --color-tile-alt: #2B3A88;
     --color-select: #7AD83A;
     --color-pressed: #EBEBEB;
     --color-locked: #BDB8CC;

@@ -17,11 +17,26 @@
 | Konu | Standart |
 |---|---|
 | Oyun görselleri | Çizim sayfalarından kesilir: kaynak `ArtSource/sheets/`, araç `tools/sprites/cut_sheets.py`, tarif `sheets.json` ([README](../../ArtSource/sheets/README.md)). Her sprite tek komutla yeniden üretilir |
-| Arayüz parçaları | 9-slice PNG. Pencere, butonlar, halka, hap, etiket ve kurdele `ui_kit.png` sayfasından; onay işareti ve ışıltılar `tools/ui_chrome/`'dan. USS `-unity-slice-*` ile gerer |
-| Harita | Bölge başına bir görsel (`map_N.jpg`), USS'te en-boy oranıyla (`padding-top` yüzdesi). Düğüm yerleri `LevelMap.cs`'teki yol noktalarından, eşit aralıkla hesaplanır |
+| Arayüz parçaları | 9-slice PNG. Pencere, butonlar, halka, hap, etiket ve kurdele `ui_kit.png` sayfasından; onay işareti, ışıltılar, alt bar (`nav`, `nav_tab_on`), krem hap (`pill`), satır (`row`), ilerleme çubuğu (`trough`, `fill`) ve rozet (`badge`) `tools/ui_chrome/`'dan (`python tools/ui_chrome/render.py nav pill …`). USS `-unity-slice-*` ile gerer |
+| Dünya | Bölge başına bir kart: görsel (`district_N.jpg`; ilk bölge oyun arka planından kırpılır, diğerlerinin kendi çizimi vardır), ilerleme çubuğu, yıldız sayısı, 10 seviye düğümü. Bölgeler `LevelMap.cs`'te ad ve görsel sınıfıyla listelenir |
 | Renkler | Yalnız `Resources/UI/Theme/Tokens.uss`. Başka dosyada renk yazılmaz (`ThemeTests` denetler) |
 | İçe aktarma | `Editor/GameTextureImport.cs`: mipmap + trilinear, clamp, Android'de ASTC 4x4. Tahta parçaları en fazla 256 px, `bg_*` 2048 px |
 | Tasarım dili | [design-system.md](design-system.md): token'lar, bileşenler, hareket, ses ve titreşim paleti, erişilebilirlik |
+
+## Efektler
+
+| Parça | Yer | Görev |
+|---|---|---|
+| Shader'lar | `Resources/Shaders/Additive.shader`, `Piece.shader` | `EmberThrone/Additive`: toplamalı ışık (parlama, kıvılcım, şimşek). `EmberThrone/Piece`: taşlar; `_Flash` ile beyaza parlama ve dünya konumuna bağlı çapraz parıltı şeridi. İkisi de `UnitySprites.cginc` üstüne kurulu ve `Resources.Load` ile yüklenir (derlemeye girmeleri için) |
+| Dokular | `Scripts/Game/Art/FxArt.cs` | Parlama, çekirdek, yıldız, şok halkası, duman, kırıntı atlası (2x2), konfeti, ışık hüzmesi ve şimşek dokuları koddan üretilir; malzemeler burada önbelleğe alınır |
+| Parçacıklar | `Scripts/Game/Board/FxParticles.cs` | Yedi `ParticleSystem` (kıvılcım, ışıltı, kırıntı, kıymık, duman, kor, konfeti). Kendiliğinden yaymazlar; her patlama `Emit` ile parçacık atar. `Ambient` arka plandaki korları kurar |
+| Sahneler | `Scripts/Game/Board/BoardFx.cs` | Havuzlu sprite ve `LineRenderer` ile parlama, şok halkası, ışık hüzmesi, şimşek, roket ve vuruş uçuşları; hazır patlamalar (`GemBurst`, `Explosion`, `Firework`…) |
+| Duraklama | `Scripts/Game/Feel/HitStop.cs` | Büyük vuruşta `Time.timeScale` kısa süre düşer. Yalnız ölçek 1 iken çalışır; yavaş çekim turunu ve hızlandırılmış testleri bozmaz |
+| Hedefe uçuş | `Scripts/Game/UI/GoalFlyers.cs` | Hedef taşları arayüz katmanında hedef yuvasına uçar; aynı anda en fazla 14 uçuş, fazlası sayacı doğrudan düşürür. Sayaç yalnız azalır |
+
+- Taş görünümü iki katmandır: kök (hamle animasyonları) ve gövde (boşta salınım). Aynı taşa yazan animasyonlar `Motion` sayacıyla birbirini iptal eder; yenisi başlayınca eskisi yazmayı bırakır.
+- Efektler oyunun durumunu değiştirmez ve beklemez: adım süresi yine `BoardView` içinde hesaplanır.
+- Toplamalı ışık açık zeminde görünmez; tahta karelerinin koyu olması bu yüzdendir.
 
 ## Tipografi
 
@@ -41,12 +56,37 @@
 - Eklenti ve Android bağımlılıkları: `Assets/GoogleMobileAds/`, `Assets/ExternalDependencyManager/`, `Assets/Plugins/Android/` (`mainTemplate.gradle`, `settingsTemplate.gradle`, `gradleTemplate.properties`). Bu klasörler üçüncü taraf dosyalarıdır; yorum satırı kuralı onlara uygulanmaz ve Gradle şablonlarındaki "Android Resolver" satırları silinmez.
 - Hesap adımları: [yayın kılavuzu](../release/README.md), adım 4.
 
+## Ekonomi ve lobi
+
+| Parça | Yer | Görev |
+|---|---|---|
+| Kurallar | `Scripts/Core/Meta/EconomyRules.cs` | Bütün sayılar: başlangıç paketi, kazanma ödülü, can süresi ve fiyatı, booster fiyatları, sandık tablosu, günlük hediyeler, görev şablonları. Kaynak: META-001; farklar karar günlüğünde |
+| Profil | `Scripts/Core/Meta/Profile.cs` | Oyuncunun durumu ve JSON'a yazılıp okunması |
+| İşlemler | `Scripts/Core/Meta/Economy.cs` | Can yenilenmesi, satın alma, ödül, günlük hediye, sandık, günlük görevler. Saat dışarıdan verilir (`now`, yerel saatle saniye); motor saate bakmaz. Sandık `Pcg32` ile, profil tohumu ve açılan sandık sayısından üretilir |
+| Koleksiyon | `Scripts/Core/Meta/Collection.cs`, `Scripts/Game/UI/CollectionViews.cs` | Kurallar ve setler (`CollectionRules`), paket açma, set ve büyük ödül (`CardCollection`); paket `Pcg32` ile profil tohumu ve açılan paket sayısından üretilir. Ekran: set karoları, set penceresi, paket penceresi. Kart çizimi `Resources/UI/Cards/<set>_<kart>.png` (256 piksel); eksik kart aynı çizimin koyu silueti olarak görünür, dosya yoksa kart destesi ikonu gösterilir. `ThemeTests.EveryCard_HasAnIllustration` 36 dosyayı arar |
+| Servis | `Scripts/Game/Meta/Meta.cs` | Profili yükler, kaydeder, `Changed` olayını yayar; `Meta.Clock` testlerde sahte saatle değişir |
+| Lobi | `Scripts/Game/UI/LobbyViews.cs` | Üst bar (can ve sayaç, altın, elmas, ayarlar), alt sıra (Dünya, büyük "Seviye N" butonu, Görevler), solda hediye butonu, beş sekmeli alt bar (`TabBar`), yükleme ekranı (`LoadingScreen`) |
+| Ana ekran ve dünya | `Scripts/Game/UI/LevelSelectScreen.cs` | Tek ekran, iki görünüm: ana ekran (köy manzarası, `et-backdrop--home`) ve dünya (bölge kartları). `ShowMap(true/false)` geçirir; Dünya butonuyla açılır, Ana Ekran sekmesiyle kapanır |
+| Pencereler | `Scripts/Game/UI/MetaPopups.cs`, `Popup.cs` | Mağaza, canlar, günlük hediye, görevler, ödül, onay. Aynı anda bir pencere (`GameApp.Modal`) ve üstünde bir ödül penceresi (`GameApp.Rewards`) açılır |
+
+Akış kuralları:
+- Can, oyuncu vazgeçince düşer: kaybettikten sonra "Tekrar dene" ya da "Seviyeler", ya da hamle yaptıktan sonra seviyeden çıkmak (önce onay sorulur). Kazanmak can harcamaz. Can yokken seviye başlamaz, "Canlar" penceresi açılır.
+- Kazanınca altın verilir (1 yıldız 100, 2 yıldız +40, 3 yıldız +80). Daha önce geçilmiş seviyeyi yeniden kazanmak 25 altın verir.
+- Kaybedince "+5 hamle": bir kez ödüllü reklamla, ayrıca altınla (900, her alışta 1,5 katı). Altın seçeneği yalnız para yetiyorsa görünür.
+- Boş booster'a dokunmak mağazayı açar.
+- Günlük görevler: her gün aynı üç görev (gün numarasından üretilir, üçü farklı türde); hepsi alınınca elmas ödülü.
+- Yükleme ekranı açılışta 1,4 sn görünür, sonra solar; arayüz zamanlayıcısıyla (gerçek zaman) çalışır. Testler `GameApp.ShowLoading = false` ile kapatır.
+- Hazır olmayan sekmeler (Sıralama, Takım) kilit rozeti taşır ve bilgi penceresi açar. Koleksiyon sekmesindeki rozet, açılmamış paket ve alınmamış ödül sayısını gösterir.
+- Ana ekranın üç sayfası vardır (`LobbyPage`): ana ekran, dünya, koleksiyon. Etkin sekme alt barda büyür ve adını gösterir.
+- Gün değişince canlar dolar ve günlük reklam hakları sıfırlanır. Saat şimdilik cihazın saati; geri alınan saat can ya da hediye kazandırmaz. Sunucu saati Faz 4'te.
+
 ## Cihazda saklananlar (PlayerPrefs)
 
 | Anahtar | İçerik |
 |---|---|
 | `et.stars.<id>` | Seviyenin en iyi yıldızı |
-| `et.booster.<Hammer\|RowBlast\|ColumnBlast\|Shuffle>` | Booster hakkı; yoksa `GameRules.StartingBoosters` |
+| `et.profile` | Oyuncu profili, tek JSON: altın, elmas, can ve can saati, booster hakları, günlük hediye serisi, günlük reklam sayaçları, günlük görev ilerlemesi, açılan sandık sayısı, kart sayıları, bekleyen ve açılmış paketler, alınmış set ödülleri |
+| `et.booster.<Hammer\|RowBlast\|ColumnBlast\|Shuffle>` | Eski booster anahtarları. Profil ilk kez oluşurken bir kez okunur, sonra kullanılmaz |
 | `et.sound`, `et.haptics`, `et.shake` | Ayarlar (ses, titreşim, ekran sarsıntısı): 1 açık, 0 kapalı |
 | `et.ads.lastInterstitial` | Son geçiş reklamının kapandığı an (Unix saniyesi) |
 
@@ -71,8 +111,8 @@ PlayMode testleri bu anahtarları başta kaydeder, sonda geri yazar (`StarsBacku
 
 | Yol | İçerik |
 |---|---|
-| `Assets/EmberThrone/Scripts/Core/` | Saf C# oyun motoru, asmdef `EmberThrone.Core` (`noEngineReferences`): tahta, eşleşme, özel taşlar ve kombolar, engeller, yerçekimi, hedefler, booster'lar, seviye JSON'u, bot |
-| `Assets/EmberThrone/Scripts/Game/` | Unity tarafı, asmdef `EmberThrone.Game`: `GameApp` (giriş noktası), `GameController` (tek seviye), `Board/` (görünüm, girdi, efektler), `UI/` (UI Toolkit ekranları), `Art/` (render'lar ve üretilen şekiller), `Feel/` (sarsıntı, titreşim, olay tablosu), `Anim/` (tween'ler, `Timing`) |
+| `Assets/EmberThrone/Scripts/Core/` | Saf C# oyun motoru, asmdef `EmberThrone.Core` (`noEngineReferences`): tahta, eşleşme, özel taşlar ve kombolar, engeller, yerçekimi, hedefler, booster'lar, seviye JSON'u, bot, ekonomi (`Meta/`) |
+| `Assets/EmberThrone/Scripts/Game/` | Unity tarafı, asmdef `EmberThrone.Game`: `GameApp` (giriş noktası), `GameController` (tek seviye), `Board/` (görünüm, girdi, efektler, parçacıklar), `UI/` (UI Toolkit ekranları), `Art/` (render'lar ve üretilen şekiller), `Feel/` (sarsıntı, titreşim, olay tablosu), `Anim/` (tween'ler, `Timing`) |
 | `Assets/EmberThrone/Editor/` | Yalnız editör: `ProjectSetup`, `GameTextureImport` |
 | `Assets/EmberThrone/Tests/EditMode/` | NUnit testleri; Unity Test Runner ve `dotnet test` ikisinde de koşar |
 | `Assets/EmberThrone/Tests/PlayMode/` | Oyunu sanal girdiyle oynatan testler ve ekran turu (`ScreenshotTour`) |
@@ -80,6 +120,7 @@ PlayMode testleri bu anahtarları başta kaydeder, sonda geri yazar (`StarsBacku
 | `Assets/EmberThrone/Resources/Board/` | Tahta render'ları |
 | `Assets/EmberThrone/Resources/UI/` | `Theme/` (USS, TSS), `Chrome/` (9-slice), `Art/` (3B ikonlar), `Fonts/` |
 | `Assets/EmberThrone/Resources/Audio/` | Ses efektleri (`sfx_*.wav`) |
+| `Assets/EmberThrone/Resources/Shaders/` | Efekt ve taş shader'ları |
 | `Assets/_Game/` | Eski Faz 0 altyapısı (servis bulucu, kayıt, havuz, Firebase taslakları). Oyun kullanmaz; Faz 3 için saklanır |
 | `ArtSource/sheets/` | Çizim sayfaları ve kesim tarifi; oyundaki görsellerin kaynağı |
 | `ArtSource/blender/` | v3 dönemindeki Blender scriptleri; oyunda artık kullanılmıyor |
@@ -99,7 +140,7 @@ PlayMode testleri bu anahtarları başta kaydeder, sonda geri yazar (`StarsBacku
 6. **Testler.** Yalnız NUnit 3 klasik assert'leri (`Assert.AreEqual/IsTrue/Throws`, `CollectionAssert`); Unity'nin NUnit 3.5 sürümü yüzünden `Assert.Multiple` ve NUnit 4 API'leri yok. Tahta yardımcıları `TestUtil.cs`'de (satırlar üstten, y=0 altta).
 7. **Özgün kimlik.** İsimler, karakterler, görseller, müzik, seviyeler ve arayüz EmberThrone'a aittir; başka oyunlarla yalnız türün genel mekanikleri ortaktır.
 8. **Yorum satırı yok.** Kod, USS, Python ve workflow dosyaları yorumsuzdur; açıklama gereken bilgi bu belgeye ya da `docs/` altına yazılır.
-9. **Arayüz.** C# yalnız `et-` sınıfları ekler ve çıkarır. İstisnalar: güvenli alan boşlukları, `HudView.Height`, animasyon stilleri (Tween ve zamanlayıcı), çalışma anında atanan sprite'lar ve harita düğümlerinin yüzde konumu.
+9. **Arayüz.** C# yalnız `et-` sınıfları ekler ve çıkarır. İstisnalar: güvenli alan boşlukları, `HudView.Height`, animasyon stilleri (Tween ve zamanlayıcı), çalışma anında atanan sprite'lar, harita düğümlerinin yüzde konumu, ilerleme çubuğunun genişliği ve hedefe uçan taşın boyutu.
 
 ## Seviye biçimi
 
