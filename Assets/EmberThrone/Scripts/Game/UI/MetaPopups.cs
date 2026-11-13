@@ -36,6 +36,15 @@ namespace EmberThrone.Game
         Label _balance;
         Label _adSub;
         AdService _ads;
+        PurchaseService _purchases;
+        ScrollView _list;
+        readonly Dictionary<string, Button> _offers = new Dictionary<string, Button>();
+        readonly Dictionary<string, Label> _offerSubs = new Dictionary<string, Label>();
+
+        public void Reveal(VisualElement e) => _list?.ScrollTo(e);
+
+        public Button OfferButton(string productId) => _offers.TryGetValue(productId, out var b) ? b : null;
+        public string OfferSub(string productId) => _offerSubs.TryGetValue(productId, out var l) ? l.text : null;
         Action<string, Reward[], bool> _showRewards;
 
         public Button ChestButton { get; private set; }
@@ -43,9 +52,9 @@ namespace EmberThrone.Game
         public Button BuyButton(BoosterType type) => _buy[type];
         public string BalanceText => _balance.text;
 
-        public static ShopPopup Show(VisualElement parent, AdService ads, Action<string, Reward[], bool> showRewards, Action closed)
+        public static ShopPopup Show(VisualElement parent, AdService ads, PurchaseService purchases, Action<string, Reward[], bool> showRewards, Action closed)
         {
-            var popup = new ShopPopup { _ads = ads, _showRewards = showRewards };
+            var popup = new ShopPopup { _ads = ads, _purchases = purchases, _showRewards = showRewards };
             popup.Build(parent, closed);
             return popup;
         }
@@ -57,18 +66,31 @@ namespace EmberThrone.Game
             Ui.El("et-icon et-balance__icon et-ic--coin", balance);
             _balance = Ui.Text("", "et-ink et-balance__text", balance, "Coins");
 
+            var list = new ScrollView(ScrollViewMode.Vertical) { name = "Items" };
+            list.AddToClassList("et-shop__list");
+            Panel.Add(list);
+            _list = list;
+            foreach (var product in Meta.Rules.Store.Products)
+            {
+                if (product.Kind == ProductKind.Starter && Meta.Economy.Profile.StarterBought) continue;
+                var p = product;
+                var row = Rows.Row(list, IconOfProduct(p), p.Title, "", out var sub, p.Id);
+                _offerSubs[p.Id] = sub;
+                _offers[p.Id] = Rows.Price(row, _purchases != null ? _purchases.PriceOf(p) : p.Price, null, ButtonKind.Cta, () => BuyProduct(p.Id));
+            }
+
             foreach (var type in BoosterInventory.All)
             {
                 var t = type;
-                var row = Rows.Row(Panel, "et-ic--" + BoosterInventory.Slug(type), BoosterInventory.Name(type), "", out var owned, type.ToString());
+                var row = Rows.Row(list, "et-ic--" + BoosterInventory.Slug(type), BoosterInventory.Name(type), "", out var owned, type.ToString());
                 _owned[type] = owned;
                 _buy[type] = Rows.Price(row, Meta.Rules.BoosterPrice(type).ToString(), "et-ic--coin", ButtonKind.Cta, () => Buy(t));
             }
 
-            var chest = Rows.Row(Panel, "et-ic--chest", "Sandık", "Sürpriz ödül", out _, "Chest");
+            var chest = Rows.Row(list, "et-ic--chest", "Sandık", "Sürpriz ödül", out _, "Chest");
             ChestButton = Rows.Price(chest, Meta.Rules.ChestPrice.ToString(), "et-ic--coin", ButtonKind.Cta, OpenChest);
 
-            var ad = Rows.Row(Panel, "et-ic--video", "Bedava altın", "", out _adSub, "FreeCoins");
+            var ad = Rows.Row(list, "et-ic--video", "Bedava altın", "", out _adSub, "FreeCoins");
             AdButton = Rows.Price(ad, "İzle", null, ButtonKind.Secondary, WatchAd, "Watch");
 
             AddClose();
@@ -93,6 +115,51 @@ namespace EmberThrone.Game
             int left = Meta.Rules.AdCoinsPerDay - economy.Profile.AdCoins;
             _adSub.text = "+" + Meta.Rules.AdCoins + " altın · bugün " + Mathf.Max(0, left) + " hak";
             AdButton.SetEnabled(_ads != null && _ads.IsRewardedReady && economy.CanWatchCoinAd(Meta.Now));
+            long now = Meta.Now;
+            foreach (var product in Meta.Rules.Store.Products)
+            {
+                if (!_offers.TryGetValue(product.Id, out var button)) continue;
+                _offerSubs[product.Id].text = SubOf(product, now);
+                bool ready = _purchases != null && _purchases.IsReady && !_purchases.IsPurchasing;
+                if (product.Kind == ProductKind.Piggy) ready &= economy.CanBreakPiggy;
+                if (product.Kind == ProductKind.Pass) ready &= !economy.PassPremium(now);
+                if (product.Kind == ProductKind.Starter) ready &= !economy.Profile.StarterBought;
+                button.SetEnabled(ready);
+            }
+        }
+
+        static string IconOfProduct(StoreProduct product)
+        {
+            switch (product.Kind)
+            {
+                case ProductKind.Starter: return "et-ic--starter";
+                case ProductKind.Pass: return "et-ic--pass";
+                case ProductKind.Piggy: return "et-ic--piggy";
+                case ProductKind.Gems: return product.Rewards[0].Amount >= 500 ? "et-ic--gems-pile" : "et-ic--gem";
+                case ProductKind.Coins: return "et-ic--coins-pile";
+                default: return "et-ic--booster-crate";
+            }
+        }
+
+        static string SubOf(StoreProduct product, long now)
+        {
+            var economy = Meta.Economy;
+            var store = Meta.Rules.Store;
+            switch (product.Kind)
+            {
+                case ProductKind.Starter: return "Yalnız bir kez";
+                case ProductKind.Pass: return economy.PassPremium(now) ? "Bu ay açık" : "Büyük ödüller, " + store.PassMaxLives + " can";
+                case ProductKind.Piggy:
+                    return economy.CanBreakPiggy ? "İçinde " + economy.Profile.PiggyCoins + " altın" : economy.Profile.PiggyCoins + "/" + store.PiggyMin + " altın, kazandıkça dolar";
+                case ProductKind.Boosters: return product.Rewards.Length + " çeşit booster";
+                default: return "";
+            }
+        }
+
+        void BuyProduct(string productId)
+        {
+            if (_purchases == null || !_purchases.Buy(productId)) return;
+            Refresh();
         }
 
         void Buy(BoosterType type)
@@ -372,10 +439,24 @@ namespace EmberThrone.Game
 
     public sealed class RewardPopup : Popup
     {
-        const float ChestShake = 0.7f;
+        public const float ChestShake = 0.8f;
+        public const float ChestSquash = 0.14f;
         const float RaySpin = 6f;
+        const float GlowTime = 0.55f;
+        const float PopTime = 0.45f;
+        const float ConfettiTime = 1.4f;
+        const int ConfettiCount = 34;
+
+        readonly List<VisualElement> _tiles = new List<VisualElement>();
+        Reward[] _rewards;
+        Vector2[] _origins;
 
         public int Count { get; private set; }
+        public bool Opened { get; private set; }
+        public Reward[] Rewards => _rewards;
+        public Vector2 OriginOf(int index) => _origins != null && index < _origins.Length ? _origins[index] : Vector2.zero;
+
+        public static float ChestTime => Timing.ModalIn + ChestShake + ChestSquash;
 
         public static RewardPopup Show(VisualElement parent, string title, Reward[] rewards, bool chest, Action closed)
         {
@@ -388,6 +469,8 @@ namespace EmberThrone.Game
         {
             Open(parent, "Rewards", title, closed);
             Count = rewards.Length;
+            _rewards = rewards;
+            Opened = !chest;
 
             var rays = Ui.El("et-fx-rays et-reward__rays", null, "Rays");
             Body.Insert(0, rays);
@@ -399,37 +482,103 @@ namespace EmberThrone.Game
             }).Every(16);
 
             var row = Ui.El("et-rewards", Panel, "Row");
-            float delay = Timing.ModalIn;
-            if (chest)
-            {
-                var box = Ui.El("et-icon et-reward__chest et-ic--chest", row, "Chest");
-                Tweens.Run(ChestShake, t =>
-                {
-                    if (Ui.Alive(box)) box.style.rotate = new Rotate(Mathf.Sin(t * Mathf.PI * 7f) * 9f);
-                }, delay, () =>
-                {
-                    if (Ui.Alive(box)) box.AddToClassList(Ui.Hidden);
-                });
-                delay += ChestShake;
-            }
-
             for (int i = 0; i < rewards.Length; i++)
             {
                 var tile = RewardTile(rewards[i], row);
                 tile.style.scale = new Scale(Vector2.zero);
-                if (chest) tile.AddToClassList(Ui.Hidden);
-                float pitch = i * 2f;
-                Tweens.Run(Timing.StarFill, t =>
+                _tiles.Add(tile);
+            }
+
+            if (chest) BuildChest(row);
+            else
+            {
+                for (int i = 0; i < _tiles.Count; i++)
                 {
-                    if (Ui.Alive(tile)) tile.style.scale = new Scale(Vector2.one * Ease.OutBack(t));
-                }, delay + i * Timing.StarFill, null, () =>
-                {
-                    if (!Ui.Alive(tile)) return;
-                    tile.RemoveFromClassList(Ui.Hidden);
-                    Sound.Play(Sfx.Star, pitch);
-                });
+                    var tile = _tiles[i];
+                    float pitch = i * 2f;
+                    Tweens.Run(Timing.StarFill, t =>
+                    {
+                        if (Ui.Alive(tile)) tile.style.scale = new Scale(Vector2.one * Ease.OutBack(t));
+                    }, Timing.ModalIn + i * Timing.StarFill, null, () => Sound.Play(Sfx.Star, pitch));
+                }
             }
             AddClose("Harika!", ButtonKind.Cta);
+        }
+
+        void BuildChest(VisualElement row)
+        {
+            var holder = Ui.El("et-fill et-reward__chest-holder", row, "ChestHolder");
+            var box = Ui.El("et-icon et-reward__chest et-ic--chest", holder, "Chest");
+            var glow = Ui.El("et-fx-glow et-reward__flash", row, "Flash");
+            glow.style.opacity = 0f;
+            Tweens.Run(ChestShake, t =>
+            {
+                if (!Ui.Alive(box)) return;
+                float strength = 0.35f + 0.65f * t;
+                box.style.rotate = new Rotate(Mathf.Sin(t * Mathf.PI * 9f) * 10f * strength);
+                box.style.translate = new Translate(0f, -Mathf.Abs(Mathf.Sin(t * Mathf.PI * 4f)) * 26f * strength);
+            }, Timing.ModalIn, () =>
+            {
+                if (!Ui.Alive(box)) return;
+                box.style.rotate = StyleKeyword.Null;
+                box.style.translate = StyleKeyword.Null;
+                Tweens.Run(ChestSquash, t =>
+                {
+                    if (Ui.Alive(box)) box.style.scale = new Scale(new Vector2(1f + 0.28f * t, 1f - 0.24f * t));
+                }, 0f, () => Burst(box, glow));
+            }, () => Sound.Play(Sfx.Shuffle));
+        }
+
+        void Burst(VisualElement box, VisualElement glow)
+        {
+            if (!Ui.Alive(box)) return;
+            Opened = true;
+            var center = box.worldBound.center;
+            Sound.Play(Sfx.Firework);
+            Haptics.Play(HapticLevel.Medium);
+            UiBurst.Confetti(Root, center, ConfettiCount, ConfettiTime);
+            Tweens.Run(GlowTime, t =>
+            {
+                if (!Ui.Alive(glow)) return;
+                glow.style.opacity = Mathf.Sin(t * Mathf.PI);
+                glow.style.scale = new Scale(Vector2.one * Mathf.Lerp(0.4f, 2.4f, Ease.OutCubic(t)));
+            });
+            Tweens.Run(0.22f, t =>
+            {
+                if (!Ui.Alive(box)) return;
+                box.style.scale = new Scale(Vector2.one * Mathf.Lerp(1.3f, 1.8f, t));
+                box.style.opacity = 1f - t;
+            }, 0f, () =>
+            {
+                if (Ui.Alive(box)) box.AddToClassList(Ui.Hidden);
+            });
+            for (int i = 0; i < _tiles.Count; i++)
+            {
+                var tile = _tiles[i];
+                var offset = center - tile.worldBound.center;
+                float pitch = i * 2f;
+                Tweens.Run(PopTime, t =>
+                {
+                    if (!Ui.Alive(tile)) return;
+                    float k = Ease.OutBack(t);
+                    tile.style.translate = new Translate(offset.x * (1f - k), offset.y * (1f - k));
+                    tile.style.scale = new Scale(Vector2.one * k);
+                }, i * 0.08f, () =>
+                {
+                    if (Ui.Alive(tile)) tile.style.translate = StyleKeyword.Null;
+                }, () => Sound.Play(Sfx.Star, pitch));
+            }
+        }
+
+        protected override void OnClosing()
+        {
+            _origins = new Vector2[_tiles.Count];
+            var fallback = Panel.worldBound.center;
+            for (int i = 0; i < _tiles.Count; i++)
+            {
+                var bound = _tiles[i].worldBound;
+                _origins[i] = bound.width > 1f && !float.IsNaN(bound.x) ? bound.center : fallback;
+            }
         }
     }
 

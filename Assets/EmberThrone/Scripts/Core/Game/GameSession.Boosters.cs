@@ -40,6 +40,21 @@ namespace EmberThrone.Core
                     break;
                 }
 
+                case BoosterType.ColorBrush:
+                {
+                    if (!_board.InBounds(target)) return Finish(false);
+                    var picked = _board.CellAt(target).Piece;
+                    if (picked == null || picked.Kind != PieceKind.Gem) return Finish(false);
+                    var painted = SameColor(picked.Color);
+                    NewStep(StepKind.Booster);
+                    Emit(new BoosterUsedEvent(type, target));
+                    RunWaves(next =>
+                    {
+                        foreach (var p in painted) Hit(p, ClearReason.Booster, next);
+                    });
+                    break;
+                }
+
                 case BoosterType.Shuffle:
                 {
                     var ev = new ShuffleEvent();
@@ -60,6 +75,18 @@ namespace EmberThrone.Core
             _stats.BoostersUsed++;
             Settle();
             return Finish(true);
+        }
+
+        List<GridPos> SameColor(int color)
+        {
+            var cells = new List<GridPos>();
+            for (int y = 0; y < _board.Height; y++)
+                for (int x = 0; x < _board.Width; x++)
+                {
+                    var piece = _board.CellAt(x, y).Piece;
+                    if (piece != null && piece.Kind == PieceKind.Gem && piece.Color == color) cells.Add(new GridPos(x, y));
+                }
+            return cells;
         }
 
         public MoveOutcome PlaceStartingSpecials(IList<PieceKind> kinds)

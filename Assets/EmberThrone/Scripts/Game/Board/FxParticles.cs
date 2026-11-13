@@ -23,12 +23,13 @@ namespace EmberThrone.Game
         readonly ParticleSystem _smoke;
         readonly ParticleSystem _embers;
         readonly ParticleSystem _confetti;
+        readonly ParticleSystem _flames;
 
         public int Emitted { get; private set; }
 
         public int Alive =>
             _sparks.particleCount + _glints.particleCount + _chunks.particleCount + _splinters.particleCount +
-            _smoke.particleCount + _embers.particleCount + _confetti.particleCount;
+            _smoke.particleCount + _embers.particleCount + _confetti.particleCount + _flames.particleCount;
 
         public FxParticles(Transform root)
         {
@@ -64,6 +65,10 @@ namespace EmberThrone.Game
             _smoke = Make("Smoke", FxArt.ParticleBlend(FxArt.Smoke()), OrderSmoke, 300, -0.03f, 1.6f);
             Fade(_smoke, 0.12f, 0.9f, 0.3f);
             Size(_smoke, new Keyframe(0f, 0.55f), new Keyframe(1f, 1.6f));
+
+            _flames = Make("Flames", FxArt.ParticleBlend(FxArt.Smoke()), OrderSmoke + 1, 700, -0.04f, 2.2f);
+            Burn(_flames);
+            Size(_flames, new Keyframe(0f, 0.45f), new Keyframe(0.35f, 1f), new Keyframe(1f, 1.5f));
 
             _embers = Make("Embers", FxArt.ParticleAdditive(FxArt.Glow()), OrderLight, 500, -0.1f, 1.2f);
             Fade(_embers, 0.08f, 1f, 0.5f);
@@ -143,6 +148,23 @@ namespace EmberThrone.Game
                 ? new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(peak, fadeInUntil), new GradientAlphaKey(peak, holdUntil), new GradientAlphaKey(0f, 1f) }
                 : new[] { new GradientAlphaKey(peak, 0f), new GradientAlphaKey(peak, holdUntil), new GradientAlphaKey(0f, 1f) };
             gradient.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) }, alpha);
+            color.color = new ParticleSystem.MinMaxGradient(gradient);
+        }
+
+        static void Burn(ParticleSystem ps)
+        {
+            var color = ps.colorOverLifetime;
+            color.enabled = true;
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[]
+                {
+                    new GradientColorKey(new Color(1f, 0.98f, 0.78f), 0f),
+                    new GradientColorKey(new Color(1f, 0.78f, 0.28f), 0.3f),
+                    new GradientColorKey(new Color(1f, 0.46f, 0.12f), 0.58f),
+                    new GradientColorKey(new Color(0.55f, 0.44f, 0.44f), 0.9f),
+                },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.85f, 0.5f), new GradientAlphaKey(0f, 1f) });
             color.color = new ParticleSystem.MinMaxGradient(gradient);
         }
 
@@ -300,6 +322,12 @@ namespace EmberThrone.Game
             if (Random.value < 0.5f)
                 Emit(_sparks, pos, back * Random.Range(1f, 3f) + (Vector3)(Random.insideUnitCircle * 1.6f), Random.Range(0.08f, 0.14f),
                     Random.Range(0.2f, 0.4f), Hot(color, 0.5f));
+        }
+
+        public void Flame(Vector3 pos, Vector3 back, float size)
+        {
+            Emit(_flames, pos + (Vector3)(Random.insideUnitCircle * 0.08f), back * Random.Range(0.6f, 1.8f) + (Vector3)(Random.insideUnitCircle * 0.35f),
+                size * Random.Range(0.75f, 1.2f), Random.Range(0.25f, 0.45f), Color.white, Random.Range(0f, 360f), Random.Range(-120f, 120f));
         }
 
         public void Confetti(Vector3 pos, Vector3 direction, int count, float speed, float spread)

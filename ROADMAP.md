@@ -89,21 +89,49 @@ Mekanikler türün ortak mekanikleri; isim, karakter, görsel ve seviyeler Ember
 - [ ] Sıralama ve Takım'ı telefonda dene; kupa ve ödül dengesini oynayarak ayarla
 - [ ] Gerçek oyuncular: proje Unity Cloud'a bağlanacak (sahibi yapar, adımlar [docs/ONLINE.md](docs/ONLINE.md)); ardından Faz 4
 
+## Faz 2c — Lider kalitesi (2026-11-13'te başladı)
+Türün liderleri (Royal Match, Royal Kingdom, Candy Crush, Toon Blast, Gardenscapes) üzerine yapılan araştırmadan çıkan sıra: önce oyuncunun en çok baktığı tahta, sonra kayıp anındaki teklif. Kimlik, karakterler ve nesneler EmberThrone'un kalır.
+- [x] Aşama 1, tahta okunurluğu (2026-11-13): tahta tek parça, altın çerçeveli, basamaklı kenarları yuvarlatılmış zemin (`BoardSkin`); taşlar hücrenin yaklaşık %90'ını doldurur; oyun arka planı sakin, koyu bir gece görünümü (`bg_game_calm.jpg`); dünyamızdan altı yeni taş: kor kalbi, alev, çan, yaprak, kar tanesi, hilal
+- [x] Aşama 2, fiziksel efektler (2026-11-13): kırılan kutu, buz, kırağı ve kül zemin kendi resminden 6-8 parçaya bölünüp yerçekimiyle tahtanın dışına savrulur (vuruş alıp kırılmayanlardan 2 parça kopar); roketin ışık çizgisi yerine ateş ve duman izi; bombada ateş topu; yeni taşlar inince ezilip hafifçe zıplar; ahşap, buz ve kül için ayrı kırılma sesi. Efektler açık zeminde de okunduğu için tahta referanstaki gibi açık tona geçti (`BoardTone.Light`)
+- [ ] Aşama 2'den kalanlar: kor kuşunun hedefi aynı dalgada yok olursa yeni hedef seçmesi (motor kuralı), iki canlı buz için ayrı çatlak resmi
+- [x] Aşama 3, Emby portresi ve yeni HUD (2026-11-13): HUD'da ev simgesinin yerinde Emby; nefes alır, göz kırpar, 5 hamle kalınca endişelenir, 2 hamlede panikler, kombo ve uzun zincirde sevinir ya da hayran kalır, hedef bitince sevinir, kırağı yayılınca endişelenir, kazanınca zıplar, kaybedince üzülür. Booster'lar büyük yeşil düğmelerde, stok bitince "+" görünür; ev düğmesi booster sırasının sonunda. Beşinci booster renk fırçası: dokunulan taşın rengindeki bütün taşları siler (altlarındaki örtüye bir vuruş), hamle harcamaz, 1500 altın. Hedef paneli dört hedefe yer açar (`MaxGoals` 4)
+- [x] Aşama 4, kayıp eşiği döngüsü (2026-11-14): galibiyet serisi (1, 2, 3+ galibiyette sonraki seviyeye hazır roket, bomba, renk küresi; seviye başı penceresinde görünür, vazgeçince biter, kaybetme ve çıkış pencereleri uyarır); "+5 hamle" altınla her zaman teklif edilir, altın yetmezse mağaza açılır; kazanınca kalan hamleler (en çok 10) rokete dönüşüp patlar, ilk kazanışta roket başına 10 altın; 20, 30 ve 40-100 arası her bölge sonu "Süper zor" (bot %39-48), ardından bölgenin ilk seviyesi kolay; LevelSim'de "near" sütunu (kayıpların +5 hamleyle kazanılan payı)
+- [ ] Yakın kayıp ayarı: bölge sonlarında "near" %18-50 arası; kayıpların çoğu yakın bitsin diye zor seviyeler bu sütuna göre yeniden ayarlanacak
+- [ ] Reklamla bedava "+5 hamle"ye günlük sınır ve geçiş reklamı kararı (sahibinin kararı bekleniyor)
+- [x] Aşama 5, engel aileleri (2026-11-14): kor kandili (ilk vuruşta yanar, ikincide toplanır), kül saksısı (her vuruşta bir kor çiçeği açar, 3 çiçek), buza hapsolmuş köylü (2x2 blok, 4 vuruş, bir dalgada en çok bir vuruş). 31-100 yeniden üretildi: Fener Limanı kandili, Bilge Kütüphanesi saksıyı, Çiçek Bahçeleri köylüyü üç öğretici seviyeyle tanıtır; sonraki seviyelerde %70 olasılıkla bilinen bir aile eklenir; Çiçek Bahçeleri'nden itibaren tahtaların %36-50'si engelle başlar (üstte serbest alan); en çok 4 hedef; 40 hamleyi geçen seviye kendiliğinden yeniden çizilir. Seviye başı penceresi yeni engeli bir cümleyle anlatır
+- [ ] Renk isteyen engel (Ayaz'ın kazanı) ve kutuların bölgeye göre görünümü (ahşap, çömlek)
+- [ ] İlk 30 elle yapılmış seviyeyi de engel temposuna göre yeniden kur
+- [x] Aşama 6, gerçek parayla satış (2026-11-14): Unity IAP 5.4.3 (Pong'daki gibi), on ürün: 4 elmas, 2 altın paketi, başlangıç paketi (5. seviyeden sonra bir kez teklif edilir), booster paketi, kumbara (kazanç başına 50 altın dolar, 1000'de kırılır), Kor Yolu (aylık 30 adım, her kazanış bir adım, bedava ve ücretli şerit, ücretli şeritte bu ay en çok 8 can; ay sonunda alınmamış ödüller verilir). Ana ekranda Kor Yolu düğmesi, mağazada paketler. Satın alma profile yazılmadan onaylanmaz, aynı işlem iki kez ödül vermez
+- [ ] Ürünleri Play Console'da aç ve telefonda test alımı yap (proje sahibi; adımlar [docs/IAP.md](docs/IAP.md))
+- [ ] Sunucu tarafı fiş doğrulaması (Faz 4 ile)
+- [x] Aşama 7, etkinlik yoğunluğu (2026-11-14): Kıvılcım Koşusu (8 galibiyetten sonra açılır, 1 saatte 5 seviye, 4 rakip, ilk 3'e ödül, 30 dk ara), Fener Yarışı (12 galibiyetten sonra, 3 günde 15 seviye, 9 rakip, 1 gün ara), Kor Merdiveni (5 galibiyetten sonra, her gün 7 seviyeyi art arda kazan, kayıp başa döndürür, 100 oyuncudan zirveye çıkanlar 10000 altını paylaşır), takım sandığı (haftalık, takımın galibiyetleri 30/70/120'de üç ödül açar). Rakipler ve takım arkadaşları köy halkından, profil tohumu ve saatle belirlenir; hepsi cihazda çalışır. Ana ekranda süreli düğmeler, Takım sekmesinde sandık
+- [ ] Yarışları ve merdiveni telefonda dene; hedefleri, rakip hızını ve ödülleri oynayarak ayarla
+- [ ] Gerçek oyunculu yarışlar ve takım sandığı (Unity Cloud ile, Faz 4)
+
 ## Faz 3 — Meta ve ekonomi
 - [x] Lobi (2026-11-12): harita üstünde üst bar (can ve sayaç, altın, elmas), altta mağaza, büyük "Seviye N" butonu ve ayarlar, solda hediye ve görev butonları, bildirim rozetleri
 - [x] Ekonomi çekirdeği (2026-11-12): motor tarafında saf C# (`Core/Meta`), 15 test; sayılar META-001'den
 - [x] Mağaza (2026-11-12): altınla booster, sandık (sürpriz ödül), reklamla bedava altın
 - [x] Günlük görevler (2026-11-12): her gün üç görev, ilerleme oynarken dolar, hepsi bitince elmas
 - [ ] Lobiyi ve ekonomiyi telefonda dene; fiyat ve ödül dengesini oynayarak ayarla
-- [ ] Kazanınca altınların üst bara uçması, sandık açılış animasyonu, altın sınırına yaklaşınca "harca" işareti
+- [x] Ödül animasyonları (2026-11-13): ödül penceresi kapanınca altın, elmas, can ve paketler üst bara ve Koleksiyon sekmesine uçar, sayaç geldikçe artar; kazanıp "Seviyeler"e dönünce kazanılan altın ana ekranda uçarak gelir; sandık sallanır, ezilip patlar, konfeti saçar, ödüller içinden fırlar; altın sınırın %90'ına gelince altının altında "Harca!" yazar
 - [ ] Elmasla alınanlar: mor sandık, booster paketi; elmas satışı (IAP, Faz 6)
-- [ ] Harita / ilerleme, bölge inşa-dekor meta oyunu (yıldızlarla görevler)
+- [x] Bölge onarımı (2026-11-13, META-001 §6): ana ekran o anki bölgenin manzarası; bölge Ayaz'ın buzuyla donmuş başlar, beş görev (seviye geç, yıldız kazan, booster kullan) birer alanı çözer, son görev bütün bölgeyi ısıtır ve bölge ödülünü verir. Üç bölgenin manzarası ve görevleri hazır; eski ilerleme ilk açılışta sayılır
+- [ ] Onarımı telefonda dene; görev hedeflerini ve ödülleri oynayarak ayarla
+- [ ] Onarım anına Emby animasyonu ve ses; tamamlanan bölge için kısa kutlama
 - [x] Canlar (5 can, 30 dk yenilenme), altın, booster envanteri (2026-11-12). Saat şimdilik cihazın saati; sunucu saati Faz 4'te
 - [x] Günlük hediye ve seri (2026-11-12): 7 günlük takvim, kaçırılan gün seriyi sıfırlar
 - [ ] Kumbara, 14 ve 30 günlük seri ödülleri, seri koruma
 - [x] 30 seviye (2026-11-11): 11–20 Fırın Sokağı, 21–30 Demirci Çarşısı; her 5. seviye zor, ardından nefes seviyesi; hamleler `--tune` ile ayarlı
-- [ ] Seviye üretimi: prosedürel üretici + bot ile ayar → 100, sonra 500+ seviye
-- [ ] Yeni engeller (önce ateş kutusu: yayılan engel), renk fırçası booster'ı
+- [x] Seviye üretici (2026-11-13, `tools/levelgen/`): kuralla tahta, hedef ve engel; hamle sayısı bot ile hedef kazanma oranına ayarlanır
+- [x] 50 seviye (2026-11-13): 31–40 Fener Limanı, 41–50 Bilge Kütüphanesi; iki bölgenin manzarası, onarım görevleri ve dünya kartı hazır
+- [x] 100 seviye (2026-11-13): 51–60 Çiçek Bahçeleri, 61–70 Kristal Maden, 71–80 Karlı Geçit, 81–90 Donmuş Göl, 91–100 Kor Tahtı; her bölgenin manzarası, beş onarım görevi ve dünya kartı hazır
+- [ ] Sonra 500+ seviye; yeni engel türleriyle
+- [x] Fener Limanı açılış sahnesi (2026-11-13)
+- [ ] 5–10. bölgeler için açılış sahnesi videoları (şimdilik sahnesiz açılıyorlar; görsel üretim aracının günlük video sınırı yüzünden bekliyor)
+- [x] Yayılan engel: Ayaz kırağısı (2026-11-13). Kırağı kırılmayan her hamleden sonra komşu bir taşa yayılır ve örtü hedefi bir artar; Karlı Geçit ve Donmuş Göl'ün sekiz seviyesinde (74, 75, 78, 80, 84, 85, 88, 90), hamleleri yeniden ayarlı. Seviye başı penceresi nasıl çalıştığını söyler, kendi sesi ve sürünme efekti var
+- [ ] Kırağı karosunu görsel üretim aracıyla özgün çizdir (şimdilik buz karosundan araçla türetildi)
+- [ ] Sonraki engeller (ateş kutusu gibi), renk fırçası booster'ı
 
 ## Faz 4 — Backend ve sosyal
 - [ ] Hesap + bulut kayıt

@@ -8,9 +8,7 @@ namespace EmberThrone.Game
 {
     public sealed class BoardView : MonoBehaviour
     {
-        const int SortGlow = -3;
         const int SortBack = -2;
-        const int SortTile = -1;
         const int SortFloor = 1;
         const int SortExit = 2;
         const int SortAura = 9;
@@ -27,6 +25,9 @@ namespace EmberThrone.Game
         const float TwinkleMin = 0.25f;
         const float TwinkleMax = 0.7f;
         const float HammerHit = 0.12f;
+        const float LandHop = 0.12f;
+        const float BrushDelay = 0.18f;
+        static readonly Vector3 StatueOffset = new Vector3(0.5f, 0.5f, 0f);
         const float IntroDrop = 0.9f;
         const float IntroTime = 0.3f;
         const float IntroColumnLag = 0.025f;
@@ -69,6 +70,7 @@ namespace EmberThrone.Game
         }
 
         public event Action<GoalProgressEvent> GoalProgressed;
+        public event Action<FrostSpreadEvent> FrostSpread;
         public event Action<Impact> Impacted;
         public event Action<int> WaveStarted;
         public event Action<ComboKind> ComboFired;
@@ -80,7 +82,9 @@ namespace EmberThrone.Game
         SpriteRenderer[] _covers;
         int[] _floorHp;
         int[] _coverHp;
+        bool[] _frost;
         bool[] _exists;
+        Texture2D _skin;
         readonly Dictionary<int, PieceView> _pieces = new Dictionary<int, PieceView>();
         readonly Stack<PieceView> _pool = new Stack<PieceView>();
         SpriteRenderer _selection;
@@ -174,7 +178,7 @@ namespace EmberThrone.Game
             for (int tries = 0; tries < 4; tries++)
             {
                 var v = _grid[UnityEngine.Random.Range(0, _grid.Length)];
-                if (v == null || v.Kind == PieceKind.Box) continue;
+                if (v == null || v.Kind.IsBlocker()) continue;
                 var at = World(v.Pos) + new Vector3(UnityEngine.Random.Range(-0.22f, 0.22f), UnityEngine.Random.Range(0f, 0.28f), 0f);
                 _fx.Particles.Glints(at, Twinkle, 1, 0.02f, 0.42f);
                 return;
@@ -192,6 +196,7 @@ namespace EmberThrone.Game
             _covers = new SpriteRenderer[n];
             _floorHp = new int[n];
             _coverHp = new int[n];
+            _frost = new bool[n];
             _exists = new bool[n];
 
             _pieceRoot = new GameObject("Pieces").transform;
@@ -213,12 +218,10 @@ namespace EmberThrone.Game
                     var pos = new GridPos(x, y);
                     int i = Index(pos);
                     _exists[i] = true;
-                    NewSprite("Glow", Art.Glow(), Palette.BoardGlow, World(pos), SortGlow).transform.localScale = Vector3.one * 1.42f;
-                    NewSprite("Back", Art.CellBack(), Palette.BoardBack, World(pos), SortBack).transform.localScale = Vector3.one * 1.2f;
-                    NewSprite("Tile", Art.Tile(), (x + y) % 2 == 0 ? Palette.TileLight : Palette.TileDark, World(pos), SortTile);
                     SetFloor(pos, cell.Floor);
-                    SetCover(pos, cell.Cover);
-                    if (cell.Piece != null) CreatePiece(cell.Piece.Id, cell.Piece.Kind, cell.Piece.Color, cell.Piece.Hp, pos);
+                    SetCover(pos, cell.Cover, cell.Frost);
+                    if (cell.Piece != null && _pieces.TryGetValue(cell.Piece.Id, out var block)) _grid[i] = block;
+                    else if (cell.Piece != null) CreatePiece(cell.Piece.Id, cell.Piece.Kind, cell.Piece.Color, cell.Piece.Hp, pos);
                     if (hasCollectibleGoal && board.IsExit(x, y))
                     {
                         var exit = NewSprite("Exit", Art.Chevron(), Palette.Gold, World(pos) + Vector3.down * 0.6f, SortExit);
@@ -227,9 +230,17 @@ namespace EmberThrone.Game
                 }
             }
 
+            _skin = BoardSkin.Bake(_exists, _w, _h, BoardSkin.Tone);
+            NewSprite("Board", BoardSkin.SpriteOf(_skin), Color.white, Vector3.zero, SortBack);
+
             _selection = NewSprite("Selection", Art.Selection(), Palette.Select, Vector3.zero, SortSelection);
             _selection.gameObject.SetActive(false);
             PlayIntro();
+        }
+
+        void OnDestroy()
+        {
+            if (_skin != null) Destroy(_skin);
         }
 
         void PlayIntro()
@@ -237,7 +248,7 @@ namespace EmberThrone.Game
             foreach (var piece in _pieces.Values)
             {
                 var v = piece;
-                var home = World(v.Pos);
+                var home = Home(v);
                 var from = home + Vector3.up * IntroDrop;
                 int motion = ++v.Motion;
                 v.T.localPosition = from;
@@ -316,12 +327,14 @@ namespace EmberThrone.Game
             v.Body.localRotation = Quaternion.identity;
             v.Aura.gameObject.SetActive(kind.IsSpecial());
             v.Aura.color = AuraColor(kind);
-            v.T.localPosition = World(pos);
+            v.T.localPosition = Home(v);
             v.T.localScale = Vector3.one;
             _pieces[id] = v;
             _grid[Index(pos)] = v;
             return v;
         }
+
+        Vector3 Home(PieceView v) => World(v.Pos) + (v.Kind == PieceKind.Statue ? StatueOffset : Vector3.zero);
 
         static Color AuraColor(PieceKind kind)
         {
@@ -372,14 +385,16 @@ namespace EmberThrone.Game
             }
         }
 
-        void SetCover(GridPos p, int hp)
+        void SetCover(GridPos p, int hp, bool frost)
         {
             int i = Index(p);
             _coverHp[i] = hp;
+            _frost[i] = hp > 0 && frost;
             if (hp > 0)
             {
-                if (_covers[i] == null) _covers[i] = NewSprite("Cover", Art.Cover(hp), new Color(1f, 1f, 1f, Palette.CoverAlpha), World(p), SortCover);
-                _covers[i].sprite = Art.Cover(hp);
+                var sprite = _frost[i] ? Art.Frost() : Art.Cover(hp);
+                if (_covers[i] == null) _covers[i] = NewSprite("Cover", sprite, new Color(1f, 1f, 1f, Palette.CoverAlpha), World(p), SortCover);
+                _covers[i].sprite = sprite;
             }
             else if (_covers[i] != null)
             {
@@ -450,6 +465,7 @@ namespace EmberThrone.Game
                         return "cell " + p + ": view " + Describe(v) + ", engine " + piece;
                     if (_floorHp[i] != cell.Floor) return "cell " + p + ": floor " + _floorHp[i] + " vs " + cell.Floor;
                     if (_coverHp[i] != cell.Cover) return "cell " + p + ": cover " + _coverHp[i] + " vs " + cell.Cover;
+                    if (_frost[i] != cell.Frost) return "cell " + p + ": frost " + _frost[i] + " vs " + cell.Frost;
                 }
             }
             return null;
@@ -611,6 +627,9 @@ namespace EmberThrone.Game
                     case FloorDamagedEvent d:
                         e = DamageFloor(d, DelayAt(d.Pos));
                         break;
+                    case FrostSpreadEvent f:
+                        e = SpreadFrost(f);
+                        break;
                     case PieceCollectedEvent c:
                         e = CollectPiece(c);
                         break;
@@ -640,6 +659,13 @@ namespace EmberThrone.Game
                 for (int x = 0; x < _w; x++) SetEarliest(new GridPos(x, b.Target.Y), Mathf.Abs(x - b.Target.X) * Timing.RocketPerCell);
             else if (b.Type == BoosterType.ColumnBlast)
                 for (int y = 0; y < _h; y++) SetEarliest(new GridPos(b.Target.X, y), Mathf.Abs(y - b.Target.Y) * Timing.RocketPerCell);
+            else if (b.Type == BoosterType.ColorBrush)
+                for (int y = 0; y < _h; y++)
+                    for (int x = 0; x < _w; x++)
+                    {
+                        var p = new GridPos(x, y);
+                        SetEarliest(p, BrushDelay + b.Target.Chebyshev(p) * Timing.ColorPerCell);
+                    }
         }
 
         void SetEarliest(GridPos p, float delay)
@@ -670,6 +696,7 @@ namespace EmberThrone.Game
 
         float UseBooster(BoosterUsedEvent b)
         {
+            if (b.Type == BoosterType.ColorBrush) return BrushFx(b);
             if (b.Type != BoosterType.Hammer)
             {
                 if (b.Type != BoosterType.Shuffle) Sound.Play(Sfx.LineBlast);
@@ -686,6 +713,20 @@ namespace EmberThrone.Game
             AddRipple(at, 2.4f, 0.14f, HammerHit);
             Signal(Impact.Rocket, HammerHit);
             return HammerHit + 0.3f;
+        }
+
+        float BrushFx(BoosterUsedEvent b)
+        {
+            Sound.Play(Sfx.ColorBomb);
+            if (!InBounds(b.Target)) return 0f;
+            var at = World(b.Target);
+            _fx.Glow(at, Cream, 2.6f, 0f, 0.3f);
+            _fx.Rays(at, Gold, 4.2f, 0f, 0.55f);
+            _fx.Sparkles(at, 10, 0f, 1.1f, 0.8f);
+            _fx.Shockwave(at, OrbLight, 0.3f, Mathf.Max(_w, _h), BrushDelay * 0.5f, 0.5f);
+            AddRipple(at, Mathf.Max(_w, _h) + 2f, 0.14f, BrushDelay * 0.5f);
+            Signal(Impact.ColorBomb, 0f);
+            return BrushDelay;
         }
 
         float ClearPiece(PieceClearedEvent e, float delay)
@@ -708,14 +749,44 @@ namespace EmberThrone.Game
                 return delay + Timing.MergeFlight;
             }
 
-            if (e.Kind == PieceKind.Box)
+            if (e.Kind == PieceKind.Lamp)
             {
-                _fx.WoodBurst(World(e.Pos), delay, true);
-                Tweens.Run(Timing.ObstacleBreak * 0.4f, t =>
+                var at = Home(v);
+                _fx.Glow(at, Alpha(Warm, 0.95f), 2.2f, delay, 0.3f);
+                Tweens.After(delay, () =>
                 {
-                    v.T.localScale = Vector3.one * (1f + 0.14f * t);
-                    SetFlash(v, t * 0.6f);
+                    _fx.Particles.Sparks(at, Gold, 10, 4.5f);
+                    Sound.Play(BreakSound(PieceKind.Lamp, true));
+                });
+                Tweens.Run(Timing.Pop * 1.5f, t =>
+                {
+                    v.T.localScale = Vector3.one * Mathf.Lerp(1f, 1.35f, Ease.OutQuad(t));
+                    v.R.color = new Color(1f, 1f, 1f, 1f - t);
                 }, delay, () => Recycle(v));
+                return delay + Timing.ObstacleBreak;
+            }
+
+            if (e.Kind.IsBlocker())
+            {
+                var at = Home(v);
+                var sprite = v.R.sprite;
+                bool statue = e.Kind == PieceKind.Statue;
+                if (e.Kind == PieceKind.Box) _fx.WoodBurst(at, delay, true);
+                else if (e.Kind == PieceKind.Planter) _fx.AshBurst(at, delay);
+                else
+                {
+                    _fx.IceBurst(at, delay);
+                    _fx.Glow(at, Alpha(Cream, 0.9f), 3.2f, delay, 0.35f);
+                    Tweens.After(delay, () => _fx.Particles.Glints(at, Twinkle, 8, 0.9f, 0.6f));
+                }
+                _fx.Shatter(sprite, at, Color.white, delay, statue ? 12 : 8, statue ? 1.2f : 1f);
+                var kind = e.Kind;
+                Tweens.After(delay, () =>
+                {
+                    Recycle(v);
+                    Sound.Play(BreakSound(kind, true));
+                });
+                if (statue) Signal(Impact.Bomb, delay);
                 return delay + Timing.ObstacleBreak + 0.06f;
             }
 
@@ -737,6 +808,9 @@ namespace EmberThrone.Game
             _pieces.Remove(v.Id);
             int i = Index(v.Pos);
             if (_grid[i] == v) _grid[i] = null;
+            if (v.Kind != PieceKind.Statue) return;
+            for (int k = 0; k < _grid.Length; k++)
+                if (_grid[k] == v) _grid[k] = null;
         }
 
         float FormSpecial(SpecialCreatedEvent e)
@@ -874,7 +948,7 @@ namespace EmberThrone.Game
                 {
                     var v = _grid[i];
                     if (v == null || _coverHp[i] > 0) continue;
-                    var home = World(v.Pos);
+                    var home = Home(v);
                     var offset = home - ripple.Center;
                     float distance = offset.magnitude;
                     if (distance < 0.01f || distance > ripple.Radius) continue;
@@ -911,7 +985,6 @@ namespace EmberThrone.Game
                 var step = horizontal ? Vector3.right * dir : Vector3.up * dir;
                 var to = center + step * (cells + 1.5f);
                 float flight = Mathf.Max(0.08f, (cells + 1) * Timing.RocketPerCell);
-                _fx.Beam(center, to, new Color(1f, 0.8f, 0.45f, 0.75f), 0.95f, 0f, flight + 0.2f);
                 end = Mathf.Max(end, _fx.Rocket(Art.Rocket(horizontal), center, to, RocketFire, flight));
             }
             return end;
@@ -964,16 +1037,52 @@ namespace EmberThrone.Game
             if (!_pieces.TryGetValue(e.PieceId, out var v)) return 0f;
             v.Hp = e.HpLeft;
             int hp = e.HpLeft;
-            Tweens.After(delay, () => v.R.sprite = Art.Box(hp));
-            _fx.WoodBurst(World(v.Pos), delay, false);
+            var before = v.R.sprite;
+            var at = Home(v);
+            var kind = v.Kind;
+            Tweens.After(delay, () =>
+            {
+                v.R.sprite = Art.Piece(kind, GemColor.None, hp);
+                Sound.Play(BreakSound(kind, false));
+            });
+            switch (kind)
+            {
+                case PieceKind.Lamp:
+                    _fx.Glow(at, Alpha(Warm, 0.9f), 1.8f, delay, 0.35f);
+                    Tweens.After(delay, () => _fx.Particles.Glints(at, Gold, 5, 0.4f, 0.5f));
+                    break;
+                case PieceKind.Planter:
+                    _fx.AshBurst(at, delay);
+                    Tweens.After(delay, () => _fx.Particles.Glints(at + Vector3.up * 0.3f, Warm, 3, 0.25f, 0.45f));
+                    break;
+                case PieceKind.Statue:
+                    _fx.IceBurst(at, delay);
+                    _fx.Shatter(before, at, Color.white, delay, 10, 0.6f, 3);
+                    break;
+                default:
+                    _fx.WoodBurst(at, delay, false);
+                    _fx.Shatter(before, at, Color.white, delay, 8, 0.7f, 2);
+                    break;
+            }
             Tweens.Run(0.12f, t => SetFlash(v, 0.7f * (1f - t)), delay, () => SetFlash(v, 0f));
             ShakePiece(v, delay);
             return delay + Timing.ObstacleBreak;
         }
 
+        static Sfx BreakSound(PieceKind kind, bool broken)
+        {
+            switch (kind)
+            {
+                case PieceKind.Lamp: return broken ? Sfx.Collect : Sfx.Star;
+                case PieceKind.Planter: return Sfx.BreakAsh;
+                case PieceKind.Statue: return Sfx.BreakIce;
+                default: return Sfx.BreakWood;
+            }
+        }
+
         void ShakePiece(PieceView v, float delay)
         {
-            var home = World(v.Pos);
+            var home = Home(v);
             int motion = ++v.Motion;
             Tweens.Run(Timing.ObstacleBreak, t =>
             {
@@ -987,19 +1096,69 @@ namespace EmberThrone.Game
         {
             int hp = e.HpLeft;
             var p = e.Pos;
-            _coverHp[Index(p)] = hp;
+            int i = Index(p);
+            bool frost = _frost[i] && hp > 0;
+            var before = _covers[i] != null ? _covers[i].sprite : null;
+            _coverHp[i] = hp;
+            _frost[i] = frost;
             _fx.IceBurst(World(p), delay);
-            Tweens.After(delay, () => SetCover(p, hp));
+            _fx.Shatter(before, World(p), new Color(1f, 1f, 1f, Palette.CoverAlpha), delay, 7, hp > 0 ? 0.7f : 0.95f, hp > 0 ? 2 : 0);
+            Tweens.After(delay, () =>
+            {
+                SetCover(p, hp, frost);
+                Sound.Play(Sfx.BreakIce);
+            });
             return delay + Timing.ObstacleBreak;
+        }
+
+        float SpreadFrost(FrostSpreadEvent e)
+        {
+            var spread = e;
+            int i = Index(e.To);
+            _coverHp[i] = 1;
+            _frost[i] = true;
+            float arrive = _fx.FrostCreep(World(e.From), World(e.To), Timing.FrostCreep);
+            Tweens.After(arrive, () =>
+            {
+                SetCover(spread.To, 1, true);
+                GrowCover(spread.To);
+                Sound.Play(Sfx.Freeze);
+                FrostSpread?.Invoke(spread);
+            });
+            return arrive + Timing.FrostGrow;
+        }
+
+        void GrowCover(GridPos p)
+        {
+            var cover = _covers[Index(p)];
+            if (cover == null) return;
+            Tweens.Run(Timing.FrostGrow, t =>
+            {
+                if (cover == null) return;
+                cover.transform.localScale = Vector3.one * Mathf.LerpUnclamped(0.3f, 1f, Ease.OutBack(t));
+                cover.color = new Color(1f, 1f, 1f, Palette.CoverAlpha * Mathf.Clamp01(t * 2.5f));
+            }, 0f, () =>
+            {
+                if (cover == null) return;
+                cover.transform.localScale = Vector3.one;
+                cover.color = new Color(1f, 1f, 1f, Palette.CoverAlpha);
+            });
         }
 
         float DamageFloor(FloorDamagedEvent e, float delay)
         {
             int hp = e.HpLeft;
             var p = e.Pos;
-            _floorHp[Index(p)] = hp;
+            int i = Index(p);
+            var before = _floors[i] != null ? _floors[i].sprite : null;
+            _floorHp[i] = hp;
             _fx.AshBurst(World(p), delay);
-            Tweens.After(delay, () => SetFloor(p, hp));
+            _fx.Shatter(before, World(p), Color.white, delay, 6, 0.55f, hp > 0 ? 2 : 0);
+            Tweens.After(delay, () =>
+            {
+                SetFloor(p, hp);
+                Sound.Play(Sfx.BreakAsh);
+            });
             return delay + Timing.ObstacleBreak;
         }
 
@@ -1195,16 +1354,21 @@ namespace EmberThrone.Game
             t.Landed = true;
             var v = t.View;
             v.R.color = Color.white;
-            v.T.localPosition = t.Points[t.Points.Count - 1];
+            var home = t.Points[t.Points.Count - 1];
+            v.T.localPosition = home;
             int motion = ++v.Motion;
-            Tweens.Run(Timing.LandSquash * 2f, s =>
+            Tweens.Run(Timing.LandSquash * 3f, s =>
             {
                 if (v.Motion != motion) return;
-                float k = Mathf.Sin(s * Mathf.PI * 2f) * (1f - s) * 0.17f;
+                float k = Mathf.Sin(s * Mathf.PI * 3f) * (1f - s) * 0.17f;
                 v.T.localScale = new Vector3(1f + k, 1f - k, 1f);
+                float hop = Mathf.Max(0f, Mathf.Sin((s - 0.2f) * Mathf.PI * 1.25f)) * LandHop * (1f - s);
+                v.T.localPosition = home + Vector3.up * hop;
             }, 0f, () =>
             {
-                if (v.Motion == motion) v.T.localScale = Vector3.one;
+                if (v.Motion != motion) return;
+                v.T.localScale = Vector3.one;
+                v.T.localPosition = home;
             });
         }
     }

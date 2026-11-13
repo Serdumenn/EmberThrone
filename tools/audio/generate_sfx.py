@@ -212,6 +212,35 @@ def moves_added():
     return mix(s, bell(note("B6"), 0.4, 0.1, 0.3), 0.18)
 
 
+def freeze():
+    s = silence(0.0)
+    for i, n in enumerate(("E7", "B6", "G6", "E6")):
+        mix(s, bell(note(n), 0.4, 0.09, 0.45), i * 0.035)
+    mix(s, noise(0.45, 0.18, 0.8, 0.6, attack=0.03, seed=71), 0.0, 0.3)
+    return mix(s, tone(note("B5"), note("E5"), 0.35, 0.12, ((1.0, 1.0), (2.0, 0.2)), glide=0.3, attack=0.02), 0.0, 0.25)
+
+
+def break_wood():
+    s = tone(170, 85, 0.18, 0.05, ((1.0, 1.0), (2.7, 0.35)), glide=0.05)
+    mix(s, noise(0.16, 0.04, 0.25, 0.7, seed=81), 0.0, 0.8)
+    mix(s, click(gain=0.4, seed=82), 0.0)
+    return mix(s, noise(0.1, 0.03, 0.5, 0.9, seed=83), 0.05, 0.5)
+
+
+def break_ice():
+    s = silence(0.0)
+    for i, n in enumerate(("B7", "F7", "D8", "G7", "C8")):
+        mix(s, bell(note(n), 0.22, 0.05, 0.35), i * 0.018)
+    mix(s, noise(0.25, 0.07, 0.75, 0.95, seed=91), 0.0, 0.55)
+    return mix(s, click(gain=0.5, seed=92), 0.0)
+
+
+def break_ash():
+    s = noise(0.3, 0.1, 0.1, 0.45, attack=0.01, seed=101)
+    mix(s, tone(120, 70, 0.2, 0.06), 0.0, 0.5)
+    return mix(s, noise(0.12, 0.04, 0.4, 0.7, seed=102), 0.03, 0.4)
+
+
 SOUNDS = {
     "sfx_swap": swap,
     "sfx_swap_back": swap_back,
@@ -231,6 +260,10 @@ SOUNDS = {
     "sfx_lose": lose,
     "sfx_star": star,
     "sfx_moves_added": moves_added,
+    "sfx_freeze": freeze,
+    "sfx_break_wood": break_wood,
+    "sfx_break_ice": break_ice,
+    "sfx_break_ash": break_ash,
 }
 
 

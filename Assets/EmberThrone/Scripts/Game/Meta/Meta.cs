@@ -16,12 +16,16 @@ namespace EmberThrone.Game
         static Race _race;
         static Team _team;
         static LiveEvent _event;
+        static Restoration _restore;
+        static Contests _contests;
 
         public static readonly EconomyRules Rules = new EconomyRules();
         public static readonly CollectionRules CardRules = new CollectionRules();
         public static readonly RaceRules RaceRules = new RaceRules();
         public static readonly TeamRules TeamRules = new TeamRules();
         public static readonly EventRules EventRules = new EventRules();
+        public static readonly RestoreRules RestoreRules = new RestoreRules();
+        public static readonly ContestRules ContestRules = new ContestRules();
 
         public static Func<long> Clock = WallClock;
 
@@ -69,6 +73,25 @@ namespace EmberThrone.Game
             }
         }
 
+        public static Contests Contests
+        {
+            get
+            {
+                if (_economy == null) Load();
+                Tick();
+                return _contests;
+            }
+        }
+
+        public static Restoration Restore
+        {
+            get
+            {
+                if (_economy == null) Load();
+                return _restore;
+            }
+        }
+
         static void Tick()
         {
             long now = Now;
@@ -76,6 +99,7 @@ namespace EmberThrone.Game
             _race.Tick(now);
             _team.Tick(now);
             _event.Tick(now);
+            _contests.Tick(now);
         }
 
         public static CardCollection Cards
@@ -115,6 +139,8 @@ namespace EmberThrone.Game
             _race = new Race(RaceRules, _economy);
             _team = new Team(TeamRules, _economy, _race);
             _event = new LiveEvent(EventRules, _economy);
+            _restore = new Restoration(RestoreRules, _economy);
+            _contests = new Contests(ContestRules, _economy);
             Tick();
         }
 
@@ -133,6 +159,7 @@ namespace EmberThrone.Game
             _race = null;
             _team = null;
             _event = null;
+            _restore = null;
         }
 
         public static string Span(int seconds)

@@ -23,6 +23,8 @@ namespace EmberThrone.Core
 
         public int ContinueMoves = 5;
 
+        public int FinaleMaxSpecials = 10;
+
         public int StarsFor(int movesLeft)
         {
             if (movesLeft >= ThreeStarMovesLeft) return 3;

@@ -96,6 +96,28 @@ namespace EmberThrone.Core.Tests
         }
 
         [Test]
+        public void ColorBrush_ClearsEveryGemOfThePickedColor_WithoutUsingAMove()
+        {
+            var s = T.Session(T.Even, T.Odd, "YP2GY", T.Odd, T.Even);
+            var o = s.UseBooster(BoosterType.ColorBrush, T.P(0, 2));
+            Assert.IsTrue(o.Accepted);
+            Assert.AreEqual(20, s.MovesLeft);
+            Assert.AreEqual(BoosterType.ColorBrush, o.EventsOf<BoosterUsedEvent>().Single().Type);
+            int yellows = o.EventsOf<PieceClearedEvent>().Count(e => e.Kind == PieceKind.Gem && e.Color == GemColor.Yellow);
+            Assert.GreaterOrEqual(yellows, 8, "all eight yellow gems");
+            Assert.AreEqual(1, s.Stats.BoostersUsed);
+            Assert.AreEqual(0, BoardDebug.Validate(s.Board, true).Count);
+        }
+
+        [Test]
+        public void ColorBrush_NeedsAGem()
+        {
+            var s = T.Session(T.Even, T.Odd, "YP2GY", T.Odd, T.Even);
+            Assert.IsFalse(s.UseBooster(BoosterType.ColorBrush, T.P(2, 2)).Accepted, "a box has no colour");
+            Assert.AreEqual(0, s.Stats.BoostersUsed);
+        }
+
+        [Test]
         public void Hammer_OnCollectible_IsRejected_AndNotCounted()
         {
             var s = T.Session(T.Even, T.Odd, "YP$GY", T.Odd, T.Even);

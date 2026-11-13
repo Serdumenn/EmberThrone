@@ -114,6 +114,8 @@ namespace EmberThrone.Game
         public const float HomingPerCell = 0.05f;
         public const float ColorPerCell = 0.04f;
         public const float StrikeFlight = 0.26f;
+        public const float FrostCreep = 0.32f;
+        public const float FrostGrow = 0.28f;
         public const float Shuffle = 0.35f;
         public const float Collect = 0.28f;
         public const float CounterBounce = 0.1f;
@@ -125,6 +127,7 @@ namespace EmberThrone.Game
         public const float WinSparkFlight = 0.32f;
         public const int WinSparksMax = 10;
         public const float WinWindowPause = 0.25f;
+        public const float FinaleRest = 0.35f;
         public const float PraisePop = 0.32f;
         public const float PraiseHold = 0.55f;
         public const float PraiseOut = 0.25f;

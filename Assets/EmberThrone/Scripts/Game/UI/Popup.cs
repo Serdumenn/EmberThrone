@@ -47,9 +47,14 @@ namespace EmberThrone.Game
         {
         }
 
+        protected virtual void OnClosing()
+        {
+        }
+
         public void Close()
         {
             if (!IsOpen) return;
+            OnClosing();
             Root.RemoveFromHierarchy();
             OnClosed();
             _closed?.Invoke();

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace EmberThrone.Core
 {
@@ -9,6 +10,7 @@ namespace EmberThrone.Core
         public Piece Piece;
         public int Floor;
         public int Cover;
+        public bool Frost;
 
         public bool IsEmpty => Exists && Piece == null;
 
@@ -21,6 +23,7 @@ namespace EmberThrone.Core
                 Piece = Piece?.Clone(),
                 Floor = Floor,
                 Cover = Cover,
+                Frost = Frost,
             };
         }
     }
@@ -87,7 +90,18 @@ namespace EmberThrone.Core
         public Board Clone()
         {
             var b = new Board(Width, Height);
-            for (int i = 0; i < _cells.Length; i++) b._cells[i] = _cells[i].Clone();
+            Dictionary<int, Piece> shared = null;
+            for (int i = 0; i < _cells.Length; i++)
+            {
+                var c = _cells[i].Clone();
+                if (c.Piece != null && c.Piece.Kind == PieceKind.Statue)
+                {
+                    if (shared == null) shared = new Dictionary<int, Piece>();
+                    if (shared.TryGetValue(c.Piece.Id, out var same)) c.Piece = same;
+                    else shared[c.Piece.Id] = c.Piece;
+                }
+                b._cells[i] = c;
+            }
             b._exit = _exit == null ? null : (bool[])_exit.Clone();
             b._nextPieceId = _nextPieceId;
             return b;
@@ -96,12 +110,39 @@ namespace EmberThrone.Core
         public int CountPieces(PieceKind kind)
         {
             int n = 0;
+            HashSet<int> seen = null;
             for (int i = 0; i < _cells.Length; i++)
             {
                 var p = _cells[i].Piece;
-                if (p != null && p.Kind == kind) n++;
+                if (p == null || p.Kind != kind) continue;
+                if (kind == PieceKind.Statue)
+                {
+                    if (seen == null) seen = new HashSet<int>();
+                    if (!seen.Add(p.Id)) continue;
+                }
+                n++;
             }
             return n;
+        }
+
+        public int SumHp(PieceKind kind)
+        {
+            int n = 0;
+            for (int i = 0; i < _cells.Length; i++)
+            {
+                var p = _cells[i].Piece;
+                if (p != null && p.Kind == kind) n += p.Hp;
+            }
+            return n;
+        }
+
+        public List<GridPos> CellsOf(Piece piece)
+        {
+            var cells = new List<GridPos>();
+            for (int y = 0; y < Height; y++)
+                for (int x = 0; x < Width; x++)
+                    if (CellAt(x, y).Piece == piece) cells.Add(new GridPos(x, y));
+            return cells;
         }
 
         public ulong ComputeHash()
@@ -124,6 +165,7 @@ namespace EmberThrone.Core
                     Mix(c.Spawner ? 1 : 0);
                     Mix(c.Floor);
                     Mix(c.Cover);
+                    if (c.Frost) Mix(7);
                     if (c.Piece == null)
                     {
                         Mix(-1);

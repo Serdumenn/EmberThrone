@@ -31,6 +31,8 @@ namespace EmberThrone.Game
         public CollectionView Cards { get; private set; }
         public RaceView Race { get; private set; }
         public IReadOnlyList<Button> StoryButtons => _stories;
+        public HomeDiorama Diorama { get; private set; }
+        public int RestoreFocus => Meta.Restore.Focus(LevelMap.ChapterOf(Mathf.Max(0, CurrentIndex)));
         public TeamView Team { get; private set; }
         public LobbyPage Page { get; private set; }
         public bool MapShown => Page == LobbyPage.World;
@@ -81,10 +83,15 @@ namespace EmberThrone.Game
                 BuildChapter(c, levels, starsOf, onPick);
             Ui.El("et-map__pad et-map__pad--bottom", Scroll, "BottomPad");
 
+            Diorama = HomeDiorama.Create(ui.Backdrop);
+            var diorama = Diorama;
+            Root.RegisterCallback<DetachFromPanelEvent>(_ => diorama.Root.RemoveFromHierarchy());
+            Diorama.Show(RestoreFocus);
+
             int current = CurrentIndex;
             Top = TopBar.Create(Root, app.OpenLives, app.OpenShop, () => OpenSettings(ui));
             SettingsButton = Top.SettingsButton;
-            Lobby = LobbyBar.Create(Root, "Seviye " + levels[current].Id, () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests, app.OpenEvent);
+            Lobby = LobbyBar.Create(Root, "Seviye " + levels[current].Id, () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests, app.OpenEvent, app.OpenRestore, app.OpenPass, app.OpenContest, app.OpenLadder, () => RestoreFocus, () => Mathf.Max(0, CurrentIndex));
             Tabs = TabBar.Create(Root, app.OpenShop,
                 () => Show(LobbyPage.Rank),
                 () => ShowMap(false),
@@ -116,10 +123,10 @@ namespace EmberThrone.Game
 
             var card = Ui.El(_locked[first] ? "et-panel et-district et-district--locked" : "et-panel et-district", Scroll, "Chapter" + (chapterIndex + 1));
             VisualElement art;
-            if (_locked[first])
+            if (_locked[first] || !StoryScene.Available(chapterIndex))
             {
                 art = Ui.El("et-district__art " + chapter.Style, card, "Art");
-                Ui.El("et-icon et-district__lock et-ic--lock", art, "Lock");
+                if (_locked[first]) Ui.El("et-icon et-district__lock et-ic--lock", art, "Lock");
             }
             else
             {
@@ -182,6 +189,7 @@ namespace EmberThrone.Game
             Tabs.SetActive(TabOf(page));
             _ui.Backdrop.EnableInClassList("et-backdrop--map", !home);
             _ui.Backdrop.EnableInClassList("et-backdrop--home", home);
+            Diorama.Root.EnableInClassList(Ui.Hidden, !home);
             if (page == LobbyPage.Cards) Cards.Refresh();
             if (page == LobbyPage.Team) Team.Refresh();
             if (page == LobbyPage.Rank)

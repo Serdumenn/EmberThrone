@@ -5,7 +5,7 @@ namespace EmberThrone.Core
 {
     public sealed class Profile
     {
-        public const int BoosterKinds = 4;
+        public const int BoosterKinds = 5;
 
         public int Coins;
         public int Gems;
@@ -29,6 +29,7 @@ namespace EmberThrone.Core
         public int ChestsOpened;
 
         public int Packs;
+        public int WinStreak;
         public int PacksOpened;
         public int[] Cards = new int[0];
         public bool[] SetsClaimed = new bool[0];
@@ -52,6 +53,30 @@ namespace EmberThrone.Core
         public long EventDoneAt;
 
         public int ScenesSeen;
+
+        public bool StarterBought;
+        public bool StarterShown;
+        public int PiggyCoins;
+        public int PassMonth = -1;
+        public int PassPoints;
+        public int PassFreeClaimed;
+        public int PassPremiumClaimed;
+        public int PassPremiumMonth = -1;
+        public List<string> Purchases = new List<string>();
+
+        public long[] Contest = new long[0];
+        public int LadderDay = -1;
+        public int LadderWins;
+        public bool LadderClaimed;
+        public int ChestWeek = -1;
+        public int ChestWins;
+        public int ChestClaimed;
+
+        public int[] RestoreLevels = new int[0];
+        public int[] RestoreStars = new int[0];
+        public int[] RestoreBoosters = new int[0];
+        public int[] RestoreClaimed = new int[0];
+        public bool RestoreSeeded;
 
         public static Profile New(EconomyRules rules, long seed)
         {
@@ -88,6 +113,7 @@ namespace EmberThrone.Core
                 ["questBonus"] = QuestBonusClaimed,
                 ["chests"] = ChestsOpened,
                 ["packs"] = Packs,
+                ["winStreak"] = WinStreak,
                 ["packsOpened"] = PacksOpened,
                 ["cards"] = ToList(Cards),
                 ["setsClaimed"] = ToList(Array.ConvertAll(SetsClaimed, c => c ? 1 : 0)),
@@ -107,6 +133,27 @@ namespace EmberThrone.Core
                 ["eventClaimed"] = EventClaimed,
                 ["eventDoneAt"] = EventDoneAt.ToString(),
                 ["scenesSeen"] = ScenesSeen,
+                ["starterBought"] = StarterBought,
+                ["starterShown"] = StarterShown,
+                ["piggy"] = PiggyCoins,
+                ["passMonth"] = PassMonth,
+                ["passPoints"] = PassPoints,
+                ["passFree"] = PassFreeClaimed,
+                ["passPremium"] = PassPremiumClaimed,
+                ["passPremiumMonth"] = PassPremiumMonth,
+                ["purchases"] = Purchases.ConvertAll(t => (object)t),
+                ["contest"] = new List<object>(Array.ConvertAll(Contest, v => (object)v.ToString())),
+                ["ladderDay"] = LadderDay,
+                ["ladderWins"] = LadderWins,
+                ["ladderClaimed"] = LadderClaimed,
+                ["chestWeek"] = ChestWeek,
+                ["chestWins"] = ChestWins,
+                ["chestClaimed"] = ChestClaimed,
+                ["restoreLevels"] = ToList(RestoreLevels),
+                ["restoreStars"] = ToList(RestoreStars),
+                ["restoreBoosters"] = ToList(RestoreBoosters),
+                ["restoreClaimed"] = ToList(RestoreClaimed),
+                ["restoreSeeded"] = RestoreSeeded,
             };
             return MiniJson.Serialize(o);
         }
@@ -130,6 +177,7 @@ namespace EmberThrone.Core
                 QuestBonusClaimed = MiniJson.GetBool(o, "questBonus", false),
                 ChestsOpened = MiniJson.GetInt(o, "chests", 0),
                 Packs = MiniJson.GetInt(o, "packs", rules.StartPacks),
+                WinStreak = MiniJson.GetInt(o, "winStreak", 0),
                 PacksOpened = MiniJson.GetInt(o, "packsOpened", 0),
                 GrandClaimed = MiniJson.GetBool(o, "grandClaimed", false),
                 RaceWeek = MiniJson.GetInt(o, "raceWeek", -1),
@@ -146,8 +194,31 @@ namespace EmberThrone.Core
                 EventClaimed = MiniJson.GetInt(o, "eventClaimed", 0),
                 EventDoneAt = ParseLong(MiniJson.GetString(o, "eventDoneAt", "0")),
                 ScenesSeen = MiniJson.GetInt(o, "scenesSeen", 0),
+                StarterBought = MiniJson.GetBool(o, "starterBought", false),
+                StarterShown = MiniJson.GetBool(o, "starterShown", false),
+                PiggyCoins = MiniJson.GetInt(o, "piggy", 0),
+                PassMonth = MiniJson.GetInt(o, "passMonth", -1),
+                PassPoints = MiniJson.GetInt(o, "passPoints", 0),
+                PassFreeClaimed = MiniJson.GetInt(o, "passFree", 0),
+                PassPremiumClaimed = MiniJson.GetInt(o, "passPremium", 0),
+                PassPremiumMonth = MiniJson.GetInt(o, "passPremiumMonth", -1),
+                LadderDay = MiniJson.GetInt(o, "ladderDay", -1),
+                LadderWins = MiniJson.GetInt(o, "ladderWins", 0),
+                LadderClaimed = MiniJson.GetBool(o, "ladderClaimed", false),
+                ChestWeek = MiniJson.GetInt(o, "chestWeek", -1),
+                ChestWins = MiniJson.GetInt(o, "chestWins", 0),
+                ChestClaimed = MiniJson.GetInt(o, "chestClaimed", 0),
+                RestoreSeeded = MiniJson.GetBool(o, "restoreSeeded", false),
             };
             p.TeamHelped = ReadInts(o, "teamHelped");
+            var contest = MiniJson.GetStringArray(o, "contest");
+            if (contest != null) p.Contest = Array.ConvertAll(contest, ParseLong);
+            var purchases = MiniJson.GetStringArray(o, "purchases");
+            if (purchases != null) p.Purchases.AddRange(purchases);
+            p.RestoreLevels = ReadInts(o, "restoreLevels");
+            p.RestoreStars = ReadInts(o, "restoreStars");
+            p.RestoreBoosters = ReadInts(o, "restoreBoosters");
+            p.RestoreClaimed = ReadInts(o, "restoreClaimed");
             p.Cards = ReadInts(o, "cards");
             p.SetsClaimed = Array.ConvertAll(ReadInts(o, "setsClaimed"), v => v != 0);
             var boosters = ReadInts(o, "boosters");

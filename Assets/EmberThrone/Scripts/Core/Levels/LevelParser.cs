@@ -14,7 +14,7 @@ namespace EmberThrone.Core
         public const int MinSize = 3;
         public const int MaxWidth = 12;
         public const int MaxHeight = 14;
-        public const int MaxGoals = 3;
+        public const int MaxGoals = 4;
 
         public static LevelDefinition FromJson(string json)
         {
@@ -34,7 +34,8 @@ namespace EmberThrone.Core
                     MiniJson.GetStringArray(root, "board") ?? throw new LevelFormatException("'board' is required"),
                     MiniJson.GetStringArray(root, "floor"),
                     MiniJson.GetStringArray(root, "cover"),
-                    MiniJson.GetStringArray(root, "spawners"));
+                    MiniJson.GetStringArray(root, "spawners"),
+                    MiniJson.GetStringArray(root, "frost"));
 
                 level.Id = MiniJson.GetInt(root, "id", 0);
                 level.Name = MiniJson.GetString(root, "name", "");
@@ -83,7 +84,7 @@ namespace EmberThrone.Core
             }
         }
 
-        public static LevelDefinition FromLayers(string[] board, string[] floor = null, string[] cover = null, string[] spawners = null)
+        public static LevelDefinition FromLayers(string[] board, string[] floor = null, string[] cover = null, string[] spawners = null, string[] frost = null)
         {
             var rows = Normalize(board, "board");
             int height = rows.Length;
@@ -94,6 +95,8 @@ namespace EmberThrone.Core
             var floorRows = floor == null ? null : Normalize(floor, "floor");
             var coverRows = cover == null ? null : Normalize(cover, "cover");
             var spawnRows = spawners == null ? null : Normalize(spawners, "spawners");
+            var frostRows = frost == null ? null : Normalize(frost, "frost");
+            CheckSize(frostRows, width, height, "frost");
             CheckSize(floorRows, width, height, "floor");
             CheckSize(coverRows, width, height, "cover");
             CheckSize(spawnRows, width, height, "spawners");
@@ -108,6 +111,12 @@ namespace EmberThrone.Core
                     if (floorRows != null) spec.Floor = ParseDigit(floorRows[row][x], "floor", x, y);
                     if (coverRows != null) spec.Cover = ParseDigit(coverRows[row][x], "cover", x, y);
                     if (spawnRows != null) spec.Spawner = ParseSpawner(spawnRows[row][x], x, y);
+                    if (frostRows != null && ParseDigit(frostRows[row][x], "frost", x, y) > 0)
+                    {
+                        if (spec.Cover > 0) throw new LevelFormatException("Frost and cover on the same cell at " + new GridPos(x, y));
+                        spec.Frost = true;
+                        spec.Cover = 1;
+                    }
                     if (!spec.Exists && (spec.Floor > 0 || spec.Cover > 0 || spec.Spawner))
                         throw new LevelFormatException("Layer data on a hole at " + new GridPos(x, y));
                     if (spec.Cover > 0 && !CanHaveCover(spec))
@@ -115,6 +124,8 @@ namespace EmberThrone.Core
                     level.Cells[y * width + x] = spec;
                 }
             }
+
+            GroupStatues(level);
 
             if (spawnRows == null)
             {
@@ -129,6 +140,30 @@ namespace EmberThrone.Core
                 }
             }
             return level;
+        }
+
+        static void GroupStatues(LevelDefinition level)
+        {
+            int next = 1;
+            for (int y = level.Height - 1; y >= 0; y--)
+            {
+                for (int x = 0; x < level.Width; x++)
+                {
+                    int i = y * level.Width + x;
+                    if (level.Cells[i].Kind != PieceKind.Statue || level.Cells[i].Content != CellContent.Fixed || level.Cells[i].Group > 0) continue;
+                    if (x + 1 >= level.Width || y - 1 < 0 || !IsFreeStatue(level, x + 1, y) || !IsFreeStatue(level, x, y - 1) || !IsFreeStatue(level, x + 1, y - 1))
+                        throw new LevelFormatException("A statue must fill a 2x2 square at " + new GridPos(x, y));
+                    foreach (var (dx, dy) in new[] { (0, 0), (1, 0), (0, -1), (1, -1) })
+                        level.Cells[(y + dy) * level.Width + x + dx].Group = next;
+                    next++;
+                }
+            }
+        }
+
+        static bool IsFreeStatue(LevelDefinition level, int x, int y)
+        {
+            var c = level.Cells[y * level.Width + x];
+            return c.Content == CellContent.Fixed && c.Kind == PieceKind.Statue && c.Group == 0;
         }
 
         static bool CanHaveCover(CellSpec s)
@@ -173,6 +208,9 @@ namespace EmberThrone.Core
                 case '^': s.Kind = PieceKind.Homing; return s;
                 case '@': s.Kind = PieceKind.ColorBomb; return s;
                 case '$': s.Kind = PieceKind.Collectible; return s;
+                case 'L': s.Kind = PieceKind.Lamp; s.Hp = PieceKind.Lamp.StartHp(); return s;
+                case 'F': s.Kind = PieceKind.Planter; s.Hp = PieceKind.Planter.StartHp(); return s;
+                case 'S': s.Kind = PieceKind.Statue; s.Hp = PieceKind.Statue.StartHp(); return s;
             }
             if (t >= '1' && t <= '9')
             {
@@ -213,6 +251,9 @@ namespace EmberThrone.Core
                 case "floor": return GoalType.Floor;
                 case "cover": return GoalType.Cover;
                 case "collectible": return GoalType.Collectible;
+                case "lamp": return GoalType.Lamp;
+                case "flower": return GoalType.Flower;
+                case "statue": return GoalType.Statue;
                 default: throw new LevelFormatException("Unknown goal type '" + s + "'");
             }
         }
@@ -266,7 +307,7 @@ namespace EmberThrone.Core
             }
             root["goals"] = goals;
 
-            bool hasFloor = false, hasCover = false, customSpawners = false;
+            bool hasFloor = false, hasCover = false, hasFrost = false, customSpawners = false;
             for (int x = 0; x < level.Width; x++)
             {
                 int top = -1;
@@ -278,14 +319,16 @@ namespace EmberThrone.Core
                 {
                     var c = level.GetCell(x, y);
                     hasFloor |= c.Floor > 0;
-                    hasCover |= c.Cover > 0;
+                    hasCover |= c.Cover > 0 && !c.Frost;
+                    hasFrost |= c.Frost;
                     if (c.Spawner != (y == top)) customSpawners = true;
                 }
             }
 
             root["board"] = Rows(level, BoardToken);
             if (hasFloor) root["floor"] = Rows(level, c => Digit(c.Floor));
-            if (hasCover) root["cover"] = Rows(level, c => Digit(c.Cover));
+            if (hasCover) root["cover"] = Rows(level, c => Digit(c.Frost ? 0 : c.Cover));
+            if (hasFrost) root["frost"] = Rows(level, c => c.Frost ? '1' : '.');
             if (customSpawners) root["spawners"] = Rows(level, c => c.Spawner ? 'S' : '.');
 
             if (level.Collectibles != null)
@@ -335,6 +378,9 @@ namespace EmberThrone.Core
                 case PieceKind.ColorBomb: return '@';
                 case PieceKind.Collectible: return '$';
                 case PieceKind.Box: return (char)('0' + Math.Max(1, Math.Min(9, hp)));
+                case PieceKind.Lamp: return 'L';
+                case PieceKind.Planter: return 'F';
+                case PieceKind.Statue: return 'S';
                 default: return '?';
             }
         }

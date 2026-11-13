@@ -126,7 +126,7 @@
       ]
     },
     {
-      "file": "soft_pieces.png",
+      "file": "soft_pieces_world.png",
       "grid": [
         3,
         2
@@ -137,7 +137,7 @@
           "out": [
             {
               "path": "Assets/EmberThrone/Resources/Board/piece_R.png",
-              "fill": 0.8
+              "fill": 0.84
             }
           ]
         },
@@ -145,17 +145,8 @@
           "keepHoles": true,
           "out": [
             {
-              "path": "Assets/EmberThrone/Resources/Board/piece_G.png",
-              "fill": 0.8
-            }
-          ]
-        },
-        {
-          "keepHoles": true,
-          "out": [
-            {
-              "path": "Assets/EmberThrone/Resources/Board/piece_B.png",
-              "fill": 0.88
+              "path": "Assets/EmberThrone/Resources/Board/piece_O.png",
+              "fill": 0.86
             }
           ]
         },
@@ -172,8 +163,17 @@
           "keepHoles": true,
           "out": [
             {
-              "path": "Assets/EmberThrone/Resources/Board/piece_P.png",
-              "fill": 0.76
+              "path": "Assets/EmberThrone/Resources/Board/piece_G.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": false,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/piece_B.png",
+              "fill": 0.88
             }
           ]
         },
@@ -181,8 +181,8 @@
           "keepHoles": true,
           "out": [
             {
-              "path": "Assets/EmberThrone/Resources/Board/piece_O.png",
-              "fill": 0.8
+              "path": "Assets/EmberThrone/Resources/Board/piece_P.png",
+              "fill": 0.86
             }
           ]
         }
@@ -1316,6 +1316,374 @@
           ]
         }
       ]
+    },
+    {
+      "file": "soft_emby_moods.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/mascot_worry.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/mascot_panic.png",
+              "fill": 0.9
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/mascot_wow.png",
+              "fill": 0.9
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/mascot_calm.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/bo_brush.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Chrome/booster_slot.png",
+              "fill": 0.96
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_obstacles_more.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "loose": 11,
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_lamp.png",
+              "fill": 0.84
+            }
+          ]
+        },
+        {
+          "loose": 40,
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_lamp_lit.png",
+              "fill": 0.84
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_planter.png",
+              "fill": 0.86
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_flower.png",
+              "fill": 0.84
+            }
+          ],
+          "loose": 40
+        },
+        {
+          "glass": 0.62,
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_statue.png",
+              "fill": 0.94
+            }
+          ]
+        },
+        {
+          "glass": 0.62,
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/Board/ob_statue_cracked.png",
+              "fill": 0.94
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_shop_icons.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_piggy.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_pass.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_starter.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_coins_pile.png",
+              "fill": 0.9
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_gems_pile.png",
+              "fill": 0.9
+            }
+          ]
+        },
+        {
+          "loose": 11,
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_booster_crate.png",
+              "fill": 0.9
+            }
+          ],
+          "erase": [
+            [
+              0,
+              0,
+              0.04,
+              1
+            ],
+            [
+              0.96,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.03
+            ],
+            [
+              0,
+              0.97,
+              1,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "file": "soft_event_icons.png",
+      "grid": [
+        3,
+        2
+      ],
+      "cells": [
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_rush.png",
+              "fill": 0.88
+            }
+          ],
+          "soft": {
+            "to": 110,
+            "boxes": [
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.62
+              ],
+              [
+                0.0,
+                0.0,
+                0.45,
+                1.0
+              ]
+            ]
+          }
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_lantern_race.png",
+              "fill": 0.88
+            }
+          ],
+          "loose": 38
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_ladder.png",
+              "fill": 0.88
+            }
+          ],
+          "loose": 11,
+          "erase": [
+            [
+              0,
+              0,
+              0.03,
+              1
+            ],
+            [
+              0.97,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.03
+            ],
+            [
+              0,
+              0.97,
+              1,
+              1
+            ]
+          ],
+          "soft": {
+            "to": 110,
+            "boxes": [
+              [
+                0.3,
+                0.0,
+                0.82,
+                0.36
+              ]
+            ]
+          }
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_team_chest.png",
+              "fill": 0.88
+            }
+          ],
+          "loose": 14,
+          "erase": [
+            [
+              0,
+              0,
+              0.03,
+              1
+            ],
+            [
+              0.97,
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              1,
+              0.03
+            ],
+            [
+              0,
+              0.97,
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "keepHoles": false,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_trophy_flame.png",
+              "fill": 0.88
+            }
+          ]
+        },
+        {
+          "keepHoles": true,
+          "out": [
+            {
+              "path": "Assets/EmberThrone/Resources/UI/Art/ic_lanterns.png",
+              "fill": 0.88
+            }
+          ],
+          "loose": 38
+        }
+      ]
     }
   ],
   "images": [
@@ -1345,12 +1713,7 @@
     },
     {
       "file": "soft_home.png",
-      "out": [
-        {
-          "path": "Assets/EmberThrone/Resources/UI/Art/bg_home.jpg",
-          "width": 1152
-        }
-      ]
+      "out": []
     },
     {
       "file": "soft_loading.png",

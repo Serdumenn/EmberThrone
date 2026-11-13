@@ -61,7 +61,7 @@ static class Program
         }
 
         Console.WriteLine($"policy={policyName} mistakes={mistakes} runs={runs} seed={seed}");
-        Console.WriteLine($"{"level",-6} {"name",-22} {"moves",5} {"win%",6} {"left",5} {"lossProg",8} {"spec",5} {"shuf",5} {"time",6}");
+        Console.WriteLine($"{"level",-6} {"name",-22} {"moves",5} {"win%",6} {"left",5} {"lossProg",8} {"near",5} {"spec",5} {"shuf",5} {"time",6}");
         int errorCount = 0;
         foreach (var file in files)
         {
@@ -160,8 +160,8 @@ static class Program
     {
         string name = level.Name.Length > 22 ? level.Name.Substring(0, 22) : level.Name;
         return string.Format(CultureInfo.InvariantCulture,
-            "{0,-6} {1,-22} {2,5} {3,6:0.0} {4,5:0.0} {5,8:0%} {6,5:0.0} {7,5:0.00} {8,5:0.0}s{9}",
-            level.Id, name, level.Moves, r.WinRate * 100, r.AvgMovesLeftOnWin, r.AvgGoalProgressOnLoss,
+            "{0,-6} {1,-22} {2,5} {3,6:0.0} {4,5:0.0} {5,8:0%} {6,5:0%} {7,5:0.0} {8,5:0.00} {9,5:0.0}s{10}",
+            level.Id, name, level.Moves, r.WinRate * 100, r.AvgMovesLeftOnWin, r.AvgGoalProgressOnLoss, r.NearLossRate,
             r.AvgSpecialsCreated, r.AvgShuffles, seconds, r.Errors.Count > 0 ? "  ERRORS=" + r.Errors.Count : "");
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using EmberThrone.Core;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,6 +11,10 @@ namespace EmberThrone.Game
         Label _lifeText;
         Label _coins;
         Label _gems;
+        Label _warn;
+        int _heldCoins;
+        int _heldGems;
+        int _heldLives;
 
         public VisualElement Root { get; private set; }
         public Button LivesPill { get; private set; }
@@ -20,6 +25,8 @@ namespace EmberThrone.Game
         public string LifeTimerText => _lifeText.text;
         public string CoinsText => _coins.text;
         public string GemsText => _gems.text;
+        public bool CapWarningShown => !_warn.ClassListContains(Ui.Hidden);
+        public bool Holding => _heldCoins > 0 || _heldGems > 0 || _heldLives > 0;
 
         public static TopBar Create(VisualElement parent, Action onLives, Action onCoins, Action onSettings)
         {
@@ -34,6 +41,7 @@ namespace EmberThrone.Game
             LivesPill = Pill("Lives", "et-ic--heart", onLives, true, out _lifeText);
             _lifeCount = Ui.Text("", "et-outlined et-pill__count", LivesPill, "Count");
             CoinsPill = Pill("Coins", "et-ic--coin", onCoins, true, out _coins);
+            _warn = Ui.Text("Harca!", "et-tag et-outlined et-pill__warn " + Ui.Hidden, CoinsPill, "Warn");
             GemsPill = Pill("Gems", "et-ic--gem", onCoins, false, out _gems);
             SettingsButton = Ui.Button(null, "et-ring et-pressable et-topbar__gear", onSettings, Root, "SettingsButton");
             Ui.El("et-icon et-topbar__gear-icon et-ic--gear", SettingsButton);
@@ -53,13 +61,45 @@ namespace EmberThrone.Game
             return pill;
         }
 
+        public VisualElement TargetOf(RewardKind kind)
+        {
+            switch (kind)
+            {
+                case RewardKind.Coins: return CoinsPill;
+                case RewardKind.Gems: return GemsPill;
+                case RewardKind.Life: return LivesPill;
+                default: return null;
+            }
+        }
+
+        public void Hold(RewardKind kind, int amount)
+        {
+            if (amount <= 0) return;
+            if (kind == RewardKind.Coins) _heldCoins += amount;
+            else if (kind == RewardKind.Gems) _heldGems += amount;
+            else if (kind == RewardKind.Life) _heldLives += amount;
+            Refresh();
+        }
+
+        public void Release(RewardKind kind, int amount)
+        {
+            if (kind == RewardKind.Coins) _heldCoins = Mathf.Max(0, _heldCoins - amount);
+            else if (kind == RewardKind.Gems) _heldGems = Mathf.Max(0, _heldGems - amount);
+            else if (kind == RewardKind.Life) _heldLives = Mathf.Max(0, _heldLives - amount);
+            Refresh();
+            var pill = TargetOf(kind);
+            if (pill != null) Popup.Bump(pill, 0.12f, 0.14f);
+        }
+
         public void Refresh()
         {
             var economy = Meta.Economy;
-            _lifeCount.text = economy.Lives.ToString();
-            _lifeText.text = economy.LivesFull ? "Dolu" : Meta.Countdown(economy.SecondsToNextLife(Meta.Now));
-            _coins.text = economy.Coins.ToString();
-            _gems.text = economy.Gems.ToString();
+            _lifeCount.text = Mathf.Max(0, economy.Lives - _heldLives).ToString();
+            _lifeText.text = economy.LivesFull && _heldLives == 0 ? "Dolu" : Meta.Countdown(economy.SecondsToNextLife(Meta.Now));
+            _coins.text = Mathf.Max(0, economy.Coins - _heldCoins).ToString();
+            _gems.text = Mathf.Max(0, economy.Gems - _heldGems).ToString();
+            var rules = economy.Rules;
+            _warn.EnableInClassList(Ui.Hidden, economy.Coins * 100L < (long)rules.CoinCap * rules.CoinWarnPercent);
         }
     }
 
@@ -75,21 +115,67 @@ namespace EmberThrone.Game
         public Button GiftButton { get; private set; }
         public Button QuestsButton { get; private set; }
         public EventButton Event { get; private set; }
+        public VisualElement RightSide { get; private set; }
+        public Button RestoreButton { get; private set; }
+        public Button PassButton { get; private set; }
+        public string PassText => _passText.text;
+        public string PassBadgeText => _passBadge.ClassListContains(Ui.Hidden) ? "" : _passBadge.text;
+        Label _passText;
+        Label _passBadge;
+        public string RestoreText => _restoreText.text;
+        public string RestoreBadgeText => _restoreBadge.ClassListContains(Ui.Hidden) ? "" : _restoreBadge.text;
+
+        Label _restoreText;
+        Label _restoreBadge;
+        Label _rushText;
+        Label _rushBadge;
+        Label _lanternText;
+        Label _lanternBadge;
+        Label _ladderText;
+        Label _ladderBadge;
+        Func<int> _focus;
+        Func<int> _levelsWon;
+
+        public Button RushButton { get; private set; }
+        public Button LanternButton { get; private set; }
+        public Button LadderButton { get; private set; }
+        public Button ContestButton(ContestKind kind) => kind == ContestKind.Rush ? RushButton : LanternButton;
+        public bool ContestShown(ContestKind kind) => !ContestButton(kind).ClassListContains(Ui.Hidden);
+        public string ContestText(ContestKind kind) => (kind == ContestKind.Rush ? _rushText : _lanternText).text;
+        public string ContestBadgeText(ContestKind kind)
+        {
+            var badge = kind == ContestKind.Rush ? _rushBadge : _lanternBadge;
+            return badge.ClassListContains(Ui.Hidden) ? "" : badge.text;
+        }
+        public bool LadderShown => !LadderButton.ClassListContains(Ui.Hidden);
+        public string LadderText => _ladderText.text;
+        public string LadderBadgeText => _ladderBadge.ClassListContains(Ui.Hidden) ? "" : _ladderBadge.text;
         public bool GiftBadgeShown => !_giftBadge.ClassListContains(Ui.Hidden);
         public string QuestBadgeText => _questBadge.ClassListContains(Ui.Hidden) ? "" : _questBadge.text;
 
-        public static LobbyBar Create(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent)
+        public static LobbyBar Create(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent, Action onRestore, Action onPass, Action<ContestKind> onContest, Action onLadder, Func<int> focus, Func<int> levelsWon)
         {
-            var bar = new LobbyBar();
-            bar.Build(parent, playLabel, onPlay, onWorld, onGift, onQuests, onEvent);
+            var bar = new LobbyBar { _focus = focus, _levelsWon = levelsWon };
+            bar.Build(parent, playLabel, onPlay, onWorld, onGift, onQuests, onEvent, onRestore, onPass, onContest, onLadder);
             return bar;
         }
 
-        void Build(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent)
+        void Build(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent, Action onRestore, Action onPass, Action<ContestKind> onContest, Action onLadder)
         {
             Side = Ui.El("et-side", parent, "Side");
             GiftButton = Ring(Side, "Gift", "et-ic--gift", "et-side__button", null, onGift, out _giftBadge);
             Event = EventButton.Create(Side, onEvent);
+            RushButton = Ring(Side, "Rush", "et-ic--rush", "et-side__button et-side__button--event", null, () => onContest(ContestKind.Rush), out _rushBadge);
+            _rushText = Ui.Text("", "et-chip et-caption et-side__chip", RushButton, "Progress");
+            LadderButton = Ring(Side, "Ladder", "et-ic--ladder", "et-side__button et-side__button--event", null, onLadder, out _ladderBadge);
+            _ladderText = Ui.Text("", "et-chip et-caption et-side__chip", LadderButton, "Progress");
+            RightSide = Ui.El("et-side et-side--right", parent, "RightSide");
+            RestoreButton = Ring(RightSide, "Restore", "et-ic--hammer", "et-side__button et-side__button--event", null, onRestore, out _restoreBadge);
+            _restoreText = Ui.Text("", "et-chip et-caption et-side__chip", RestoreButton, "Progress");
+            PassButton = Ring(RightSide, "Pass", "et-ic--pass", "et-side__button et-side__button--event", null, onPass, out _passBadge);
+            _passText = Ui.Text("", "et-chip et-caption et-side__chip", PassButton, "Progress");
+            LanternButton = Ring(RightSide, "Lantern", "et-ic--lantern-race", "et-side__button et-side__button--event", null, () => onContest(ContestKind.Lantern), out _lanternBadge);
+            _lanternText = Ui.Text("", "et-chip et-caption et-side__chip", LanternButton, "Progress");
 
             Root = Ui.El("et-lobby", parent, "Lobby");
             WorldButton = Ring(Root, "World", "et-ic--world", "et-lobby__ring", "Dünya", onWorld, out _);
@@ -115,6 +201,7 @@ namespace EmberThrone.Game
         {
             Root.EnableInClassList(Ui.Hidden, !shown);
             Side.EnableInClassList(Ui.Hidden, !shown);
+            RightSide.EnableInClassList(Ui.Hidden, !shown);
         }
 
         public void Refresh()
@@ -126,6 +213,37 @@ namespace EmberThrone.Game
             _questBadge.text = claimable.ToString();
             _questBadge.EnableInClassList(Ui.Hidden, claimable <= 0);
             Event.Refresh();
+            int district = _focus();
+            var restore = Meta.Restore;
+            _restoreText.text = restore.ClaimedCount(district) + "/" + restore.Tasks(district).Length;
+            int repairs = restore.Claimable(district);
+            _restoreBadge.text = repairs.ToString();
+            _restoreBadge.EnableInClassList(Ui.Hidden, repairs <= 0);
+            _passText.text = economy.PassReached(now) + "/" + Meta.Rules.Store.PassTrack.Length;
+            int passes = economy.PassClaimable(now);
+            _passBadge.text = passes.ToString();
+            _passBadge.EnableInClassList(Ui.Hidden, passes <= 0);
+
+            var contests = Meta.Contests;
+            int won = _levelsWon();
+            RefreshContest(contests, ContestKind.Rush, RushButton, _rushText, _rushBadge, won, now);
+            RefreshContest(contests, ContestKind.Lantern, LanternButton, _lanternText, _lanternBadge, won, now);
+            LadderButton.EnableInClassList(Ui.Hidden, !contests.LadderUnlocked(won));
+            _ladderText.text = contests.LadderWins(now) + "/" + contests.Rules.LadderTarget;
+            _ladderBadge.text = "!";
+            _ladderBadge.EnableInClassList(Ui.Hidden, !contests.LadderClaimable(now));
+        }
+
+        static void RefreshContest(Contests contests, ContestKind kind, Button button, Label text, Label badge, int won, long now)
+        {
+            button.EnableInClassList(Ui.Hidden, !contests.Unlocked(kind, won));
+            bool over = contests.Over(kind, now);
+            if (over) text.text = "Bitti";
+            else if (contests.Running(kind, now)) text.text = Meta.Span(contests.SecondsLeft(kind, now));
+            else if (contests.CanStart(kind, now)) text.text = "Başla";
+            else text.text = Meta.Span(contests.SecondsLeft(kind, now));
+            badge.text = "!";
+            badge.EnableInClassList(Ui.Hidden, !over);
         }
     }
 

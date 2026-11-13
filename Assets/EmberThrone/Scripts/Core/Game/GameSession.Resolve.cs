@@ -100,7 +100,7 @@ namespace EmberThrone.Core
                     var n = Neighbor(p, d);
                     if (!_board.Exists(n) || g.Contains(n) || !done.Add(n)) continue;
                     var cell = _board.CellAt(n);
-                    if (cell.Piece != null && cell.Piece.Kind == PieceKind.Box && cell.Cover == 0)
+                    if (cell.Piece != null && cell.Piece.Kind.IsBlocker() && cell.Cover == 0)
                         DamageBlocker(n, cell, ClearReason.Match);
                 }
             }
@@ -137,6 +137,11 @@ namespace EmberThrone.Core
         {
             if (cell.Cover <= 0) return;
             cell.Cover--;
+            if (cell.Cover == 0 && cell.Frost)
+            {
+                cell.Frost = false;
+                _frostBroken = true;
+            }
             Emit(new CoverDamagedEvent(p, cell.Cover));
             if (cell.Cover == 0) Progress(GoalType.Cover, GemColor.None, p);
         }
@@ -144,15 +149,32 @@ namespace EmberThrone.Core
         void DamageBlocker(GridPos p, Cell cell, ClearReason reason)
         {
             var piece = cell.Piece;
+            if (piece.Kind == PieceKind.Statue && !_blockerHits.Add(piece.Id)) return;
             piece.Hp--;
+            if (piece.Kind == PieceKind.Planter) Progress(GoalType.Flower, GemColor.None, p);
             if (piece.Hp > 0)
             {
                 Emit(new PieceDamagedEvent(piece.Id, p, piece.Hp));
                 return;
             }
-            cell.Piece = null;
-            Emit(new PieceClearedEvent(piece.Id, p, piece.Kind, piece.Color, reason));
-            Progress(GoalType.Box, GemColor.None, p);
+            var at = p;
+            if (piece.Kind == PieceKind.Statue)
+            {
+                var cells = _board.CellsOf(piece);
+                at = cells[0];
+                foreach (var q in cells) _board.CellAt(q).Piece = null;
+            }
+            else
+            {
+                cell.Piece = null;
+            }
+            Emit(new PieceClearedEvent(piece.Id, at, piece.Kind, piece.Color, reason));
+            switch (piece.Kind)
+            {
+                case PieceKind.Box: Progress(GoalType.Box, GemColor.None, at); break;
+                case PieceKind.Lamp: Progress(GoalType.Lamp, GemColor.None, at); break;
+                case PieceKind.Statue: Progress(GoalType.Statue, GemColor.None, at); break;
+            }
         }
 
         void Hit(GridPos p, ClearReason reason, List<Activation> next)
@@ -177,6 +199,9 @@ namespace EmberThrone.Core
                     DamageFloor(p, cell);
                     return;
                 case PieceKind.Box:
+                case PieceKind.Lamp:
+                case PieceKind.Planter:
+                case PieceKind.Statue:
                     DamageBlocker(p, cell, reason);
                     return;
                 case PieceKind.Collectible:
@@ -412,6 +437,12 @@ namespace EmberThrone.Core
             {
                 case PieceKind.Box:
                     return GoalActive(GoalType.Box) ? 100 : 30;
+                case PieceKind.Lamp:
+                    return GoalActive(GoalType.Lamp) ? 100 : 30;
+                case PieceKind.Planter:
+                    return GoalActive(GoalType.Flower) ? 100 : 30;
+                case PieceKind.Statue:
+                    return GoalActive(GoalType.Statue) ? 100 : 30;
                 case PieceKind.Collectible:
                     return 0;
                 case PieceKind.Gem:

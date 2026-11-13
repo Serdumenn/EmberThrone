@@ -25,33 +25,34 @@ namespace EmberThrone.Game
         VisualElement _movesPanel;
 
         public VisualElement Root { get; private set; }
-        public Button HomeButton { get; private set; }
+        public EmbyPortrait Emby { get; private set; }
         public VisualElement MovesPanel => _movesPanel;
         public VisualElement GoalSlotOf(int index) => _slots[index].Root;
         public string MovesText => _moves.text;
         public string GoalText(int index) => _slots[index].Count.text;
         public bool GoalChecked(int index) => !_slots[index].Check.ClassListContains(Ui.Hidden);
 
-        public static HudView Create(VisualElement parent, GameSession session, string levelLabel, Action onBack)
+        public static HudView Create(VisualElement parent, GameSession session, string levelLabel)
         {
             var hud = new HudView();
-            hud.Build(parent, session, levelLabel, onBack);
+            hud.Build(parent, session, levelLabel);
             return hud;
         }
 
-        void Build(VisualElement parent, GameSession session, string levelLabel, Action onBack)
+        void Build(VisualElement parent, GameSession session, string levelLabel)
         {
             Root = Ui.El("et-hud", parent, "Hud");
             Root.style.height = Height;
 
             var left = Ui.El("et-hud__left", Root);
-            HomeButton = Ui.Button(null, "et-ring et-pressable", onBack, left, "Home");
-            Ui.El("et-icon et-hud__home-icon", HomeButton);
+            Emby = new EmbyPortrait(left);
             Ui.Text(levelLabel, "et-chip et-caption et-hud__level", left, "Level");
 
             var goals = Ui.El("et-panel et-hud__goals", Root, "Goals");
+            goals.EnableInClassList("et-hud__goals--four", session.Goals.Count >= 4);
             Ui.Text("Hedefler", "et-tag et-outlined", goals);
-            foreach (var goal in session.Goals) _slots.Add(BuildSlot(goals, goal));
+            FrostIcons = CoversAreFrost(session.Board);
+            foreach (var goal in session.Goals) _slots.Add(BuildSlot(goals, goal, FrostIcons));
 
             _movesPanel = Ui.El("et-panel et-hud__moves", Root, "Moves");
             Ui.Text("Hamle", "et-tag et-outlined", _movesPanel);
@@ -61,29 +62,57 @@ namespace EmberThrone.Game
             for (int i = 0; i < session.Goals.Count; i++) SetGoal(i, session.Goals[i].Remaining, false);
         }
 
-        static GoalSlot BuildSlot(VisualElement parent, Goal goal)
+        public bool FrostIcons { get; private set; }
+
+        static GoalSlot BuildSlot(VisualElement parent, Goal goal, bool frost)
         {
             var s = new GoalSlot { Root = Ui.El("et-goal", parent, "Goal") };
-            Ui.Image(GoalSprite(goal), "et-fill", s.Root);
+            Ui.Image(GoalSprite(goal, frost), "et-fill", s.Root);
             s.Count = Ui.Text("", "et-outlined et-goal__count", s.Root, "Count");
             s.Check = Ui.El("et-check et-goal__check", s.Root, "Check");
             return s;
         }
 
-        public static Sprite GoalSprite(Goal goal)
+        public static Sprite GoalSprite(Goal goal, bool frost = false)
         {
             switch (goal.Type)
             {
                 case GoalType.Color: return Art.Gem(goal.Color);
                 case GoalType.Box: return Art.Box(1);
                 case GoalType.Floor: return Art.Floor(1);
-                case GoalType.Cover: return Art.Cover(2);
+                case GoalType.Cover: return frost ? Art.FrostIcon() : Art.Cover(2);
+                case GoalType.Lamp: return Art.Lamp(1);
+                case GoalType.Flower: return Art.Flower();
+                case GoalType.Statue: return Art.Statue(4);
                 default: return Art.Collectible();
             }
         }
 
+        public static bool HasFrost(Board board)
+        {
+            for (int y = 0; y < board.Height; y++)
+                for (int x = 0; x < board.Width; x++)
+                    if (board.CellAt(x, y).Frost) return true;
+            return false;
+        }
+
+        public static bool CoversAreFrost(Board board)
+        {
+            bool frost = false;
+            for (int y = 0; y < board.Height; y++)
+                for (int x = 0; x < board.Width; x++)
+                {
+                    var c = board.CellAt(x, y);
+                    if (c.Cover <= 0) continue;
+                    if (!c.Frost) return false;
+                    frost = true;
+                }
+            return frost;
+        }
+
         public void SetMoves(int moves, bool animate = true)
         {
+            Emby?.SetMoves(moves);
             string text = moves.ToString();
             bool changed = _moves.text != text;
             _moves.text = text;

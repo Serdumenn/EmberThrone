@@ -39,11 +39,13 @@ namespace EmberThrone.Core
                     }
                     if (c.Floor < 0 || c.Cover < 0) errors.Add("Negative layer HP at " + p);
                     if (c.Cover > 0 && c.Piece == null) errors.Add("Cover without piece at " + p);
+                    if (c.Frost && c.Cover != 1) errors.Add("Frost must be a single layer at " + p);
                     if (c.Piece == null) continue;
-                    if (!ids.Add(c.Piece.Id)) errors.Add("Duplicate piece id " + c.Piece.Id + " at " + p);
+                    if (!ids.Add(c.Piece.Id) && c.Piece.Kind != PieceKind.Statue) errors.Add("Duplicate piece id " + c.Piece.Id + " at " + p);
                     if (c.Piece.Kind == PieceKind.Gem && (c.Piece.Color < 0 || c.Piece.Color >= GemColor.Count)) errors.Add("Bad gem color at " + p);
                     if (c.Piece.Kind != PieceKind.Gem && c.Piece.Color != GemColor.None) errors.Add("Colored non-gem at " + p);
-                    if (c.Piece.Kind == PieceKind.Box && c.Piece.Hp <= 0) errors.Add("Dead box at " + p);
+                    if (c.Piece.Kind.IsBlocker() && c.Piece.Hp <= 0) errors.Add("Dead blocker at " + p);
+                    if (c.Piece.Kind == PieceKind.Statue && b.CellsOf(c.Piece).Count != 4) errors.Add("Broken statue at " + p);
                     if (c.Piece.Triggered) errors.Add("Piece left triggered at " + p);
                     if (settled && c.Piece.Kind == PieceKind.Collectible && c.Cover == 0 && b.IsExit(x, y)) errors.Add("Uncollected collectible at " + p);
                 }

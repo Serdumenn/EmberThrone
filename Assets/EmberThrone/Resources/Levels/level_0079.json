@@ -1,0 +1,34 @@
+{
+  "id": 79,
+  "name": "High Pass",
+  "moves": 29,
+  "colors": 5,
+  "difficulty": "normal",
+  "goals": [
+    {
+      "type": "collectible"
+    },
+    {
+      "type": "color",
+      "color": "Y",
+      "count": 35
+    }
+  ],
+  "board": [
+    "..$.$....",
+    ".........",
+    "#.......#",
+    ".........",
+    ".........",
+    ".........",
+    "#.......#",
+    ".........",
+    ".........",
+    "........."
+  ],
+  "collectibles": {
+    "total": 3,
+    "maxOnBoard": 2,
+    "spawnChance": 0.15
+  }
+}

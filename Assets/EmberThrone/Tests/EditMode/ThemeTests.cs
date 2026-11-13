@@ -143,6 +143,37 @@ namespace EmberThrone.Core.Tests
         }
 
         [Test]
+        public void EveryDistrict_HasItsRestoreArt_AndTenLevels()
+        {
+            var rules = new RestoreRules();
+            var folder = Path.Combine(UiFolder, "Restore");
+            var layout = MiniJson.AsObject(MiniJson.Parse(File.ReadAllText(Path.Combine(folder, "restore.json"))), "restore");
+            MiniJson.TryGet(layout, "districts", out var raw);
+            var districts = MiniJson.AsArray(raw, "districts");
+            Assert.AreEqual(rules.Areas.Length, districts.Count, "one diorama per district");
+            for (int d = 0; d < districts.Count; d++)
+            {
+                var district = MiniJson.AsObject(districts[d], "district");
+                foreach (var key in new[] { "warm", "frozen" })
+                {
+                    string name = MiniJson.GetString(district, key, "");
+                    Assert.IsTrue(File.Exists(Path.Combine(folder, name + ".jpg")), "missing Restore/" + name + ".jpg");
+                }
+                MiniJson.TryGet(district, "areas", out var areasRaw);
+                var areas = MiniJson.AsArray(areasRaw, "areas");
+                Assert.AreEqual(rules.Areas[d].Tasks.Length, areas.Count, "one area per task in district " + (d + 1));
+                foreach (var area in areas)
+                {
+                    string image = MiniJson.GetString(MiniJson.AsObject(area, "area"), "image", "");
+                    Assert.IsTrue(File.Exists(Path.Combine(folder, image + ".png")), "missing Restore/" + image + ".png");
+                }
+                Assert.IsTrue(File.Exists(Path.Combine(UiFolder, "Art", "district_" + (d + 1) + ".jpg")), "missing world card " + (d + 1));
+            }
+            var levels = Path.Combine(Path.GetDirectoryName(UiFolder), "Levels");
+            Assert.AreEqual(rules.Areas.Length * 10, Directory.GetFiles(levels, "level_*.json").Length, "ten levels per district");
+        }
+
+        [Test]
         public void EveryFont_HasTheTurkishLetters()
         {
             var fonts = Directory.GetFiles(Path.Combine(UiFolder, "Fonts"), "*.ttf");

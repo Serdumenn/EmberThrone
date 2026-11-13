@@ -96,6 +96,7 @@ namespace EmberThrone.Core.Simulation
         public int Wins;
         public double AvgMovesLeftOnWin;
         public double AvgGoalProgressOnLoss;
+        public double NearLossRate;
         public double AvgSpecialsCreated;
         public double AvgShuffles;
         public int MaxClearRounds;
@@ -111,6 +112,7 @@ namespace EmberThrone.Core.Simulation
             sb.Append("(").Append(Wins).Append('/').Append(Runs).Append(") ");
             sb.Append("movesLeft ").Append(AvgMovesLeftOnWin.ToString("0.0", CultureInfo.InvariantCulture)).Append(' ');
             sb.Append("lossProgress ").Append((AvgGoalProgressOnLoss * 100).ToString("0", CultureInfo.InvariantCulture)).Append("% ");
+            sb.Append("nearLoss ").Append((NearLossRate * 100).ToString("0", CultureInfo.InvariantCulture)).Append("% ");
             sb.Append("specials ").Append(AvgSpecialsCreated.ToString("0.0", CultureInfo.InvariantCulture)).Append(' ');
             sb.Append("shuffles ").Append(AvgShuffles.ToString("0.00", CultureInfo.InvariantCulture));
             if (Errors.Count > 0) sb.Append(" ERRORS ").Append(Errors.Count);
@@ -125,6 +127,7 @@ namespace EmberThrone.Core.Simulation
             public bool Won;
             public int MovesLeft;
             public double GoalProgress;
+            public bool NearLoss;
             public int SpecialsCreated;
             public int Shuffles;
             public int MaxClearRounds;
@@ -173,7 +176,20 @@ namespace EmberThrone.Core.Simulation
             result.SpecialsCreated = session.Stats.SpecialsCreated;
             result.Shuffles = session.Stats.Shuffles;
             result.MaxClearRounds = session.Stats.MaxClearRounds;
+            if (session.State == GameState.Lost && result.Error == null) result.NearLoss = WinsWithContinue(session, policy, rng);
             return result;
+        }
+
+        static bool WinsWithContinue(GameSession session, IPlayerPolicy policy, Pcg32 rng)
+        {
+            session.AddMoves(session.Rules.ContinueMoves);
+            int guard = 0;
+            while (session.State == GameState.Playing && guard++ < 100)
+            {
+                var move = policy.Choose(session, rng);
+                if (!move.HasValue || !session.Apply(move.Value).Accepted) break;
+            }
+            return session.State == GameState.Won;
         }
 
         public static SimulationReport Run(LevelDefinition level, int runs, int baseSeed, Func<IPlayerPolicy> policyFactory, GameRules rules = null, bool validate = false)
@@ -199,7 +215,7 @@ namespace EmberThrone.Core.Simulation
                 Runs = results.Count,
             };
             double movesLeft = 0, lossProgress = 0, specials = 0, shuffles = 0;
-            int losses = 0;
+            int losses = 0, near = 0;
             foreach (var r in results)
             {
                 if (r.Error != null) report.Errors.Add(r.Error);
@@ -215,10 +231,12 @@ namespace EmberThrone.Core.Simulation
                 {
                     losses++;
                     lossProgress += r.GoalProgress;
+                    if (r.NearLoss) near++;
                 }
             }
             report.AvgMovesLeftOnWin = report.Wins == 0 ? 0 : movesLeft / report.Wins;
             report.AvgGoalProgressOnLoss = losses == 0 ? 1 : lossProgress / losses;
+            report.NearLossRate = losses == 0 ? 0 : near / (double)losses;
             report.AvgSpecialsCreated = results.Count == 0 ? 0 : specials / results.Count;
             report.AvgShuffles = results.Count == 0 ? 0 : shuffles / results.Count;
             return report;

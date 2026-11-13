@@ -1,0 +1,37 @@
+{
+  "id": 89,
+  "name": "Mist Lake",
+  "moves": 24,
+  "colors": 5,
+  "difficulty": "normal",
+  "goals": [
+    {
+      "type": "collectible"
+    },
+    {
+      "type": "flower"
+    },
+    {
+      "type": "color",
+      "color": "G",
+      "count": 35
+    }
+  ],
+  "board": [
+    "#..$$...#",
+    ".........",
+    ".........",
+    ".........",
+    "..F..FF..",
+    ".........",
+    ".........",
+    ".........",
+    "#.......#",
+    "##.....##"
+  ],
+  "collectibles": {
+    "total": 2,
+    "maxOnBoard": 2,
+    "spawnChance": 0.15
+  }
+}

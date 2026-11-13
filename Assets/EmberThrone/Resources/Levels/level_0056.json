@@ -1,0 +1,29 @@
+{
+  "id": 56,
+  "name": "Sunny Lawn",
+  "moves": 35,
+  "colors": 5,
+  "difficulty": "normal",
+  "goals": [
+    {
+      "type": "collectible"
+    }
+  ],
+  "board": [
+    "..$...$.",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "collectibles": {
+    "total": 3,
+    "maxOnBoard": 2,
+    "spawnChance": 0.15
+  }
+}

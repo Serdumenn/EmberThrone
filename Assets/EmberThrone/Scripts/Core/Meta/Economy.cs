@@ -29,6 +29,7 @@ namespace EmberThrone.Core
 
         public readonly EconomyRules Rules;
         public readonly Profile Profile;
+        int _month = -1;
 
         public Economy(EconomyRules rules, Profile profile)
         {
@@ -38,8 +39,132 @@ namespace EmberThrone.Core
 
         public void Tick(long now)
         {
+            RollPass(now);
             RollDay(now);
             RegenLives(now);
+        }
+
+        public StoreRules Store => Rules.Store;
+
+        public int MaxLives => _month >= 0 && Profile.PassPremiumMonth == _month ? Store.PassMaxLives : Rules.MaxLives;
+
+        public bool StarterOffered(int levelReached) =>
+            !Profile.StarterBought && levelReached >= Store.StarterFromLevel && levelReached <= Store.StarterUntilLevel;
+
+        public bool CanBreakPiggy => Profile.PiggyCoins >= Store.PiggyMin;
+
+        public void ReportStoreWin(long now)
+        {
+            Tick(now);
+            Profile.PiggyCoins = Math.Min(Store.PiggyCap, Profile.PiggyCoins + Store.PiggyPerWin);
+            Profile.PassPoints += Store.PassPointsPerWin;
+        }
+
+        public bool PassPremium(long now)
+        {
+            Tick(now);
+            return Profile.PassPremiumMonth == _month;
+        }
+
+        public int PassReached(long now)
+        {
+            Tick(now);
+            return Math.Min(Store.PassTrack.Length, Profile.PassPoints);
+        }
+
+        public bool PassClaimed(int step, bool premium) => ((premium ? Profile.PassPremiumClaimed : Profile.PassFreeClaimed) & (1 << step)) != 0;
+
+        public bool CanClaimPass(int step, bool premium, long now) =>
+            step >= 1 && step <= PassReached(now) && !PassClaimed(step, premium) && (!premium || PassPremium(now));
+
+        public Reward? ClaimPass(int step, bool premium, long now)
+        {
+            if (!CanClaimPass(step, premium, now)) return null;
+            var reward = premium ? Store.PassTrack[step - 1].Premium : Store.PassTrack[step - 1].Free;
+            if (premium) Profile.PassPremiumClaimed |= 1 << step;
+            else Profile.PassFreeClaimed |= 1 << step;
+            Grant(reward);
+            return reward;
+        }
+
+        public int PassClaimable(long now)
+        {
+            int reached = PassReached(now);
+            bool premium = PassPremium(now);
+            int n = 0;
+            for (int step = 1; step <= reached; step++)
+            {
+                if (!PassClaimed(step, false)) n++;
+                if (premium && !PassClaimed(step, true)) n++;
+            }
+            return n;
+        }
+
+        public int PassSecondsLeft(long now)
+        {
+            int month = EventRules.MonthOf(now);
+            return (int)Math.Min(int.MaxValue, Math.Max(0, EventRules.MonthStart(month + 1) - now));
+        }
+
+        void RollPass(long now)
+        {
+            int month = EventRules.MonthOf(now);
+            _month = month;
+            if (Profile.PassMonth == month) return;
+            if (Profile.PassMonth >= 0)
+            {
+                bool premium = Profile.PassPremiumMonth == Profile.PassMonth;
+                int reached = Math.Min(Store.PassTrack.Length, Profile.PassPoints);
+                for (int step = 1; step <= reached; step++)
+                {
+                    if ((Profile.PassFreeClaimed & (1 << step)) == 0) Grant(Store.PassTrack[step - 1].Free);
+                    if (premium && (Profile.PassPremiumClaimed & (1 << step)) == 0) Grant(Store.PassTrack[step - 1].Premium);
+                }
+            }
+            Profile.PassMonth = month;
+            Profile.PassPoints = 0;
+            Profile.PassFreeClaimed = 0;
+            Profile.PassPremiumClaimed = 0;
+        }
+
+        public bool GrantPurchase(string productId, string transactionId, long now, out Reward[] granted)
+        {
+            granted = new Reward[0];
+            var product = Store.Find(productId);
+            if (product == null) return false;
+            if (!string.IsNullOrEmpty(transactionId) && Profile.Purchases.Contains(transactionId)) return true;
+            Tick(now);
+            switch (product.Kind)
+            {
+                case ProductKind.Piggy:
+                    granted = Profile.PiggyCoins > 0 ? new[] { Reward.Coins(Profile.PiggyCoins) } : new Reward[0];
+                    Profile.PiggyCoins = 0;
+                    break;
+                case ProductKind.Pass:
+                    Profile.PassPremiumMonth = _month;
+                    break;
+                default:
+                    granted = product.Rewards;
+                    break;
+            }
+            foreach (var reward in granted) GrantPaid(reward);
+            if (product.Kind == ProductKind.Starter) Profile.StarterBought = true;
+            if (!string.IsNullOrEmpty(transactionId))
+            {
+                Profile.Purchases.Add(transactionId);
+                while (Profile.Purchases.Count > Store.RememberedPurchases) Profile.Purchases.RemoveAt(0);
+            }
+            return true;
+        }
+
+        void GrantPaid(Reward reward)
+        {
+            switch (reward.Kind)
+            {
+                case RewardKind.Coins: Profile.Coins += Math.Max(0, reward.Amount); break;
+                case RewardKind.Gems: Profile.Gems += Math.Max(0, reward.Amount); break;
+                default: Grant(reward); break;
+            }
         }
 
         void RollDay(long now)
@@ -51,14 +176,14 @@ namespace EmberThrone.Core
             if (!newDay) return;
             Profile.AdLives = 0;
             Profile.AdCoins = 0;
-            Profile.Lives = Math.Max(Profile.Lives, Rules.MaxLives);
+            Profile.Lives = Math.Max(Profile.Lives, MaxLives);
             Profile.LifeAnchor = 0;
         }
 
         void RegenLives(long now)
         {
             var p = Profile;
-            if (p.Lives >= Rules.MaxLives)
+            if (p.Lives >= MaxLives)
             {
                 p.LifeAnchor = 0;
                 return;
@@ -70,14 +195,14 @@ namespace EmberThrone.Core
             }
             long gained = (now - p.LifeAnchor) / Rules.LifeSeconds;
             if (gained <= 0) return;
-            p.Lives = (int)Math.Min(Rules.MaxLives, p.Lives + gained);
-            p.LifeAnchor = p.Lives >= Rules.MaxLives ? 0 : p.LifeAnchor + gained * Rules.LifeSeconds;
+            p.Lives = (int)Math.Min(MaxLives, p.Lives + gained);
+            p.LifeAnchor = p.Lives >= MaxLives ? 0 : p.LifeAnchor + gained * Rules.LifeSeconds;
         }
 
         public int Coins => Profile.Coins;
         public int Gems => Profile.Gems;
         public int Lives => Profile.Lives;
-        public bool LivesFull => Profile.Lives >= Rules.MaxLives;
+        public bool LivesFull => Profile.Lives >= MaxLives;
 
         public int SecondsToNextLife(long now)
         {
@@ -98,7 +223,7 @@ namespace EmberThrone.Core
 
         void AddLives(int amount)
         {
-            Profile.Lives = Math.Min(Rules.MaxLives, Profile.Lives + amount);
+            Profile.Lives = Math.Min(MaxLives, Profile.Lives + amount);
             if (LivesFull) Profile.LifeAnchor = 0;
         }
 
@@ -114,7 +239,7 @@ namespace EmberThrone.Core
         {
             Tick(now);
             if (LivesFull || !SpendGems(Rules.RefillGemPrice)) return false;
-            AddLives(Rules.MaxLives);
+            AddLives(MaxLives);
             return true;
         }
 
@@ -197,6 +322,27 @@ namespace EmberThrone.Core
         }
 
         public bool BuyExtraMoves(int taken) => SpendCoins(Rules.ExtraMovesCost(taken));
+
+        public int WinStreak => Profile.WinStreak;
+
+        public void ExtendStreak() => Profile.WinStreak++;
+
+        public bool BreakStreak()
+        {
+            bool had = Profile.WinStreak > 0;
+            Profile.WinStreak = 0;
+            return had;
+        }
+
+        public PieceKind[] StreakSpecials()
+        {
+            int count = Math.Min(Profile.WinStreak, Rules.StreakSpecials.Length);
+            var kinds = new PieceKind[count];
+            Array.Copy(Rules.StreakSpecials, kinds, count);
+            return kinds;
+        }
+
+        public int RewardFinale(int specials, bool firstTime) => firstTime && specials > 0 ? AddCoins(specials * Rules.FinaleCoinsPerSpecial) : 0;
 
         public int RewardWin(int stars, bool firstTime = true)
         {

@@ -1,0 +1,28 @@
+{
+  "id": 46,
+  "name": "Quiet Hall",
+  "moves": 32,
+  "colors": 5,
+  "difficulty": "normal",
+  "goals": [
+    {
+      "type": "collectible"
+    }
+  ],
+  "board": [
+    ".$$.....",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "collectibles": {
+    "total": 2,
+    "maxOnBoard": 2,
+    "spawnChance": 0.15
+  }
+}

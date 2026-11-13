@@ -1,0 +1,36 @@
+{
+  "id": 99,
+  "name": "Last Ember",
+  "moves": 30,
+  "colors": 5,
+  "difficulty": "normal",
+  "goals": [
+    {
+      "type": "collectible"
+    },
+    {
+      "type": "statue"
+    },
+    {
+      "type": "color",
+      "color": "R",
+      "count": 45
+    }
+  ],
+  "board": [
+    "..$.$...",
+    "........",
+    "........",
+    "#......#",
+    "........",
+    "........",
+    "#......#",
+    "SS....SS",
+    "SS....SS"
+  ],
+  "collectibles": {
+    "total": 2,
+    "maxOnBoard": 2,
+    "spawnChance": 0.15
+  }
+}

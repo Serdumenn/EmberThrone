@@ -1,0 +1,124 @@
+{
+  "seed": 2611,
+  "districts": [
+    {
+      "index": 3,
+      "names": [
+        "Salt Breeze",
+        "Gull Pier",
+        "Net Mender",
+        "Tide Crates",
+        "Anchor Watch",
+        "Calm Harbor",
+        "Lantern Dock",
+        "Fishing Nets",
+        "Foggy Bay",
+        "Lighthouse Storm"
+      ],
+      "ready": true
+    },
+    {
+      "index": 4,
+      "names": [
+        "Dusty Shelves",
+        "Ink Wells",
+        "Scroll Stacks",
+        "Reading Nook",
+        "Owl Tower",
+        "Quiet Hall",
+        "Star Charts",
+        "Map Room",
+        "Candle Study",
+        "Frozen Archive"
+      ],
+      "ready": true
+    },
+    {
+      "index": 5,
+      "names": [
+        "Seed Rows",
+        "Honey Path",
+        "Petal Steps",
+        "Glass House",
+        "Bee Garden",
+        "Sunny Lawn",
+        "Rose Arch",
+        "Pond Lilies",
+        "Ivy Maze",
+        "Frost Bloom"
+      ],
+      "ready": true
+    },
+    {
+      "index": 6,
+      "names": [
+        "Mine Mouth",
+        "Rail Tracks",
+        "Lamp Shaft",
+        "Ore Carts",
+        "Crystal Vein",
+        "Deep Tunnel",
+        "Glow Cavern",
+        "Gem Sorter",
+        "Echo Chamber",
+        "Frozen Shaft"
+      ],
+      "ready": true
+    },
+    {
+      "index": 7,
+      "names": [
+        "Snowy Trail",
+        "Pine Ridge",
+        "Sled Run",
+        "Cliff Path",
+        "Avalanche",
+        "Warm Hut",
+        "Icy Steps",
+        "Wind Gap",
+        "High Pass",
+        "Blizzard Gate"
+      ],
+      "ready": true
+    },
+    {
+      "index": 8,
+      "names": [
+        "Frozen Shore",
+        "Skate Ring",
+        "Ice Fishers",
+        "Thin Ice",
+        "Lake Heart",
+        "Reed Banks",
+        "Snow Islands",
+        "Crack Lines",
+        "Mist Lake",
+        "Ayaz Mirror"
+      ],
+      "ready": true
+    },
+    {
+      "index": 9,
+      "names": [
+        "Ember Road",
+        "Ash Square",
+        "Spark Steps",
+        "Coal Gates",
+        "Great Hearth",
+        "Warm Return",
+        "Torch Row",
+        "Hearth Guard",
+        "Last Ember",
+        "Ember Throne"
+      ],
+      "ready": true
+    }
+  ],
+  "rerolls": {
+    "90": 2,
+    "50": 2,
+    "55": 3,
+    "77": 3,
+    "99": 2
+  }
+}

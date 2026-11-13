@@ -25,6 +25,10 @@ namespace EmberThrone.Game
         Lose,
         Star,
         MovesAdded,
+        Freeze,
+        BreakWood,
+        BreakIce,
+        BreakAsh,
     }
 
     public static class Sound

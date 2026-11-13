@@ -13,11 +13,15 @@ namespace EmberThrone.Core.Tests
 
         public static LevelDefinition Level(string[] board, int moves = 20, int colors = 6, string[] floor = null,
             string[] cover = null, bool spawners = false, params GoalDefinition[] goals)
+            => Level(board, moves, colors, floor, cover, null, spawners, goals);
+
+        public static LevelDefinition Level(string[] board, int moves, int colors, string[] floor,
+            string[] cover, string[] frost, bool spawners, params GoalDefinition[] goals)
         {
             string[] spawn = null;
             if (!spawners)
                 spawn = board.Select(r => new string('.', r.Replace(" ", "").Length)).ToArray();
-            var level = LevelParser.FromLayers(board, floor, cover, spawn);
+            var level = LevelParser.FromLayers(board, floor, cover, spawn, frost);
             level.Moves = moves;
             level.ColorCount = colors;
             if (goals == null || goals.Length == 0) level.Goals.Add(new GoalDefinition(GoalType.Color, 999, GemColor.Red));

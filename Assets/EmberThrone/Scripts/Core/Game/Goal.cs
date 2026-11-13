@@ -7,13 +7,15 @@ namespace EmberThrone.Core
         public readonly GoalType Type;
         public readonly int Color;
         public readonly int Target;
+        public readonly bool CountsAll;
         public int Remaining;
 
-        public Goal(GoalType type, int color, int target)
+        public Goal(GoalType type, int color, int target, bool countsAll = false)
         {
             Type = type;
             Color = color;
             Target = target;
+            CountsAll = countsAll;
             Remaining = target;
         }
 
@@ -23,7 +25,7 @@ namespace EmberThrone.Core
 
         public Goal Clone()
         {
-            return new Goal(Type, Color, Target) { Remaining = Remaining };
+            return new Goal(Type, Color, Target, CountsAll) { Remaining = Remaining };
         }
 
         public override string ToString()
@@ -54,12 +56,21 @@ namespace EmberThrone.Core
                         case GoalType.Collectible:
                             count = board.CountPieces(PieceKind.Collectible) + (level.Collectibles?.Total ?? 0);
                             break;
+                        case GoalType.Lamp:
+                            count = board.CountPieces(PieceKind.Lamp);
+                            break;
+                        case GoalType.Flower:
+                            count = board.SumHp(PieceKind.Planter);
+                            break;
+                        case GoalType.Statue:
+                            count = board.CountPieces(PieceKind.Statue);
+                            break;
                         default:
                             count = 0;
                             break;
                     }
                 }
-                goals.Add(new Goal(def.Type, def.Color, count));
+                goals.Add(new Goal(def.Type, def.Color, count, def.Count < 0));
             }
             return goals;
         }
@@ -87,6 +98,8 @@ namespace EmberThrone.Core
         public int BoostersUsed;
         public int MaxClearRounds;
         public int ContinuesUsed;
+        public int FrostSpreads;
+        public int FinaleSpecials;
 
         public SessionStats Clone() => (SessionStats)MemberwiseClone();
     }

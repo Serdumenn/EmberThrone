@@ -1,9 +1,9 @@
 {
   "id": 30,
   "name": "Frozen Furnace",
-  "moves": 27,
+  "moves": 26,
   "colors": 5,
-  "difficulty": "hard",
+  "difficulty": "superhard",
   "goals": [
     {
       "type": "collectible"

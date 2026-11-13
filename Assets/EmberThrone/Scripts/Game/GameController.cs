@@ -9,7 +9,7 @@ namespace EmberThrone.Game
     public sealed class GameController : MonoBehaviour
     {
         const float BottomMargin = BoosterBar.Height + 24f;
-        const float BoardMargin = 0.32f;
+        const float BoardMargin = 0.24f;
         const int BackdropOrder = -100;
         const float BackdropOverscan = 1.04f;
         const float AmbientWarmUp = 8f;
@@ -47,6 +47,9 @@ namespace EmberThrone.Game
         public ResultPopup Popup { get; private set; }
         public bool IsBusy { get; private set; }
         public int WinCoins { get; private set; }
+        public int FinaleCoins { get; private set; }
+        public int StreakSpecialsPlaced { get; private set; }
+        bool _firstWin;
         public int WinPacks { get; private set; }
         public int WinTrophies { get; private set; }
         public string LastMismatch { get; private set; }
@@ -70,12 +73,12 @@ namespace EmberThrone.Game
             BuildBackdrop();
             BuildView();
 
-            _hud = HudView.Create(app.Ui.Content, Session, "Seviye " + level.Id, OnHome);
+            _hud = HudView.Create(app.Ui.Content, Session, "Seviye " + level.Id);
             _flyers = GoalFlyers.Create(app.Ui.Content);
             _goalShown = new int[Session.Goals.Count];
             for (int i = 0; i < _goalShown.Length; i++) _goalShown[i] = Session.Goals[i].Remaining;
             _praise = PraiseView.Create(app.Ui.Content);
-            _boosters = BoosterBar.Create(app.Ui.Content, PickBooster);
+            _boosters = BoosterBar.Create(app.Ui.Content, PickBooster, OnHome);
             RefreshBoosters();
             Meta.Changed += RefreshBoosters;
 
@@ -94,8 +97,29 @@ namespace EmberThrone.Game
             FitCamera();
 
             SaveIfWon();
+            if (Session.State == GameState.Playing && PlaceStreakSpecials()) return;
             if (Session.State == GameState.Playing) _input.SetEnabled(true);
             else StartCoroutine(EndLevel());
+        }
+
+        bool PlaceStreakSpecials()
+        {
+            if (!GameApp.StreakBoosts) return false;
+            var kinds = Meta.Economy.StreakSpecials();
+            if (kinds.Length == 0) return false;
+            var outcome = Session.PlaceStartingSpecials(kinds);
+            if (!outcome.Accepted) return false;
+            StreakSpecialsPlaced = kinds.Length;
+            StartCoroutine(AfterIntro(outcome));
+            return true;
+        }
+
+        IEnumerator AfterIntro(MoveOutcome outcome)
+        {
+            IsBusy = true;
+            yield return new WaitForSeconds(View.IntroLength);
+            IsBusy = false;
+            Run(outcome);
         }
 
         void BuildView()
@@ -105,6 +129,7 @@ namespace EmberThrone.Game
             View = boardObject.AddComponent<BoardView>();
             View.Build(Session);
             View.GoalProgressed += OnGoalProgress;
+            View.FrostSpread += OnFrostSpread;
             View.Impacted += OnImpact;
             View.WaveStarted += OnWave;
             View.ComboFired += OnCombo;
@@ -123,20 +148,28 @@ namespace EmberThrone.Game
         void OnGoalProgress(GoalProgressEvent e)
         {
             int index = e.GoalIndex;
-            int remaining = e.Remaining;
             var at = View.World(e.Source);
             float size = (PanelPoint(at + Vector3.right) - PanelPoint(at)).x;
-            bool flying = _flyers.Fly(HudView.GoalSprite(Session.Goals[index]), PanelPoint(at), size, _hud.GoalSlotOf(index),
-                () => ShowGoal(index, remaining));
-            if (!flying) ShowGoal(index, remaining);
+            bool flying = _flyers.Fly(HudView.GoalSprite(Session.Goals[index], _hud.FrostIcons), PanelPoint(at), size, _hud.GoalSlotOf(index),
+                () => ShowGoal(index));
+            if (!flying) ShowGoal(index);
         }
 
-        void ShowGoal(int index, int remaining)
+        void ShowGoal(int index)
         {
-            if (remaining >= _goalShown[index]) return;
-            _goalShown[index] = remaining;
+            if (_goalShown[index] <= 0) return;
+            _goalShown[index]--;
             Sound.Play(Sfx.Collect);
-            _hud.SetGoal(index, remaining);
+            _hud.SetGoal(index, _goalShown[index]);
+            if (_goalShown[index] == 0) _hud.Emby.React(EmbyMood.Joy);
+        }
+
+        void OnFrostSpread(FrostSpreadEvent e)
+        {
+            _hud.Emby.React(EmbyMood.Worry);
+            if (e.GoalIndex < 0) return;
+            _goalShown[e.GoalIndex]++;
+            _hud.SetGoal(e.GoalIndex, _goalShown[e.GoalIndex]);
         }
 
         Vector2 PanelPoint(Vector3 world)
@@ -203,18 +236,24 @@ namespace EmberThrone.Game
                 _app.ShowLevelSelect();
                 return;
             }
-            _app.Confirm("Çıkış", "Çıkarsan bir can kaybedersin.", "Çık", "Devam et", () =>
+            string streak = Meta.Economy.WinStreak > 0 ? " Galibiyet serin de biter." : "";
+            if (LadderAtRisk) streak += " Kor Merdiveni başa döner.";
+            _app.Confirm("Çıkış", "Çıkarsan bir can kaybedersin." + streak, "Çık", "Devam et", () =>
             {
                 GiveUp();
                 _app.ShowLevelSelect();
             });
         }
 
+        bool LadderAtRisk => Meta.Contests.LadderUnlocked(_levelIndex) && Meta.Contests.LadderAtRisk(Meta.Now);
+
         void GiveUp()
         {
             if (_lifeTaken || Session.State == GameState.Won) return;
             _lifeTaken = true;
             Meta.Economy.LoseLife(Meta.Now);
+            Meta.Economy.BreakStreak();
+            Meta.Contests.ReportLoss(Meta.Now);
             Meta.Save();
         }
 
@@ -255,6 +294,7 @@ namespace EmberThrone.Game
             }
             BoosterInventory.Spend(type);
             Meta.Event.Report(EventMetric.Boosters, 1, Meta.Now);
+            Meta.Restore.ReportBooster(LevelMap.ChapterOf(_levelIndex));
             Arm(null);
             RefreshBoosters();
             Run(outcome);
@@ -411,10 +451,15 @@ namespace EmberThrone.Game
         void OnWave(int wave)
         {
             _wave = wave;
+            if (wave >= 3) _hud.Emby.React(wave >= 5 ? EmbyMood.Wow : EmbyMood.Joy);
             ShowPraise(wave >= 6 ? 3 : wave >= 4 ? 2 : wave >= 3 ? 1 : 0);
         }
 
-        void OnCombo(ComboKind combo) => ShowPraise(combo == ComboKind.ColorColor ? 3 : 2);
+        void OnCombo(ComboKind combo)
+        {
+            ShowPraise(combo == ComboKind.ColorColor ? 3 : 2);
+            _hud.Emby.React(EmbyMood.Wow);
+        }
 
         void ShowPraise(int level)
         {
@@ -428,14 +473,20 @@ namespace EmberThrone.Game
             if (Session.State != GameState.Won || _rewarded) return;
             _rewarded = true;
             int stars = Session.Rules.StarsFor(Session.MovesLeft);
-            bool first = LevelProgress.GetStars(_level.Id) <= 0;
+            int best = LevelProgress.GetStars(_level.Id);
+            bool first = best <= 0;
+            _firstWin = first;
             LevelProgress.SaveStars(_level.Id, stars);
             long now = Meta.Now;
             var economy = Meta.Economy;
             WinCoins = economy.RewardWin(stars, first);
             WinPacks = first ? Meta.Rules.PacksOnFirstWin : 0;
             WinTrophies = Meta.Race.AddWin(stars, first, now);
-            Meta.Event.ReportWin(stars, _level.Difficulty == "hard", now);
+            Meta.Event.ReportWin(stars, _level.IsHard, now);
+            economy.ExtendStreak();
+            economy.ReportStoreWin(now);
+            Meta.Contests.ReportWin(now);
+            Meta.Restore.ReportWin(LevelMap.ChapterOf(_levelIndex), Mathf.Max(0, stars - best), first);
             economy.Report(QuestKind.WinLevels, 1, now);
             economy.Report(QuestKind.EarnStars, stars, now);
             Meta.Save();
@@ -452,7 +503,7 @@ namespace EmberThrone.Game
                     {
                         case PieceClearedEvent piece:
                             if (piece.Kind == PieceKind.Gem) gems++;
-                            else if (piece.Kind == PieceKind.Box) obstacles++;
+                            else if (piece.Kind.IsBlocker()) obstacles++;
                             break;
                         case SpecialActivatedEvent _:
                             specials++;
@@ -478,6 +529,7 @@ namespace EmberThrone.Game
 
         IEnumerator ShowWin()
         {
+            _hud.Emby.Win();
             yield return new WaitForSeconds(Timing.WinDelay);
 
             int left = Session.MovesLeft;
@@ -485,15 +537,41 @@ namespace EmberThrone.Game
             float show = View.Celebrate(MovesPanelWorld(), sparks,
                 i => _hud.SetMoves(left - Mathf.RoundToInt((i + 1) * (float)left / sparks)));
             yield return new WaitForSeconds(show + Timing.WinWindowPause);
+            if (GameApp.WinFinale && left > 0) yield return PlayFinale();
 
             OnImpact(Impact.Win);
             int stars = Session.Rules.StarsFor(Session.MovesLeft);
             var next = _app.HasLevel(_levelIndex + 1)
                 ? new ResultPopup.Choice("Sonraki seviye", ButtonKind.Cta, AfterAd(() => _app.StartLevel(_levelIndex + 1)))
                 : new ResultPopup.Choice("Tekrar oyna", ButtonKind.Cta, AfterAd(() => _app.StartLevel(_levelIndex)));
-            Popup = ResultPopup.Show(_app.Ui.Popups, "Kazandın!", Session.MovesLeft + " hamle arttı", stars, WinCoins, WinPacks, WinTrophies,
+            string message = Session.MovesLeft + " hamle arttı";
+            if (Meta.Economy.WinStreak > 1) message += "\nGalibiyet serisi: " + Meta.Economy.WinStreak;
+            var contests = Meta.Contests;
+            if (contests.LadderUnlocked(_levelIndex + 1) && contests.LadderWins(Meta.Now) > 0)
+                message += "\nKor Merdiveni: " + contests.LadderWins(Meta.Now) + "/" + contests.Rules.LadderTarget;
+            Popup = ResultPopup.Show(_app.Ui.Popups, "Kazandın!", message, stars, WinCoins, WinPacks, WinTrophies,
                 next,
-                new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, AfterAd(_app.ShowLevelSelect)));
+                new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, AfterAd(() => _app.ShowLevelSelect(WonRewards()))));
+        }
+
+        IEnumerator PlayFinale()
+        {
+            var finale = Session.PlayFinale();
+            if (!finale.Accepted) yield break;
+            FinaleCoins = Meta.Economy.RewardFinale(Session.Stats.FinaleSpecials, _firstWin);
+            WinCoins += FinaleCoins;
+            Meta.Save();
+            yield return PlayGuarded(finale);
+            CheckSync();
+            yield return new WaitForSeconds(Timing.FinaleRest);
+        }
+
+        Reward[] WonRewards()
+        {
+            var rewards = new System.Collections.Generic.List<Reward>();
+            if (WinCoins > 0) rewards.Add(Reward.Coins(WinCoins));
+            if (WinPacks > 0) rewards.Add(Reward.Pack(WinPacks));
+            return rewards.ToArray();
         }
 
         Action AfterAd(Action go)
@@ -504,6 +582,7 @@ namespace EmberThrone.Game
 
         IEnumerator ShowLose()
         {
+            _hud.Emby.Lose();
             yield return new WaitForSeconds(Timing.LoseDelay);
             OnImpact(Impact.Lose);
             var choices = new List<ResultPopup.Choice>();
@@ -511,11 +590,13 @@ namespace EmberThrone.Game
             bool ad = !_adContinueUsed && _app.Ads.IsRewardedReady;
             if (ad) choices.Add(new ResultPopup.Choice(ContinueLabel(moves), ButtonKind.Cta, WatchForExtraMoves));
             int price = Meta.Rules.ExtraMovesCost(_continues);
-            bool coins = Meta.Economy.Coins >= price;
-            if (coins) choices.Add(new ResultPopup.Choice(CoinContinueLabel(moves, price), ad ? ButtonKind.Secondary : ButtonKind.Cta, BuyExtraMoves));
-            choices.Add(new ResultPopup.Choice("Tekrar dene", ad || coins ? ButtonKind.Secondary : ButtonKind.Cta, Retry));
+            choices.Add(new ResultPopup.Choice(CoinContinueLabel(moves, price), ad ? ButtonKind.Secondary : ButtonKind.Cta, BuyExtraMoves));
+            choices.Add(new ResultPopup.Choice("Tekrar dene", ButtonKind.Secondary, Retry));
             choices.Add(new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, Leave));
-            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", RemainingText(), -1, 0, 0, 0, choices.ToArray());
+            string message = RemainingText();
+            if (Meta.Economy.WinStreak > 0) message += "\nVazgeçersen " + Meta.Economy.WinStreak + " galibiyetlik serin biter";
+            if (LadderAtRisk) message += "\nVazgeçersen Kor Merdiveni başa döner";
+            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", message, -1, 0, 0, 0, choices.ToArray());
         }
 
         public static string ContinueLabel(int moves) => "İzle: +" + moves + " hamle";
@@ -542,7 +623,13 @@ namespace EmberThrone.Game
 
         void BuyExtraMoves()
         {
-            if (Session.State != GameState.Lost || !Meta.Economy.BuyExtraMoves(_continues)) return;
+            if (Session.State != GameState.Lost) return;
+            if (Meta.Economy.Coins < Meta.Rules.ExtraMovesCost(_continues))
+            {
+                _app.OpenShop();
+                return;
+            }
+            if (!Meta.Economy.BuyExtraMoves(_continues)) return;
             _continues++;
             Meta.Save();
             Resume();

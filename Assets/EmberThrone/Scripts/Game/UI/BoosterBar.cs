@@ -17,34 +17,37 @@ namespace EmberThrone.Game
         readonly Dictionary<BoosterType, Label> _counts = new Dictionary<BoosterType, Label>();
 
         public VisualElement Root { get; private set; }
+        public Button HomeButton { get; private set; }
 
         public Button ButtonOf(BoosterType type) => _buttons[type];
 
         public string CountText(BoosterType type) => _counts[type].text;
 
-        public static BoosterBar Create(VisualElement parent, Action<BoosterType> onPick)
+        public static BoosterBar Create(VisualElement parent, Action<BoosterType> onPick, Action onHome)
         {
             var bar = new BoosterBar();
-            bar.Build(parent, onPick);
+            bar.Build(parent, onPick, onHome);
             return bar;
         }
 
-        void Build(VisualElement parent, Action<BoosterType> onPick)
+        void Build(VisualElement parent, Action<BoosterType> onPick, Action onHome)
         {
             Root = Ui.El("et-boosters", parent, "Boosters");
             foreach (var type in BoosterInventory.All)
             {
                 var t = type;
-                var button = Ui.Button(null, "et-ring et-pressable et-booster", () => onPick(t), Root, type.ToString());
+                var button = Ui.Button(null, "et-pressable et-booster", () => onPick(t), Root, type.ToString());
                 Ui.El("et-icon et-booster__icon et-booster__icon--" + BoosterInventory.Slug(type), button);
                 _counts[type] = Ui.Text("0", "et-chip et-caption et-outlined et-booster__count", button, "Count");
                 _buttons[type] = button;
             }
+            HomeButton = Ui.Button(null, "et-ring et-pressable et-boosters__home", onHome, Root, "Home");
+            Ui.El("et-icon et-boosters__home-icon", HomeButton);
         }
 
         public void SetCount(BoosterType type, int count)
         {
-            _counts[type].text = count.ToString();
+            _counts[type].text = count > 0 ? count.ToString() : "+";
             _buttons[type].EnableInClassList(Empty, count <= 0);
         }
 

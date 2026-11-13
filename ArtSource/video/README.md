@@ -32,9 +32,22 @@ Oyun Unity'nin `VideoPlayer`'ıyla oynatır. APK GitHub Actions'ta Linux üzerin
 | `village_story.mp4` | İlk 10 sn yükleme videosunun aynısı; ikinci 10 sn: bacası buzla tıkalı ocağa Emby girer, ocak yanar | Kıvılcım Köyü açılışı (`scene_1`, 10,1. saniyeden) |
 | `bakery_story.mp4` | Soğuk fırın, bacada buz; Emby fırını yakar, sokak ısınır | Fırın Sokağı açılışı (`scene_2`) |
 | `forge_story.mp4` | Buz tutmuş demirci ocağı; Emby ocağı yakar, kıvılcımlar uçar | Demirci Çarşısı açılışı (`scene_3`) |
+| `harbor_story.mp4` | Gece, donmuş liman ve sönük fener; Emby fenerin lamba odasına girer, ışık huzmeleri döner, buz erir, gün doğar | Fener Limanı açılışı (`scene_4`) |
+
+## Bekleyen sahneler
+
+| Bölge | Sahne |
+|---|---|
+| Bilge Kütüphanesi (`scene_5`) | Gece, kule kütüphane; mumlar ve lambalar sönük, kitaplarda kırağı. Emby ilk mumu yakar, lambalar zincirleme yanar, kırağı erir |
+| Çiçek Bahçeleri (`scene_6`) | Kırağıyla kaplı bahçe, çiçekler kapalı, gölet buzlu. Emby bahçede zıplar, dokunduğu yerde çiçekler açar, gölet çözülür |
+| Kristal Maden (`scene_7`) | Maden lambaları sönük, kristaller buzlu ve donuk. Emby maden fenerini yakar, kristaller mor ve mavi parlar |
+| Karlı Geçit (`scene_8`) | Kar fırtınasında sönük gözcü ateşi. Emby ateşi yakar, fırtına diner, dağ evinin pencereleri yanar |
+| Donmuş Göl (`scene_9`) | Buzla kaplı göl, donmuş çan kulesi. Emby çanı ısıtır, çan sallanır, buz çatlayıp erir, tekneler serbest kalır |
+| Kor Tahtı (`scene_10`) | Sönmüş Büyük Ocak, gri ve donuk meydan. Emby ocağa dalar, büyük alev yükselir, sıcaklık bütün meydana yayılır (final) |
 
 ## Yeni sahne eklerken
 
+- Video üretiminin de günlük sınırı var: 2026-11-13'te bir videodan sonra "sınıra ulaştınız" dendi; ayarlar menüsünün altındaki kutu sınırın açılacağı saati yazar.
 - Aynı sohbette ikinci video istenirse araç önceki videoyu uzatabilir; her sahne yeni sohbette istenir.
 - İstem şablonu: dikey 9:16, yumuşak 3B CGI, çizgisiz; başta Ayaz'ın hilesi (buz, soğuk mavi ışık), Emby ocağı ya da lambayı yakar, renk ve sıcak ışık geri gelir; kamera sabit; insan, yazı ve logo yok; yalnız ortam sesi.
 - Sahne `LevelMap.cs`'te bölgeye bağlanır (`SceneOf`), metni `District.Story`'dedir.

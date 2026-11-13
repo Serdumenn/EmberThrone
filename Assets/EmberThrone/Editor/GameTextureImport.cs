@@ -20,6 +20,7 @@ namespace EmberThrone.EditorTools
             if (!board && !assetPath.StartsWith(Ui)) return;
 
             bool backdrop = board && System.IO.Path.GetFileName(assetPath).StartsWith("bg_");
+            bool restore = assetPath.StartsWith(Ui + "Restore/");
             int maxSize = board && !backdrop ? 256 : 2048;
 
             var importer = (TextureImporter)assetImporter;
@@ -27,7 +28,7 @@ namespace EmberThrone.EditorTools
             importer.npotScale = TextureImporterNPOTScale.None;
             importer.alphaIsTransparency = true;
             importer.wrapMode = TextureWrapMode.Clamp;
-            importer.mipmapEnabled = board || assetPath.StartsWith(Ui + "Art/") || assetPath.StartsWith(Ui + "Cards/");
+            importer.mipmapEnabled = !restore && (board || assetPath.StartsWith(Ui + "Art/") || assetPath.StartsWith(Ui + "Cards/"));
             importer.filterMode = importer.mipmapEnabled ? FilterMode.Trilinear : FilterMode.Bilinear;
             importer.maxTextureSize = maxSize;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
@@ -36,7 +37,7 @@ namespace EmberThrone.EditorTools
                 name = "Android",
                 overridden = true,
                 maxTextureSize = maxSize,
-                format = TextureImporterFormat.ASTC_4x4,
+                format = restore ? TextureImporterFormat.ASTC_6x6 : TextureImporterFormat.ASTC_4x4,
                 compressionQuality = 100,
             });
         }

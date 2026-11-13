@@ -16,6 +16,7 @@ namespace EmberThrone.Core
         RowBlast,
         ColumnBlast,
         Shuffle,
+        ColorBrush,
     }
 
     public sealed partial class GameSession
@@ -29,10 +30,14 @@ namespace EmberThrone.Core
         int _movesLeft;
         GameState _state;
         int _collectiblesToSpawn;
+        bool _spreadDue;
+        bool _finaleDone;
+        bool _frostBroken;
 
         MoveOutcome _outcome;
         BoardStep _step;
         readonly List<GridPos> _strikeTargets = new List<GridPos>();
+        readonly HashSet<int> _blockerHits = new HashSet<int>();
 
         public GameSession(LevelDefinition level, int seed, GameRules rules = null)
         {
@@ -63,6 +68,9 @@ namespace EmberThrone.Core
             _movesLeft = other._movesLeft;
             _state = other._state;
             _collectiblesToSpawn = other._collectiblesToSpawn;
+            _spreadDue = other._spreadDue;
+            _frostBroken = other._frostBroken;
+            _finaleDone = other._finaleDone;
             InitialOutcome = new MoveOutcome { Accepted = true, MovesLeft = _movesLeft, State = _state };
         }
 
@@ -207,6 +215,8 @@ namespace EmberThrone.Core
         {
             _movesLeft--;
             _stats.MovesMade++;
+            _spreadDue = true;
+            _frostBroken = false;
         }
 
         void RunWaves(Action<List<Activation>> firstWave)
@@ -214,6 +224,7 @@ namespace EmberThrone.Core
             _outcome.ClearRounds++;
             NewStep(StepKind.Clear);
             _strikeTargets.Clear();
+            _blockerHits.Clear();
             var next = new List<Activation>();
             firstWave(next);
             int guard = 0;
@@ -223,6 +234,7 @@ namespace EmberThrone.Core
                 next = new List<Activation>();
                 NewStep(StepKind.Clear);
                 _strikeTargets.Clear();
+                _blockerHits.Clear();
                 foreach (var act in current) Execute(act, next);
             }
         }
@@ -243,6 +255,11 @@ namespace EmberThrone.Core
         void EndOfAction()
         {
             if (_state != GameState.Playing) return;
+            if (_spreadDue)
+            {
+                _spreadDue = false;
+                if (!_frostBroken && _movesLeft > 0 && !AllGoalsComplete) SpreadFrost();
+            }
             if (AllGoalsComplete)
             {
                 _state = GameState.Won;
@@ -349,6 +366,47 @@ namespace EmberThrone.Core
             foreach (var g in _goals)
                 if (g.Type == GoalType.Color && g.Color == color && !g.IsComplete) return true;
             return false;
+        }
+
+        static readonly GridPos[] Around = { new GridPos(0, 1), new GridPos(1, 0), new GridPos(0, -1), new GridPos(-1, 0) };
+
+        void SpreadFrost()
+        {
+            var from = new List<GridPos>();
+            var to = new List<GridPos>();
+            for (int y = 0; y < _board.Height; y++)
+                for (int x = 0; x < _board.Width; x++)
+                {
+                    if (!_board.CellAt(x, y).Frost) continue;
+                    var source = new GridPos(x, y);
+                    foreach (var d in Around)
+                    {
+                        var target = new GridPos(x + d.X, y + d.Y);
+                        if (!_board.Exists(target)) continue;
+                        var c = _board.CellAt(target);
+                        if (c.Cover > 0 || c.Piece == null || c.Piece.Kind != PieceKind.Gem || c.Piece.Triggered) continue;
+                        from.Add(source);
+                        to.Add(target);
+                    }
+                }
+            if (to.Count == 0) return;
+            int pick = _rng.Next(to.Count);
+            var cell = _board.CellAt(to[pick]);
+            cell.Cover = 1;
+            cell.Frost = true;
+            _stats.FrostSpreads++;
+            int goalIndex = -1, remaining = 0;
+            for (int i = 0; i < _goals.Count; i++)
+            {
+                var g = _goals[i];
+                if (g.Type != GoalType.Cover || !g.CountsAll) continue;
+                g.Remaining++;
+                goalIndex = i;
+                remaining = g.Remaining;
+                break;
+            }
+            NewStep(StepKind.Clear);
+            Emit(new FrostSpreadEvent(from[pick], to[pick], goalIndex, remaining));
         }
 
         List<GridPos> FreeGems()

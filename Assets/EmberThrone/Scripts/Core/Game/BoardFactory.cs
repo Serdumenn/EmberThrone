@@ -8,6 +8,7 @@ namespace EmberThrone.Core
         {
             var board = new Board(level.Width, level.Height);
             var randomCells = new List<GridPos>();
+            var groups = new Dictionary<int, Piece>();
 
             for (int y = 0; y < level.Height; y++)
             {
@@ -20,13 +21,20 @@ namespace EmberThrone.Core
                     cell.Spawner = spec.Spawner;
                     cell.Floor = spec.Floor;
                     cell.Cover = spec.Cover;
+                    cell.Frost = spec.Frost;
                     switch (spec.Content)
                     {
                         case CellContent.Random:
                             randomCells.Add(new GridPos(x, y));
                             break;
                         case CellContent.Fixed:
-                            cell.Piece = board.CreatePiece(spec.Kind, spec.Color, spec.Kind == PieceKind.Box ? System.Math.Max(1, spec.Hp) : 0);
+                            if (spec.Group > 0 && groups.TryGetValue(spec.Group, out var shared))
+                            {
+                                cell.Piece = shared;
+                                break;
+                            }
+                            cell.Piece = board.CreatePiece(spec.Kind, spec.Color, spec.Kind.IsBlocker() ? System.Math.Max(1, spec.Hp) : 0);
+                            if (spec.Group > 0) groups[spec.Group] = cell.Piece;
                             break;
                     }
                 }

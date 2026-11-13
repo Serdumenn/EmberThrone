@@ -1,9 +1,9 @@
 {
   "id": 20,
   "name": "Cold Hearth",
-  "moves": 26,
+  "moves": 24,
   "colors": 5,
-  "difficulty": "hard",
+  "difficulty": "superhard",
   "goals": [
     {
       "type": "collectible"

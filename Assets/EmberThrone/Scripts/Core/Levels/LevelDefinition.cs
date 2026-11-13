@@ -9,6 +9,9 @@ namespace EmberThrone.Core
         Floor,
         Cover,
         Collectible,
+        Lamp,
+        Flower,
+        Statue,
     }
 
     public enum CellContent
@@ -28,6 +31,8 @@ namespace EmberThrone.Core
         public int Hp;
         public int Floor;
         public int Cover;
+        public bool Frost;
+        public int Group;
     }
 
     public sealed class GoalDefinition
@@ -62,6 +67,9 @@ namespace EmberThrone.Core
         public int Moves;
         public int ColorCount = 5;
         public string Difficulty = "normal";
+
+        public bool IsSuperHard => Difficulty == "superhard";
+        public bool IsHard => Difficulty == "hard" || IsSuperHard;
         public CellSpec[] Cells;
         public readonly List<GoalDefinition> Goals = new List<GoalDefinition>();
         public CollectibleSettings Collectibles;

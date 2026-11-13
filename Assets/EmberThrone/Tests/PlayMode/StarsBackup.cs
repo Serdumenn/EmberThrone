@@ -6,7 +6,7 @@ namespace EmberThrone.Game.Tests
 {
     static class StarsBackup
     {
-        static readonly int[] TestLevelIds = { 0, 99, 4242 };
+        static readonly int[] TestLevelIds = { 0, 99, 4242, 4243 };
 
         static IEnumerable<int> KnownIds() => LevelProgress.LoadLevels().Select(l => l.Id).Concat(TestLevelIds);
 

@@ -10,6 +10,9 @@ namespace EmberThrone.Core
         ColorBomb = 5,
         Box = 6,
         Collectible = 7,
+        Lamp = 8,
+        Planter = 9,
+        Statue = 10,
     }
 
     public static class PieceKindExtensions
@@ -22,11 +25,23 @@ namespace EmberThrone.Core
 
         public static bool IsRocket(this PieceKind kind) => kind == PieceKind.RocketH || kind == PieceKind.RocketV;
 
-        public static bool IsBlocker(this PieceKind kind) => kind == PieceKind.Box;
+        public static bool IsBlocker(this PieceKind kind) =>
+            kind == PieceKind.Box || kind == PieceKind.Lamp || kind == PieceKind.Planter || kind == PieceKind.Statue;
 
-        public static bool CanFall(this PieceKind kind) => kind != PieceKind.Box;
+        public static bool CanFall(this PieceKind kind) => !kind.IsBlocker();
 
-        public static bool IsSwappable(this PieceKind kind) => kind != PieceKind.Box;
+        public static bool IsSwappable(this PieceKind kind) => !kind.IsBlocker();
+
+        public static int StartHp(this PieceKind kind)
+        {
+            switch (kind)
+            {
+                case PieceKind.Lamp: return 2;
+                case PieceKind.Planter: return 3;
+                case PieceKind.Statue: return 4;
+                default: return 1;
+            }
+        }
     }
 
     public static class GemColor

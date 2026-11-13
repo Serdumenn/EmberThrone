@@ -155,6 +155,7 @@ namespace EmberThrone.Game
         public Button LeaveButton { get; private set; }
         public IReadOnlyList<Button> JoinButtons => _joins;
         public IReadOnlyList<Button> HelpButtons => _helps;
+        public TeamChest Chest { get; private set; }
         public int MemberRows => _members.Count;
         public string StatusText => _status != null ? _status.text : "";
         public string RequestLabel => RequestButton != null ? Rows.LabelOf(RequestButton) : "";
@@ -206,6 +207,7 @@ namespace EmberThrone.Game
             _members.Clear();
             RequestButton = null;
             LeaveButton = null;
+            Chest = null;
             _status = null;
             if (Meta.Team.Joined) BuildTeam(now);
             else BuildList(now);
@@ -257,6 +259,7 @@ namespace EmberThrone.Game
             UpdateRequest(now);
 
             var scroll = Scroll("Feed");
+            Chest = TeamChest.Build(scroll, _app.ShowRewards);
             foreach (var ask in team.Asks(now))
             {
                 int id = ask.Id;

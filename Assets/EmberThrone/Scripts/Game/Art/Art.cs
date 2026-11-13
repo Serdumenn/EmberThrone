@@ -7,10 +7,6 @@ namespace EmberThrone.Game
     public static class Palette
     {
         public static readonly Color Background = Hex("1A1220");
-        public static readonly Color BoardBack = Hex("131A4A");
-        public static readonly Color BoardGlow = new Color(1f, 0.84f, 0.48f, 0.95f);
-        public static readonly Color TileLight = Hex("34459A");
-        public static readonly Color TileDark = Hex("2B3A88");
         public static readonly Color Gold = Hex("FFD24A");
         public static readonly Color Select = Hex("7AD83A");
         public const float CoverAlpha = 0.82f;
@@ -34,9 +30,10 @@ namespace EmberThrone.Game
         internal const int HelperSize = 128;
         const string BoardFolder = "Board/";
 
-        const float PieceCells = 1.1f;
+        const float PieceCells = 1.17f;
         const float FloorCells = 1.08f;
         const float CoverCells = 1.12f;
+        const float StatueCells = 2.12f;
         const float BackdropPixelsPerUnit = 100f;
 
         static readonly string[] GemFiles = { "piece_R", "piece_G", "piece_B", "piece_Y", "piece_P", "piece_O" };
@@ -57,6 +54,12 @@ namespace EmberThrone.Game
             Homing();
             ColorBomb();
             Collectible();
+            Lamp(1);
+            Lamp(2);
+            Planter();
+            Flower();
+            Statue(1);
+            Statue(4);
             for (int hp = 1; hp <= 3; hp++)
             {
                 Box(hp);
@@ -64,9 +67,6 @@ namespace EmberThrone.Game
                 Floor(hp);
             }
             Backdrop();
-            Tile();
-            CellBack();
-            Glow();
             Selection();
             Ring();
             Disc();
@@ -91,9 +91,17 @@ namespace EmberThrone.Game
                 case PieceKind.ColorBomb: return ColorBomb();
                 case PieceKind.Box: return Box(hp);
                 case PieceKind.Collectible: return Collectible();
+                case PieceKind.Lamp: return Lamp(hp);
+                case PieceKind.Planter: return Planter();
+                case PieceKind.Statue: return Statue(hp);
                 default: return Disc();
             }
         }
+
+        public static Sprite Lamp(int hp) => Render(hp >= 2 ? "ob_lamp" : "ob_lamp_lit");
+        public static Sprite Planter() => Render("ob_planter");
+        public static Sprite Flower() => Render("ob_flower");
+        public static Sprite Statue(int hp) => Render(hp > 2 ? "ob_statue" : "ob_statue_cracked", StatueCells);
 
         public static Sprite Rocket(bool horizontal) => Render(horizontal ? "sp_rocket" : "sp_rocket_v");
         public static Sprite Bomb() => Render("sp_bomb");
@@ -106,13 +114,17 @@ namespace EmberThrone.Game
 
         public static Sprite Cover(int hp) => Render("ob_ice", CoverCells);
 
+        public static Sprite Frost() => Render("ob_frost", CoverCells);
+
+        public static Sprite FrostIcon() => Render("ob_frost_icon", CoverCells);
+
         public static Sprite Floor(int hp) => Render(hp >= 2 ? "ob_floor2" : "ob_floor1", FloorCells);
 
         public static Sprite Backdrop()
         {
-            return Get("bg_game", () =>
+            return Get("bg_game_calm", () =>
             {
-                var tex = Load("bg_game");
+                var tex = Load("bg_game_calm");
                 return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), BackdropPixelsPerUnit, 0, SpriteMeshType.FullRect);
             });
         }
@@ -131,38 +143,6 @@ namespace EmberThrone.Game
             var tex = Resources.Load<Texture2D>(BoardFolder + file);
             if (tex == null) throw new MissingReferenceException("[EmberThrone] Missing board art: Resources/" + BoardFolder + file);
             return tex;
-        }
-
-        public static Sprite Tile()
-        {
-            return Get("tile", () => Bake("tile", p =>
-            {
-                float d = SdRoundBox(p, 0.93f, 0.93f, 0.37f);
-                float lowerEdge = Smooth(-0.78f, -0.84f, p.y);
-                var c = Color.Lerp(Color.white, new Color(0.24f, 0.31f, 0.63f), 0.18f * lowerEdge);
-                c.a = Coverage(d);
-                return c;
-            }));
-        }
-
-        public static Sprite CellBack()
-        {
-            return Get("back", () => Bake("back", p =>
-            {
-                var c = Color.white;
-                c.a = Coverage(SdRoundBox(p, 0.98f, 0.98f, 0.42f));
-                return c;
-            }));
-        }
-
-        public static Sprite Glow()
-        {
-            return Get("glow", () => Bake("glow", p =>
-            {
-                var c = Color.white;
-                c.a = 1f - Smooth(-0.12f, 0f, SdRoundBox(p, 0.92f, 0.92f, 0.4f));
-                return c;
-            }));
         }
 
         public static Sprite Selection()

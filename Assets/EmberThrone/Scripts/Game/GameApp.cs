@@ -4,6 +4,7 @@ using EmberThrone.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
 {
@@ -12,7 +13,11 @@ namespace EmberThrone.Game
         public const string BootstrapScene = "Bootstrap";
 
         public static bool ShowLoading = true;
+        const long ArriveDelayMs = 350;
         public static bool ShowStories = true;
+        public static bool StreakBoosts = true;
+        public static bool WinFinale = true;
+        public static bool OfferStarter = true;
 
         public static GameApp Instance { get; private set; }
 
@@ -20,6 +25,7 @@ namespace EmberThrone.Game
         public CameraShake Shake { get; private set; }
         public UiRoot Ui { get; private set; }
         public AdService Ads { get; private set; }
+        public PurchaseService Purchases { get; private set; }
         public GameController Game { get; private set; }
         public LevelSelectScreen LevelSelect { get; private set; }
         public LevelStartPopup LevelStart { get; private set; }
@@ -27,6 +33,7 @@ namespace EmberThrone.Game
         public RewardPopup Rewards { get; private set; }
         public LoadingScreen Loading { get; private set; }
         public StoryScene Story { get; private set; }
+        public RewardFlyers Flyers { get; private set; }
         public bool ScreenStaysOn { get; private set; }
         public IReadOnlyList<LevelDefinition> Levels => _levels;
 
@@ -54,11 +61,15 @@ namespace EmberThrone.Game
             gameObject.AddComponent<HitStop>();
             Sound.Init(gameObject);
             Ads = gameObject.AddComponent<AdService>();
+            Purchases = gameObject.AddComponent<PurchaseService>();
+            Purchases.Initialize(Meta.Rules.Store.Products, GrantPurchase);
             Camera = BuildCamera();
             Shake = Camera.gameObject.AddComponent<CameraShake>();
             Shake.SetRest(Camera.transform.position);
             Ui = UiRoot.Create(transform);
+            Flyers = RewardFlyers.Create(Ui.Popups);
             _levels = LevelProgress.LoadLevels();
+            SeedRestore();
             ShowLevelSelect();
             if (ShowLoading) ShowLoadingScreen();
         }
@@ -136,7 +147,29 @@ namespace EmberThrone.Game
         {
             CloseCurrent();
             LevelSelect = LevelSelectScreen.Create(Ui, _levels, l => LevelProgress.GetStars(l.Id), ShowLevelStart, this);
+            OfferStarterOnce();
         }
+
+        void OfferStarterOnce()
+        {
+            var economy = Meta.Economy;
+            if (!OfferStarter || Modal != null || economy.Profile.StarterShown || !economy.StarterOffered(LevelSelect.CurrentIndex)) return;
+            economy.Profile.StarterShown = true;
+            Meta.Save();
+            OpenStarter();
+        }
+
+        public void OpenStarter() => OpenModal(closed => StarterPopup.Show(Ui.Popups, Purchases, closed));
+
+        bool GrantPurchase(string productId, string transaction)
+        {
+            if (!Meta.Economy.GrantPurchase(productId, transaction, Meta.Now, out var granted)) return false;
+            Meta.Save();
+            if (granted.Length > 0) ShowRewards("Teşekkürler!", granted, false);
+            return true;
+        }
+
+        public void OpenPass() => OpenModal(closed => PassPopup.Show(Ui.Popups, Purchases, ShowRewards, closed));
 
         public void ShowLevelStart(int index)
         {
@@ -147,7 +180,7 @@ namespace EmberThrone.Game
                 return;
             }
             int chapter = LevelMap.ChapterStarting(index);
-            if (ShowStories && chapter >= 0 && Meta.Economy.MarkSceneSeen(chapter))
+            if (ShowStories && StoryScene.Available(chapter) && Meta.Economy.MarkSceneSeen(chapter))
             {
                 Meta.Save();
                 PlayStory(chapter, () => ShowLevelStart(index));
@@ -179,7 +212,7 @@ namespace EmberThrone.Game
             StartLevel(_levels[index], index, Environment.TickCount);
         }
 
-        public void OpenShop() => OpenModal(closed => ShopPopup.Show(Ui.Popups, Ads, ShowRewards, closed));
+        public void OpenShop() => OpenModal(closed => ShopPopup.Show(Ui.Popups, Ads, Purchases, ShowRewards, closed));
 
         public void OpenLives() => OpenModal(closed => LivesPopup.Show(Ui.Popups, Ads, closed));
 
@@ -198,10 +231,53 @@ namespace EmberThrone.Game
             OpenModal(closed => PackPopup.Show(Ui.Popups, draws, Meta.Cards.Packs > 0, OpenPack, closed));
         }
 
+        public void OpenContest(ContestKind kind) => OpenModal(closed => ContestPopup.Show(Ui.Popups, kind, ShowRewards, closed));
+
+        public void OpenLadder() => OpenModal(closed => LadderPopup.Show(Ui.Popups, ShowRewards, closed));
+
         public void OpenEvent()
         {
             if (Meta.Event.Current(Meta.Now) == null) return;
             OpenModal(closed => EventPopup.Show(Ui.Popups, ShowRewards, closed));
+        }
+
+        void SeedRestore()
+        {
+            var levels = new int[LevelMap.Chapters.Length];
+            var stars = new int[LevelMap.Chapters.Length];
+            for (int i = 0; i < _levels.Count; i++)
+            {
+                int best = LevelProgress.GetStars(_levels[i].Id);
+                if (best <= 0) continue;
+                int chapter = LevelMap.ChapterOf(i);
+                levels[chapter]++;
+                stars[chapter] += best;
+            }
+            if (Meta.Restore.Seed(levels, stars)) Meta.Save();
+        }
+
+        public void OpenRestore()
+        {
+            if (LevelSelect == null || LevelSelect.Diorama.Busy) return;
+            int district = LevelSelect.RestoreFocus;
+            OpenModal(closed => RestorePopup.Show(Ui.Popups, district, Repair, closed));
+        }
+
+        public void Repair(int district, int task)
+        {
+            var rewards = Meta.Restore.Claim(district, task);
+            if (rewards == null) return;
+            bool restored = Meta.Restore.Restored(district);
+            Meta.Save();
+            var select = LevelSelect;
+            if (select == null)
+            {
+                ShowRewards(LevelMap.Chapters[district].Title, rewards, false);
+                return;
+            }
+            select.ShowMap(false);
+            string title = restored ? LevelMap.Chapters[district].Title + " onarıldı!" : Meta.RestoreRules.Areas[district].Tasks[task].Name;
+            select.Diorama.Thaw(task, restored, () => ShowRewards(title, rewards, restored));
         }
 
         public void ShowRaceResult()
@@ -235,12 +311,56 @@ namespace EmberThrone.Game
         public void ShowRewards(string title, Reward[] rewards, bool chest)
         {
             Rewards?.Close();
+            Hold(rewards);
             RewardPopup popup = null;
             popup = RewardPopup.Show(Ui.Popups, title, rewards, chest, () =>
             {
                 if (Rewards == popup) Rewards = null;
+                for (int i = 0; i < popup.Rewards.Length; i++) FlyHome(popup.Rewards[i], popup.OriginOf(i));
             });
             Rewards = popup;
+        }
+
+        void Hold(Reward[] rewards)
+        {
+            var top = LevelSelect?.Top;
+            if (top == null) return;
+            foreach (var reward in rewards) top.Hold(reward.Kind, reward.Amount);
+        }
+
+        VisualElement HomeOf(Reward reward)
+        {
+            if (LevelSelect == null) return null;
+            if (reward.Kind == RewardKind.Pack) return LevelSelect.Tabs.CardsTab;
+            return LevelSelect.Top.TargetOf(reward.Kind);
+        }
+
+        void FlyHome(Reward reward, Vector2 fromPanel)
+        {
+            var top = LevelSelect?.Top;
+            var target = HomeOf(reward);
+            if (top == null || target == null) return;
+            int landed = 0;
+            Flyers.Fly(reward, fromPanel, target, amount =>
+            {
+                Sound.Play(Sfx.Collect, Mathf.Min(landed++, 8));
+                if (reward.Kind == RewardKind.Pack) Popup.Bump(target, 0.12f, 0.14f);
+                else top.Release(reward.Kind, amount);
+            });
+        }
+
+        public void ShowLevelSelect(Reward[] arriving)
+        {
+            ShowLevelSelect();
+            if (arriving == null || arriving.Length == 0) return;
+            Hold(arriving);
+            var select = LevelSelect;
+            select.Root.schedule.Execute(() =>
+            {
+                if (LevelSelect != select) return;
+                var from = Ui.Content.worldBound.center;
+                foreach (var reward in arriving) FlyHome(reward, from);
+            }).ExecuteLater(ArriveDelayMs);
         }
 
         public void StartLevel(LevelDefinition level, int index, int seed)

@@ -129,6 +129,9 @@ namespace EmberThrone.Game
         public int Chapter { get; private set; }
         public bool IsOpen => Root != null && Root.parent != null;
 
+        public static bool Available(int chapter) =>
+            chapter >= 0 && chapter < LevelMap.Chapters.Length && Resources.Load<VideoClip>("Video/" + LevelMap.SceneOf(chapter)) != null;
+
         public static StoryScene Show(VisualElement parent, Transform owner, int chapter, Action<bool> closed)
         {
             var scene = new StoryScene { Chapter = chapter, _closed = closed };

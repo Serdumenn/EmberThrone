@@ -77,7 +77,10 @@ namespace EmberThrone.Core
 
         public int StartCoins = 500;
         public int StartGems = 50;
+        public StoreRules Store = new StoreRules();
+
         public int CoinCap = 15000;
+        public int CoinWarnPercent = 90;
         public int GemCap = 9999;
 
         public int WinCoins = 100;
@@ -101,9 +104,12 @@ namespace EmberThrone.Core
         public int PacksOnFirstWin = 1;
         public int PacksOnAllQuests = 1;
 
+        public PieceKind[] StreakSpecials = { PieceKind.RocketH, PieceKind.Bomb, PieceKind.ColorBomb };
+        public int FinaleCoinsPerSpecial = 10;
+
         public int StartBoosters = 3;
         public int BoosterCap = 20;
-        public int[] BoosterPrices = { 900, 1200, 1200, 900 };
+        public int[] BoosterPrices = { 900, 1200, 1200, 900, 1500 };
 
         public int ChestPrice = 400;
         public ChestDrop[] ChestDrops =

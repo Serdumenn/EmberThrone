@@ -371,6 +371,62 @@
     background-image: url("../Art/bo_shuffle.png");
 }
 
+.et-ic--brush {
+    background-image: url("../Art/bo_brush.png");
+}
+
+.et-ic--piggy {
+    background-image: url("../Art/ic_piggy.png");
+}
+
+.et-ic--pass {
+    background-image: url("../Art/ic_pass.png");
+}
+
+.et-ic--starter {
+    background-image: url("../Art/ic_starter.png");
+}
+
+.et-ic--coins-pile {
+    background-image: url("../Art/ic_coins_pile.png");
+}
+
+.et-ic--gems-pile {
+    background-image: url("../Art/ic_gems_pile.png");
+}
+
+.et-ic--booster-crate {
+    background-image: url("../Art/ic_booster_crate.png");
+}
+
+.et-ic--rush {
+    background-image: url("../Art/ic_rush.png");
+}
+
+.et-ic--lantern-race {
+    background-image: url("../Art/ic_lantern_race.png");
+}
+
+.et-ic--lanterns {
+    background-image: url("../Art/ic_lanterns.png");
+}
+
+.et-ic--ladder {
+    background-image: url("../Art/ic_ladder.png");
+}
+
+.et-ic--team-chest {
+    background-image: url("../Art/ic_team_chest.png");
+}
+
+.et-ic--trophy-flame {
+    background-image: url("../Art/ic_trophy_flame.png");
+}
+
+.et-ic--mascot {
+    background-image: url("../Art/mascot.png");
+}
+
 .et-ic--star {
     background-image: url("../Art/ui_star.png");
 }

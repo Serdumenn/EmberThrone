@@ -40,6 +40,8 @@ namespace EmberThrone.Game.Tests
             Time.timeScale = 1f;
             GameApp.ShowLoading = false;
             GameApp.ShowStories = false;
+            GameApp.StreakBoosts = false;
+            GameApp.OfferStarter = false;
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = new Vector2Int(1080, 1920);
             _app = GameApp.Create();
@@ -53,6 +55,8 @@ namespace EmberThrone.Game.Tests
             Time.timeScale = 1f;
             GameApp.ShowLoading = true;
             GameApp.ShowStories = true;
+            GameApp.StreakBoosts = true;
+            GameApp.OfferStarter = true;
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = null;
             Object.Destroy(_app.gameObject);
@@ -161,6 +165,7 @@ namespace EmberThrone.Game.Tests
         }
 
         [UnityTest]
+        [Timeout(600000)]
         public IEnumerator TakeAll()
         {
             _app.ShowLoadingScreen();
@@ -169,6 +174,7 @@ namespace EmberThrone.Game.Tests
             _app.Loading?.Close();
             for (int chapter = 0; chapter < LevelMap.Chapters.Length; chapter++)
             {
+                if (!StoryScene.Available(chapter)) continue;
                 _app.PlayStory(chapter);
                 yield return new WaitForSecondsRealtime(1.5f);
                 yield return Shot("00" + (char)('a' + chapter) + "_sahne_" + (chapter + 1) + "_basi");
@@ -181,6 +187,9 @@ namespace EmberThrone.Game.Tests
             _app.LevelSelect.ShowMap(true);
             for (int i = 0; i < 4; i++) yield return null;
             yield return Shot("01a_dunya");
+            _app.LevelSelect.Scroll.scrollOffset = new Vector2(0f, 1e6f);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01a_dunya_sonu");
             _app.LevelSelect.ShowMap(false);
             yield return null;
             for (int c = 0; c < 4; c++) Meta.Economy.Profile.Cards[Meta.CardRules.IndexOf(0, c)] = 1;
@@ -247,6 +256,76 @@ namespace EmberThrone.Game.Tests
             yield return Shot("01p_etkinlik_sprint");
             _app.Modal.Close();
 
+            long race = RaceRules.WeekStart(RaceRules.WeekOf(real)) + 2 * EconomyRules.SecondsPerDay + 18 * 3600;
+            Meta.Clock = () => race;
+            for (int i = 0; i < Meta.ContestRules.FromWins[1]; i++) LevelProgress.SaveStars(_app.Levels[i].Id, 3);
+            Meta.Contests.Begin(ContestKind.Lantern, race - EconomyRules.SecondsPerDay);
+            Meta.Contests.Begin(ContestKind.Rush, race - 1700);
+            for (int i = 0; i < 3; i++) Meta.Contests.ReportWin(race - 1200 + i * 300);
+            Meta.Save();
+            _app.ShowLevelSelect();
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01u_ana_ekran_yarislar");
+            _app.OpenContest(ContestKind.Rush);
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01v_kivilcim_kosusu");
+            _app.Modal.Close();
+            _app.OpenContest(ContestKind.Lantern);
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01w_fener_yarisi");
+            _app.Modal.Close();
+            _app.OpenLadder();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01x_kor_merdiveni");
+            _app.Modal.Close();
+            for (int i = 0; i < 2; i++) Meta.Contests.ReportWin(race);
+            Meta.Save();
+            _app.OpenContest(ContestKind.Rush);
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01y_kosu_bitti");
+            _app.Modal.Close();
+            Meta.Team.Join(2);
+            Meta.Contests.TeamWins(race);
+            Meta.Economy.Profile.ChestWins = 12;
+            Meta.Save();
+            _app.LevelSelect.Show(LobbyPage.Team);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01z_takim_sandigi");
+            Meta.Team.Leave();
+            StarsBackup.Restore(new System.Collections.Generic.Dictionary<int, int>());
+            _app.ShowLevelSelect();
+            for (int i = 0; i < 4; i++) yield return null;
+
+            Meta.Clock = Meta.WallClock;
+            var select = _app.LevelSelect;
+            int district = select.RestoreFocus;
+            var profile = Meta.Economy.Profile;
+            profile.RestoreLevels[district] = 4;
+            profile.RestoreStars[district] = 9;
+            profile.RestoreBoosters[district] = 2;
+            profile.RestoreClaimed[district] = 0;
+            Meta.Save();
+            select.ShowMap(false);
+            select.Diorama.Show(district);
+            select.Lobby.Refresh();
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01q_onarim_donmus");
+            _app.OpenRestore();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01r_onarim_penceresi");
+            _app.Modal.Close();
+            _app.Repair(district, 0);
+            yield return new WaitForSecondsRealtime(0.55f);
+            yield return Shot("01s_onarim_cozuluyor");
+            while (select.Diorama.Busy) yield return null;
+            _app.Rewards?.Close();
+            _app.Repair(district, 2);
+            while (select.Diorama.Busy) yield return null;
+            _app.Rewards?.Close();
+            select.Lobby.Refresh();
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01t_onarim_ilerleme");
+
             Meta.Clock = Meta.WallClock;
             Meta.Economy.Profile.Lives = Meta.Rules.MaxLives;
             Meta.Save();
@@ -255,6 +334,17 @@ namespace EmberThrone.Game.Tests
             _app.OpenShop();
             yield return GameTime(Timing.ModalIn + 0.1f);
             yield return Shot("01c_magaza");
+            _app.Modal.Close();
+            for (int i = 0; i < 7; i++) Meta.Economy.ReportStoreWin(Meta.Now);
+            Meta.Economy.ClaimPass(1, false, Meta.Now);
+            Meta.Save();
+            _app.OpenPass();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01c2_kor_yolu");
+            _app.Modal.Close();
+            _app.OpenStarter();
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01c3_baslangic_paketi");
             _app.Modal.Close();
             _app.OpenLives();
             yield return GameTime(Timing.ModalIn + 0.1f);
@@ -272,13 +362,58 @@ namespace EmberThrone.Game.Tests
             yield return GameTime(Timing.ModalIn + Timing.StarFill * 4f);
             yield return Shot("01g_odul");
             _app.Rewards.Close();
+            yield return GameTime(RewardFlyers.Burst + RewardFlyers.Flight * 0.45f);
+            yield return Shot("01g2_odul_ucuyor");
+            while (_app.Flyers.Flying > 0) yield return null;
+            _app.ShowRewards("Sandık", new[] { Reward.Coins(250), Reward.Of(BoosterType.Hammer) }, true);
+            yield return GameTime(RewardPopup.ChestTime - RewardPopup.ChestShake * 0.4f);
+            yield return Shot("01g3_sandik_sallaniyor");
+            yield return GameTime(RewardPopup.ChestShake * 0.4f + 0.2f);
+            yield return Shot("01g4_sandik_acildi");
+            yield return GameTime(0.6f);
+            _app.Rewards.Close();
+            while (_app.Flyers.Flying > 0) yield return null;
+            Meta.Economy.AddCoins(Meta.Rules.CoinCap);
+            Meta.Save();
+            yield return null;
+            yield return Shot("01g5_altin_dolu");
+            Meta.Economy.SpendCoins(Meta.Economy.Coins - 2000);
+            Meta.Save();
             _app.ShowLevelStart(8);
             yield return GameTime(Timing.ModalIn + 0.1f);
             yield return Shot("01b_seviye_basi");
             _app.LevelStart.Close();
+            _app.ShowLevelStart(_app.Levels.ToList().FindIndex(l => l.Cells.Any(c => c.Frost)));
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01b2_seviye_basi_kiragi");
+            _app.LevelStart.Close();
+            GameApp.StreakBoosts = true;
+            Meta.Economy.Profile.WinStreak = 3;
+            _app.ShowLevelStart(19);
+            yield return GameTime(Timing.ModalIn + 0.1f);
+            yield return Shot("01b3_seviye_basi_seri_super_zor");
+            _app.LevelStart.Close();
+            Meta.Economy.Profile.WinStreak = 0;
+            GameApp.StreakBoosts = false;
 
             yield return Begin(_app.Levels[0]);
             yield return Shot("02_tahta_ve_hud");
+            _app.Game.Hud.Emby.SetMoves(1);
+            yield return GameTime(0.3f);
+            yield return Shot("02e_emby_panik");
+            _app.Game.Hud.Emby.React(EmbyMood.Wow);
+            yield return GameTime(0.2f);
+            yield return Shot("02f_emby_hayran");
+            var tone = BoardSkin.Tone;
+            foreach (BoardTone t in System.Enum.GetValues(typeof(BoardTone)))
+            {
+                BoardSkin.Tone = t;
+                yield return Begin(_app.Levels[8]);
+                yield return Shot("02t_ton_" + t.ToString().ToLowerInvariant());
+                yield return Fire("-", "02t_ton_" + t.ToString().ToLowerInvariant() + "_roket");
+                yield return Fire("*", "02t_ton_" + t.ToString().ToLowerInvariant() + "_bomba");
+            }
+            BoardSkin.Tone = tone;
             var firstMove = Game.Session.FindValidMoves().First(m => m.Type == MoveType.Swap);
             Game.OnTap(firstMove.A);
             yield return null;
@@ -309,6 +444,19 @@ namespace EmberThrone.Game.Tests
             yield return Fire("*", "09_bomba_ates");
             yield return Fire("@", "10_renk_bombasi_ates", new GridPos(3, 3));
             yield return Fire("^", "11_gudumlu_ates");
+            yield return Smash(new[] { "YPOGYO", "OGYPOG", "YPOGYO", "-1111O", "YPOGYO", "OGYPOG", "YPOGYO" }, null, "11b_kutular_parcalaniyor");
+            yield return Smash(new[] { "YPOGYO", "OGYPOG", "YPOGYO", "-POGYO", "YPOGYO", "OGYPOG", "YPOGYO" },
+                new[] { "......", "......", "......", ".11111", "......", "......", "......" }, "11c_buz_parcalaniyor");
+            BoosterInventory.Set(BoosterType.ColorBrush, 3);
+            yield return Begin(Level(20, null, "YPOGYO", "OGYPOG", "YPOGYO", "OGYPOG", "YPOGYO", "OGYPOG", "YPOGYO"));
+            Time.timeScale = SlowMotion;
+            Game.PickBooster(BoosterType.ColorBrush);
+            Game.OnTap(new GridPos(0, 0));
+            yield return GameTime(0.3f);
+            yield return Shot("11d_firca");
+            Time.timeScale = 1f;
+            yield return WaitIdle();
+            Assert.IsNull(Game.LastMismatch);
 
             yield return Begin(Level(20, null, "YPOGYO", "OGYPOG", "YP-*YO", "OGYPOG", "YPOGYO", "OGYPOG", "YPOGYO"));
             yield return Shot("12_ozel_taslar_tahtada");
@@ -332,7 +480,65 @@ namespace EmberThrone.Game.Tests
             yield return Begin(_app.Levels[6]);
             yield return Shot("18_toplanan_obje_seviyesi");
 
-            yield return Win("19_kazandin", "19a_kutlama_havai_fisek");
+            var frosted = LevelParser.FromLayers(
+                new[] { "YPOGYO", "OGYPOG", "YPOGYO", "OGYPOG", "RRBRYO", "OGYPOG", "YPOGYO" }, null, null, null,
+                new[] { "......", "......", "......", ".11...", "......", "...11.", "......" });
+            frosted.Name = "Deneme";
+            frosted.Id = 99;
+            frosted.Moves = 20;
+            frosted.ColorCount = 5;
+            frosted.Goals.Add(new GoalDefinition(GoalType.Cover));
+            yield return Begin(frosted);
+            yield return Shot("18b_kiragi_seviyesi");
+            bool spread = false;
+            Game.View.FrostSpread += _ => spread = true;
+            Time.timeScale = SlowMotion;
+            Game.RequestSwap(new GridPos(2, 2), new GridPos(3, 2));
+            while (!spread) yield return null;
+            yield return GameTime(0.06f);
+            yield return Shot("18c_kiragi_yayiliyor");
+            Time.timeScale = 1f;
+            yield return WaitIdle();
+            Assert.IsNull(Game.LastMismatch);
+            yield return GameTime(GoalFlyers.Flight + 0.2f);
+            yield return Shot("18d_kiragi_yayildi");
+
+            BoosterInventory.Set(BoosterType.Hammer, 20);
+            var blocks = LevelParser.FromLayers(new[] { "YPOGYO", "OGYPOG", "YPOGYO", "LFOGFL", "SSYPSS", "SSOGSS", "YPOGYO" }, null, null, null);
+            blocks.Name = "Deneme";
+            blocks.Id = 99;
+            blocks.Moves = 20;
+            blocks.ColorCount = 5;
+            blocks.Goals.Add(new GoalDefinition(GoalType.Lamp));
+            blocks.Goals.Add(new GoalDefinition(GoalType.Flower));
+            blocks.Goals.Add(new GoalDefinition(GoalType.Statue));
+            blocks.Goals.Add(new GoalDefinition(GoalType.Color, 20, GemColor.Red));
+            yield return Begin(blocks);
+            yield return Shot("18e_yeni_engeller");
+            foreach (var p in new[] { new GridPos(0, 3), new GridPos(1, 3), new GridPos(0, 2), new GridPos(1, 2), new GridPos(0, 1) })
+            {
+                Game.PickBooster(BoosterType.Hammer);
+                Game.OnTap(p);
+                yield return WaitIdle();
+            }
+            Game.PickBooster(BoosterType.Hammer);
+            Game.OnTap(new GridPos(4, 3));
+            yield return WaitIdle();
+            yield return Shot("18f_kandil_yandi_saksi_acti");
+            Time.timeScale = SlowMotion;
+            Game.PickBooster(BoosterType.Hammer);
+            Game.OnTap(new GridPos(1, 1));
+            yield return GameTime(0.25f);
+            yield return Shot("18g_koylu_kurtuluyor");
+            Time.timeScale = 1f;
+            yield return WaitIdle();
+            Assert.IsNull(Game.LastMismatch);
+            yield return Begin(_app.Levels[59]);
+            yield return Shot("18h_seviye_60_koylu");
+            yield return Begin(_app.Levels[91]);
+            yield return Shot("18i_seviye_92_dolu_tahta");
+
+            yield return Win("19_kazandin", "19a_kutlama_havai_fisek", "19b_final_roketler");
             yield return Lose("20_kaybettin");
 
             yield return Shape("21_uzun_telefon_20x9", 1080, 2400, new Rect(0f, 90f, 1080f, 2220f));
@@ -359,7 +565,27 @@ namespace EmberThrone.Game.Tests
             Assert.IsNull(Game.LastMismatch);
         }
 
-        IEnumerator Win(string shot, string celebrationShot = null)
+        IEnumerator Smash(string[] board, string[] cover, string shot)
+        {
+            var level = LevelParser.FromLayers(board, null, cover, null);
+            level.Name = "Deneme";
+            level.Id = 99;
+            level.Moves = 20;
+            level.ColorCount = 5;
+            level.Goals.Add(new GoalDefinition(GoalType.Color, 40, GemColor.Red));
+            yield return Begin(level);
+            Time.timeScale = SlowMotion;
+            Game.OnTap(new GridPos(0, 3));
+            yield return GameTime(0.22f);
+            yield return Shot(shot);
+            yield return GameTime(0.2f);
+            yield return Shot(shot + "_sonra");
+            Time.timeScale = 1f;
+            yield return WaitIdle();
+            Assert.IsNull(Game.LastMismatch);
+        }
+
+        IEnumerator Win(string shot, string celebrationShot = null, string finaleShot = null)
         {
             yield return Begin(Level(9, new GoalDefinition(GoalType.Color, 3, GemColor.Red), "YPOGY", "OGYPO", "RRBRY", "OGRPO", "YPOGY"));
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
@@ -368,6 +594,15 @@ namespace EmberThrone.Game.Tests
             {
                 yield return GameTime(Timing.WinDelay + Timing.WinSparkFlight + Timing.WinSparkInterval * 3f);
                 yield return Shot(celebrationShot);
+            }
+            if (finaleShot != null)
+            {
+                while (!Game.Session.FinalePlayed && Game.Popup == null) yield return null;
+                if (Game.Session.FinalePlayed)
+                {
+                    yield return GameTime(0.3f);
+                    yield return Shot(finaleShot);
+                }
             }
             while (Game.Popup == null) yield return null;
             yield return GameTime(Timing.ModalIn + Timing.StarFill * 3f + 0.3f);

@@ -22,6 +22,11 @@
       "file": "forge_story.mp4",
       "clip": "Assets/EmberThrone/Resources/Video/scene_3.webm",
       "poster": "Assets/EmberThrone/Resources/UI/Art/scene_3.jpg"
+    },
+    {
+      "file": "harbor_story.mp4",
+      "clip": "Assets/EmberThrone/Resources/Video/scene_4.webm",
+      "poster": "Assets/EmberThrone/Resources/UI/Art/scene_4.jpg"
     }
   ]
 }

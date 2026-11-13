@@ -114,6 +114,15 @@ namespace EmberThrone.Core
         public CoverDamagedEvent(GridPos pos, int hpLeft) { Pos = pos; HpLeft = hpLeft; }
     }
 
+    public sealed class FrostSpreadEvent : BoardEvent
+    {
+        public readonly GridPos From;
+        public readonly GridPos To;
+        public readonly int GoalIndex;
+        public readonly int Remaining;
+        public FrostSpreadEvent(GridPos from, GridPos to, int goalIndex, int remaining) { From = from; To = to; GoalIndex = goalIndex; Remaining = remaining; }
+    }
+
     public sealed class FloorDamagedEvent : BoardEvent
     {
         public readonly GridPos Pos;

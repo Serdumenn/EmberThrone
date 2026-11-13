@@ -1,0 +1,33 @@
+{
+  "id": 69,
+  "name": "Echo Chamber",
+  "moves": 20,
+  "colors": 5,
+  "difficulty": "normal",
+  "goals": [
+    {
+      "type": "collectible"
+    },
+    {
+      "type": "color",
+      "color": "P",
+      "count": 30
+    }
+  ],
+  "board": [
+    "....$.$..",
+    ".........",
+    ".........",
+    ".........",
+    "#.......#",
+    "#.......#",
+    ".........",
+    ".........",
+    "........."
+  ],
+  "collectibles": {
+    "total": 1,
+    "maxOnBoard": 2,
+    "spawnChance": 0.15
+  }
+}

@@ -18,6 +18,8 @@ namespace EmberThrone.Game
 
         readonly List<Button> _buttons = new List<Button>();
 
+        public string Message { get; private set; }
+
         public readonly struct Choice
         {
             public readonly string Label;
@@ -28,7 +30,7 @@ namespace EmberThrone.Game
 
         public static ResultPopup Show(VisualElement parent, string title, string message, int stars, int coins, int packs, int trophies, params Choice[] buttons)
         {
-            var popup = new ResultPopup { Title = title, Coins = coins, Packs = packs, Trophies = trophies };
+            var popup = new ResultPopup { Title = title, Message = message, Coins = coins, Packs = packs, Trophies = trophies };
             popup.Build(parent, message, stars, buttons);
             return popup;
         }

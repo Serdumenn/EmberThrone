@@ -11,6 +11,7 @@ namespace EmberThrone.Game
             BoosterType.RowBlast,
             BoosterType.ColumnBlast,
             BoosterType.Shuffle,
+            BoosterType.ColorBrush,
         };
 
         public static int Count(BoosterType type) => Meta.Economy.Boosters(type);
@@ -35,6 +36,7 @@ namespace EmberThrone.Game
                 case BoosterType.Hammer: return "hammer";
                 case BoosterType.RowBlast: return "row";
                 case BoosterType.ColumnBlast: return "column";
+                case BoosterType.ColorBrush: return "brush";
                 default: return "shuffle";
             }
         }
@@ -46,6 +48,7 @@ namespace EmberThrone.Game
                 case BoosterType.Hammer: return "Çekiç";
                 case BoosterType.RowBlast: return "Satır";
                 case BoosterType.ColumnBlast: return "Sütun";
+                case BoosterType.ColorBrush: return "Fırça";
                 default: return "Karıştır";
             }
         }
