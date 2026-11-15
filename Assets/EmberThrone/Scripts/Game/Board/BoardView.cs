@@ -19,7 +19,6 @@ namespace EmberThrone.Game
 
         const float AuraScale = 1.75f;
         const float AuraAlpha = 0.55f;
-        const float PopSwell = 0.6f;
         const float RippleTime = 0.3f;
         const float RippleLag = 0.025f;
         const float TwinkleMin = 0.25f;
@@ -27,11 +26,12 @@ namespace EmberThrone.Game
         const float HammerHit = 0.12f;
         const float LandHop = 0.12f;
         const float BrushDelay = 0.18f;
+        const float MarkFlash = 0.45f;
         static readonly Vector3 StatueOffset = new Vector3(0.5f, 0.5f, 0f);
-        const float IntroDrop = 0.9f;
-        const float IntroTime = 0.3f;
-        const float IntroColumnLag = 0.025f;
-        const float IntroRowLag = 0.035f;
+        const float IntroDelay = 0.4f;
+        const float IntroSlide = 0.16f;
+        const float IntroSettle = 0.04f;
+        const float IntroOffset = 2f;
 
         static readonly Color Warm = new Color(1f, 0.85f, 0.55f, 0.95f);
         static readonly Color Gold = new Color(1f, 0.9f, 0.55f, 0.9f);
@@ -90,6 +90,7 @@ namespace EmberThrone.Game
         SpriteRenderer _selection;
         readonly Dictionary<GridPos, float> _delays = new Dictionary<GridPos, float>();
         readonly Dictionary<GridPos, GridPos> _mergeTargets = new Dictionary<GridPos, GridPos>();
+        readonly HashSet<int> _marked = new HashSet<int>();
         readonly List<Ripple> _ripples = new List<Ripple>();
         readonly List<PieceView> _hint = new List<PieceView>();
         float _hintTime;
@@ -245,29 +246,19 @@ namespace EmberThrone.Game
 
         void PlayIntro()
         {
-            foreach (var piece in _pieces.Values)
+            var home = transform.localPosition;
+            var from = home + Vector3.right * (_w + IntroOffset);
+            transform.localPosition = from;
+            Tweens.Run(IntroSlide, t =>
             {
-                var v = piece;
-                var home = Home(v);
-                var from = home + Vector3.up * IntroDrop;
-                int motion = ++v.Motion;
-                v.T.localPosition = from;
-                v.T.localScale = Vector3.zero;
-                Tweens.Run(IntroTime, t =>
-                {
-                    if (v.Motion != motion) return;
-                    v.T.localPosition = Vector3.LerpUnclamped(from, home, Ease.OutBackSoft(t));
-                    v.T.localScale = Vector3.one * Mathf.Min(1f, 0.3f + t * 2.2f);
-                }, v.Pos.X * IntroColumnLag + v.Pos.Y * IntroRowLag, () =>
-                {
-                    if (v.Motion != motion) return;
-                    v.T.localPosition = home;
-                    v.T.localScale = Vector3.one;
-                });
-            }
+                if (this != null) transform.localPosition = Vector3.LerpUnclamped(from, home, Ease.OutBackSoft(t));
+            }, IntroDelay, () =>
+            {
+                if (this != null) transform.localPosition = home;
+            });
         }
 
-        public float IntroLength => (_w - 1) * IntroColumnLag + (_h - 1) * IntroRowLag + IntroTime;
+        public float IntroLength => IntroDelay + IntroSlide + IntroSettle;
 
         SpriteRenderer NewSprite(string name, Sprite sprite, Color color, Vector3 pos, int order)
         {
@@ -554,6 +545,7 @@ namespace EmberThrone.Game
         {
             _delays.Clear();
             _mergeTargets.Clear();
+            _marked.Clear();
             _ripples.Clear();
             _convertFrom = GridPos.Invalid;
             float strikeDelay = 0f;
@@ -563,8 +555,16 @@ namespace EmberThrone.Game
                 switch (ev)
                 {
                     case SpecialActivatedEvent s:
-                        float perCell = PerCell(s);
-                        foreach (var cell in s.Area) SetEarliest(cell, s.Pos.Chebyshev(cell) * perCell);
+                        if (IsLoneColorBomb(s))
+                        {
+                            float burstAt = ColorBurstAt(s);
+                            foreach (var cell in s.Area) SetEarliest(cell, burstAt);
+                        }
+                        else
+                        {
+                            float perCell = PerCell(s);
+                            foreach (var cell in s.Area) SetEarliest(cell, s.Pos.Chebyshev(cell) * perCell);
+                        }
                         if (s.Combo == ComboKind.ColorRocket || s.Combo == ComboKind.ColorBomb || s.Combo == ComboKind.ColorHoming)
                             _convertFrom = s.Pos;
                         break;
@@ -791,16 +791,17 @@ namespace EmberThrone.Game
             }
 
             var color = e.Kind == PieceKind.Gem ? Palette.Gem(e.Color) : Warm;
-            float swell = Timing.Pop * PopSwell;
-            float burst = delay + swell;
-            Tweens.Run(swell, t =>
+            float shrink = delay + Timing.MatchFlash;
+            float gone = shrink + Timing.MatchShrink;
+            float flashFrom = _marked.Remove(v.Id) ? MarkFlash : 0f;
+            Tweens.Run(Timing.MatchFlash, t =>
             {
                 v.T.localScale = Vector3.one * Mathf.Lerp(1f, 1.24f, Ease.OutQuad(t));
-                SetFlash(v, t * 0.6f);
+                SetFlash(v, Mathf.Lerp(flashFrom, 0.6f, t));
             }, delay);
-            Tweens.Run(Timing.Pop - swell, t => v.T.localScale = Vector3.one * Mathf.Lerp(1.24f, 0.2f, t), burst, () => Recycle(v));
-            float fx = _fx.GemBurst(World(e.Pos), color, burst, e.Reason == ClearReason.Match ? 6 : 4);
-            return Mathf.Max(delay + Timing.Pop, fx - 0.12f);
+            Tweens.Run(Timing.MatchShrink, t => v.T.localScale = Vector3.one * Mathf.Lerp(1.24f, 0.2f, t), shrink, () => Recycle(v));
+            float fx = _fx.GemBurst(World(e.Pos), color, gone, e.Reason == ClearReason.Match ? 6 : 4);
+            return Mathf.Max(gone, fx - 0.12f);
         }
 
         void Forget(PieceView v)
@@ -858,7 +859,11 @@ namespace EmberThrone.Game
 
         float Activate(SpecialActivatedEvent e)
         {
-            if (_pieces.TryGetValue(e.PieceId, out var main)) Consume(main);
+            if (_pieces.TryGetValue(e.PieceId, out var main))
+            {
+                if (IsLoneColorBomb(e)) Hold(main, ColorBurstAt(e));
+                else Consume(main);
+            }
             if (e.PartnerPieceId >= 0 && _pieces.TryGetValue(e.PartnerPieceId, out var partner)) Consume(partner);
 
             var center = World(e.Pos);
@@ -886,7 +891,7 @@ namespace EmberThrone.Game
                     if (e.Kind.IsRocket()) end = Mathf.Max(end, RocketFx(e.Pos, e.Kind == PieceKind.RocketH));
                     else if (e.Kind == PieceKind.Bomb) end = Mathf.Max(end, BombFx(center, reach));
                     else if (e.Kind == PieceKind.Homing) end = Mathf.Max(end, LaunchFx(center));
-                    else end = Mathf.Max(end, ColorFx(e, perCell));
+                    else end = Mathf.Max(end, ColorFx(e));
                     break;
                 case ComboKind.RocketRocket:
                     RocketFx(e.Pos, true);
@@ -932,6 +937,45 @@ namespace EmberThrone.Game
                 v.T.localScale = Vector3.one * (1f + t * 0.45f);
                 SetFlash(v, t);
             }, 0f, () => Recycle(v));
+        }
+
+        void Hold(PieceView v, float until)
+        {
+            Forget(v);
+            int motion = ++v.Motion;
+            Tweens.Run(until, t =>
+            {
+                if (v.Motion != motion) return;
+                v.T.localScale = Vector3.one * (1f + 0.08f * Mathf.Sin(t * until * Mathf.PI * 6f));
+                SetFlash(v, 0.25f);
+            }, 0f, () =>
+            {
+                if (v.Motion == motion) Consume(v);
+            });
+        }
+
+        static bool IsLoneColorBomb(SpecialActivatedEvent s) => s.Combo == ComboKind.None && s.Kind == PieceKind.ColorBomb;
+
+        static List<GridPos> ColorTargets(SpecialActivatedEvent s)
+        {
+            var list = new List<GridPos>();
+            foreach (var cell in s.Area)
+                if (cell != s.Pos) list.Add(cell);
+            list.Sort((a, b) =>
+            {
+                int byDistance = s.Pos.Chebyshev(a).CompareTo(s.Pos.Chebyshev(b));
+                if (byDistance != 0) return byDistance;
+                return a.Y != b.Y ? a.Y.CompareTo(b.Y) : a.X.CompareTo(b.X);
+            });
+            return list;
+        }
+
+        static float ColorBurstAt(SpecialActivatedEvent s)
+        {
+            int targets = 0;
+            foreach (var cell in s.Area)
+                if (cell != s.Pos) targets++;
+            return Timing.ColorMarkLead + Mathf.Max(0, targets - 1) * Timing.ColorMark + Timing.ColorHold;
         }
 
         void AddRipple(Vector3 center, float radius, float strength, float delay)
@@ -1004,26 +1048,38 @@ namespace EmberThrone.Game
             return _fx.Shockwave(center, HomingFire, 0.2f, 1.3f, 0f, 0.24f);
         }
 
-        float ColorFx(SpecialActivatedEvent e, float perCell)
+        float ColorFx(SpecialActivatedEvent e)
         {
             var center = World(e.Pos);
             var color = Palette.Gem(e.TargetColor);
-            float end = 0f;
-            float longest = 0f;
-            foreach (var cell in e.Area)
+            var targets = ColorTargets(e);
+            float burstAt = ColorBurstAt(e);
+            for (int i = 0; i < targets.Count; i++)
             {
-                if (cell == e.Pos) continue;
-                float hit = e.Pos.Chebyshev(cell) * perCell;
-                longest = Mathf.Max(longest, hit);
+                var cell = targets[i];
+                float markAt = Timing.ColorMarkLead + i * Timing.ColorMark;
                 var at = World(cell);
-                end = Mathf.Max(end, _fx.Lightning(center, at, color, Mathf.Max(0f, hit - 0.08f), 0.2f));
-                _fx.Glow(at, Alpha(color, 0.8f), 1.5f, Mathf.Max(0f, hit - 0.06f), 0.2f);
+                _fx.Lightning(center, at, color, markAt, 0.2f);
+                _fx.Glow(at, Alpha(color, 0.8f), 1.5f, markAt, burstAt - markAt);
+                var marked = InBounds(cell) ? _grid[Index(cell)] : null;
+                if (marked == null) continue;
+                var view = marked;
+                int id = view.Id;
+                _marked.Add(id);
+                Tweens.After(markAt, () =>
+                {
+                    if (view.Id == id) SetFlash(view, MarkFlash);
+                });
+                Tweens.After(burstAt + Timing.MatchFlash, () =>
+                {
+                    if (view.Id == id && _pieces.ContainsKey(id)) SetFlash(view, 0f);
+                });
             }
-            _fx.Rays(center, Color.Lerp(color, Color.white, 0.4f), 4f, 0f, longest + 0.35f);
-            _fx.Glow(center, new Color(1f, 1f, 1f, 0.9f), 2.6f, 0f, longest + 0.25f, 0.15f);
+            _fx.Rays(center, Color.Lerp(color, Color.white, 0.4f), 4f, 0f, burstAt);
+            _fx.Glow(center, new Color(1f, 1f, 1f, 0.9f), 2.6f, 0f, burstAt, 0.15f);
             _fx.Shockwave(center, color, 0.3f, 1.6f, 0f, 0.3f);
             _fx.Sparkles(center, 6, 0f, 0.8f, 0.7f);
-            return end;
+            return burstAt;
         }
 
         static Color Alpha(Color c, float a)

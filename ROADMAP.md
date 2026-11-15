@@ -108,6 +108,20 @@ Türün liderleri (Royal Match, Royal Kingdom, Candy Crush, Toon Blast, Gardensc
 - [ ] Yarışları ve merdiveni telefonda dene; hedefleri, rakip hızını ve ödülleri oynayarak ayarla
 - [ ] Gerçek oyunculu yarışlar ve takım sandığı (Unity Cloud ile, Faz 4)
 
+## Faz 2d — Referans eşitleme (2026-11-15)
+Türün liderinin 60 fps ekran kaydından kare kare ölçülen süreler ([docs/reference/](docs/reference/README.md)). Önce oyuncunun her hamlede gördüğü tahta.
+- [x] Takas 140 ms'den 85 ms'ye (referans 82 ms); his farkının en büyüğü buydu
+- [x] Eşleşme iki aşamalı: 70 ms parlama, 65 ms küçülme; kırıntılar taş kaybolunca çıkar, düşüş yaklaşık 140 ms sonra başlar
+- [x] Renk küresi: hedefler 40 ms arayla sırayla şimşekle işaretlenir, son işaretten 0,44 sn sonra hepsi aynı anda patlar; küre bu sürede tahtada kalır
+- [x] Seviye girişi: taşlar tek tek düşmek yerine tahta 0,4 sn sonra sağdan tek parça kayar (160 ms, hafif aşma); giriş toplam 0,6 sn
+- [x] Pencere açılışı 200 ms'den 165 ms'ye
+- [x] Bomba + bomba yarıçapı 3'ten 4'e (9×9); bot kazanma oranı ortalamada +0,1 puan, en çok +3 puan (69. seviye), yeniden ayar gerekmedi
+- [x] Kare şeridi aracı `tools/reference/strip.py`: telefondaki kayıt referansla aynı yöntemle ölçülür
+- [ ] Telefonda dene: takas, eşleşme ve renk küresi hissi; gerekirse süreleri ±1 kare ayarla
+- [ ] HUD üstten, booster çubuğu alttan kayarak girsin (PlayMode testleri bu butonlara seviye açılır açılmaz dokunuyor; testlerle birlikte yapılmalı)
+- [ ] "Hamlen Kalmadı!" afişi (1,6 sn) ve kayıp akışının eksik katmanları
+- [ ] Büyücü Şapkası (renk değiştirip özel taş yapar) ve Bombardıman Uçağı (3 bomba) booster'ları
+
 ## Faz 3 — Meta ve ekonomi
 - [x] Lobi (2026-11-12): harita üstünde üst bar (can ve sayaç, altın, elmas), altta mağaza, büyük "Seviye N" butonu ve ayarlar, solda hediye ve görev butonları, bildirim rozetleri
 - [x] Ekonomi çekirdeği (2026-11-12): motor tarafında saf C# (`Core/Meta`), 15 test; sayılar META-001'den

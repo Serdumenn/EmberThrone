@@ -134,6 +134,7 @@ Bu klasör oyunun tasarım ve teknik kararlarının kaydıdır. Plan ve durum [R
 | 2026-11-12 | Efektler baştan yazıldı: gerçek parçacık sistemi, iki shader, şimşek, şok halkası, vuruş duraklaması, hedefe uçan taşlar; tahta koyu lacivert oldu | Sahibi telefondaki ilk denemede oyunu prototip gibi buldu: patlama ve animasyonlar zayıf, shader ve parçacık yok. Açık karelerde ışık efektleri görünmüyordu |
 | 2026-11-12 | Hedef: türün liderindeki özellik seti ve kalite (lobi, can, altın, etkinlikler, görevler, takımlar, sıralamalar). Sıra: efektler → Faz 3 (lobi ve ekonomi) → Faz 4 (hesap, takım, sıralama) → Faz 5 (etkinlikler). Kimlik EmberThrone'un kalır | Sahibinin isteği; yol haritasındaki fazlarla aynı sıra |
 | 2026-11-11 | Seviye 11–30: Fırın Sokağı (11–20) ve Demirci Çarşısı (21–30). Her 5. seviye zor, ardından kolay bir nefes seviyesi; hamle sayıları botla ayarlı | Dalgalı zorluk eğrisi türün standardı; her bölüm yeni bir engel karışımı öğretir |
+| 2026-11-15 | Tahta süreleri referans ölçümlerine çekildi: takas 85 ms, eşleşme 70 + 65 ms, renk küresi işaretle-bekle-patlat, tahta sağdan tek parça girer, pencere 165 ms; bomba + bomba yarıçapı 4 | Türün liderinin ekran kaydından kare kare ölçüm ([docs/reference/](../reference/README.md)); en büyük his farkı takastaydı |
 
 ## Asset takibi
 

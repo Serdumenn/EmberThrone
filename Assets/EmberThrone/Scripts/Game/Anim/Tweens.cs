@@ -102,8 +102,10 @@ namespace EmberThrone.Game
 
     public static class Timing
     {
-        public const float Swap = 0.14f;
+        public const float Swap = 0.085f;
         public const float Pop = 0.11f;
+        public const float MatchFlash = 0.07f;
+        public const float MatchShrink = 0.065f;
         public const float GravityTick = 0.055f;
         public const float LandSquash = 0.09f;
         public const float ObstacleBreak = 0.2f;
@@ -113,13 +115,16 @@ namespace EmberThrone.Game
         public const float BombPerCell = 0.09f;
         public const float HomingPerCell = 0.05f;
         public const float ColorPerCell = 0.04f;
+        public const float ColorMarkLead = 0.15f;
+        public const float ColorMark = 0.04f;
+        public const float ColorHold = 0.44f;
         public const float StrikeFlight = 0.26f;
         public const float FrostCreep = 0.32f;
         public const float FrostGrow = 0.28f;
         public const float Shuffle = 0.35f;
         public const float Collect = 0.28f;
         public const float CounterBounce = 0.1f;
-        public const float ModalIn = 0.2f;
+        public const float ModalIn = 0.165f;
         public const float StarFill = 0.2f;
         public const float WinDelay = 0.5f;
         public const float LoseDelay = 1.5f;
