@@ -4,7 +4,7 @@ namespace EmberThrone.Core
     {
         public int BombRadius = 2;
 
-        public int BombBombRadius = 3;
+        public int BombBombRadius = 4;
 
         public int HomingHomingStrikes = 3;
 

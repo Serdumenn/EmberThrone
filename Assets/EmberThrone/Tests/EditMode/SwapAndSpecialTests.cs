@@ -146,6 +146,19 @@ namespace EmberThrone.Core.Tests
         }
 
         [Test]
+        public void BombPlusBomb_ClearsNineByNine()
+        {
+            const string even = "YPOGYPOGY", odd = "OGYPOGYPO";
+            var s = T.Session(even, odd, even, odd, "YPOG**OGY", odd, even, odd, even);
+            var o = s.TrySwap(T.P(5, 4), T.P(4, 4));
+            Assert.IsTrue(o.Accepted);
+            var act = o.EventsOf<SpecialActivatedEvent>().Single();
+            Assert.AreEqual(ComboKind.BombBomb, act.Combo);
+            Assert.AreEqual(81, act.Area.Length, "four-cell radius, like the reference");
+            Assert.AreEqual(79, o.Count<PieceClearedEvent>());
+        }
+
+        [Test]
         public void ColorBombPlusColorBomb_HitsWholeBoard()
         {
             var s = T.Session(T.Even, T.Odd, "Y@@GY", T.Odd, T.Even);
