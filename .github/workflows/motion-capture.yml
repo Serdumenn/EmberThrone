@@ -1,0 +1,67 @@
+name: Motion capture
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: motion-capture
+  cancel-in-progress: false
+
+env:
+  UNITY_VERSION: 6000.3.25f1
+
+jobs:
+  capture:
+    name: Record board animations (60 fps)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout (with LFS)
+        uses: actions/checkout@v7
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v6
+        with:
+          path: Library
+          key: Library-Test-${{ env.UNITY_VERSION }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Test-${{ env.UNITY_VERSION }}-
+
+      - name: Record frames
+        uses: game-ci/unity-test-runner@v4.3.2
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: playmode
+          artifactsPath: test-results
+          customParameters: -testFilter EmberThrone.Game.Tests.MotionCapture.Record
+
+      - name: Publish frames as a draft release
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pack="$RUNNER_TEMP/motion"
+          mkdir -p "$pack"
+          if [ -d TestResults/motion ]; then cp -r TestResults/motion/. "$pack/"; fi
+          if [ -d test-results ]; then cp -r test-results "$pack/_results"; fi
+          zip_path="$RUNNER_TEMP/motion-${GITHUB_RUN_ID}.zip"
+          (cd "$pack" && zip -qr "$zip_path" .)
+          du -h "$zip_path"
+          gh release create "motion-${GITHUB_RUN_ID}" "$zip_path" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft \
+            --title "Motion capture ${GITHUB_RUN_ID}" \
+            --notes "Board animation frames recorded at 60 fps by MotionCapture.Record."

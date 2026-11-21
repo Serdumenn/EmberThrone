@@ -224,8 +224,14 @@ Ekran turu (grafik gerekir, `-nographics` yok). Bütün ekranları ve animasyonl
 "C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe" -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter EmberThrone.Game.Tests.ScreenshotTour.TakeAll -testResults TestResults/tour.xml
 ```
 
+Hareket kaydı (grafik gerekir). Tahta animasyonlarını `Time.captureFramerate = 60` ile oynatır ve her kareyi 720×1564 JPEG olarak `TestResults/motion/<sahne>/` altına yazar; her klasörde karelerin oyun zamanı `times.csv`'dedir. Bulutta **Actions → Motion capture → Run workflow** aynı testi çalıştırır ve kareleri taslak bir release'e zip olarak ekler:
+
+```bash
+"C:\Program Files\Unity\Hub\Editor\6000.3.25f1\Editor\Unity.exe" -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter EmberThrone.Game.Tests.MotionCapture.Record -testResults TestResults/motion.xml
+```
+
 - Batch modunda `WaitForEndOfFrame` gelmez; tur kamerayı kendisi çizer.
-- Arayüz kendi render texture'ına çizilir. Bu doku doğrusal uzayda karışmış, önceden çarpılmış renk tutar; birleştirme doğrusal uzayda yapılır, yoksa yarı saydam arayüz fazla parlak görünür.
+- Arayüz kendi render texture'ına çizilir (`FrameGrabber`, iki test ortak kullanır). Bu doku doğrusal uzayda karışmış, önceden çarpılmış renk tutar; birleştirme doğrusal uzayda yapılır, yoksa yarı saydam arayüz fazla parlak görünür.
 
 Seviye araçları:
 

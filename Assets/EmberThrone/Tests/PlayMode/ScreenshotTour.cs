@@ -17,8 +17,7 @@ namespace EmberThrone.Game.Tests
         const float SlowMotion = 0.1f;
 
         GameApp _app;
-        RenderTexture _target;
-        RenderTexture _uiTarget;
+        FrameGrabber _grabber;
         System.Collections.Generic.Dictionary<int, int> _savedStars;
         string _savedProfile;
         GameController Game => _app.Game;
@@ -45,6 +44,7 @@ namespace EmberThrone.Game.Tests
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = new Vector2Int(1080, 1920);
             _app = GameApp.Create();
+            _grabber = new FrameGrabber(_app);
             UseScreen(1080, 1920, null);
             for (int i = 0; i < 3; i++) yield return null;
         }
@@ -60,75 +60,18 @@ namespace EmberThrone.Game.Tests
             UiRoot.SafeAreaOverride = null;
             UiRoot.ScreenSizeOverride = null;
             Object.Destroy(_app.gameObject);
-            Object.Destroy(_target);
-            Object.Destroy(_uiTarget);
+            _grabber.Release();
             StarsBackup.Restore(_savedStars);
             StarsBackup.RestoreProfile(_savedProfile);
             yield return null;
         }
 
-        void UseScreen(int width, int height, Rect? safeArea)
-        {
-            UiRoot.ScreenSizeOverride = new Vector2Int(width, height);
-            UiRoot.SafeAreaOverride = safeArea;
-            var oldBoard = _target;
-            var oldUi = _uiTarget;
-            _target = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-            _app.Camera.targetTexture = _target;
-
-            _uiTarget = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-            var settings = _app.Ui.Settings;
-            settings.targetTexture = _uiTarget;
-            settings.clearColor = true;
-            settings.colorClearValue = Color.clear;
-
-            if (oldBoard != null) Object.Destroy(oldBoard);
-            if (oldUi != null) Object.Destroy(oldUi);
-        }
-
-        static readonly float[] Linear = BuildLinear();
-
-        static float[] BuildLinear()
-        {
-            var table = new float[256];
-            for (int i = 0; i < 256; i++) table[i] = Mathf.GammaToLinearSpace(i / 255f);
-            return table;
-        }
-
-        static byte Over(byte ui, byte board, float k)
-        {
-            float linear = Mathf.Min(1f, Linear[ui] + Linear[board] * k);
-            return (byte)Mathf.RoundToInt(Mathf.LinearToGammaSpace(linear) * 255f);
-        }
-
-        static Color32[] Read(RenderTexture rt)
-        {
-            var previous = RenderTexture.active;
-            RenderTexture.active = rt;
-            var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
-            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-            tex.Apply();
-            RenderTexture.active = previous;
-            var pixels = tex.GetPixels32();
-            Object.Destroy(tex);
-            return pixels;
-        }
+        void UseScreen(int width, int height, Rect? safeArea) => _grabber.Use(width, height, safeArea);
 
         IEnumerator Shot(string name)
         {
             yield return null;
-            _app.Camera.Render();
-            var board = Read(_target);
-            var ui = Read(_uiTarget);
-            for (int i = 0; i < board.Length; i++)
-            {
-                var u = ui[i];
-                var b = board[i];
-                float k = 1f - u.a / 255f;
-                board[i] = new Color32(Over(u.r, b.r, k), Over(u.g, b.g, k), Over(u.b, b.b, k), 255);
-            }
-            var tex = new Texture2D(_target.width, _target.height, TextureFormat.RGBA32, false);
-            tex.SetPixels32(board);
+            var tex = _grabber.Grab();
             File.WriteAllBytes(Path.Combine(Folder, name + ".png"), tex.EncodeToPNG());
             Object.Destroy(tex);
         }

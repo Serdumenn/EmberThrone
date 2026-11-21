@@ -37,6 +37,10 @@ Hata payı: 60 fps şeritlerde ±1 kare (17 ms), 30 fps şeritlerde ±33 ms.
 
 ## Karşılaştırma yöntemi
 
+EmberThrone kareleri telefona gerek kalmadan alınır: **Actions → Motion capture → Run workflow** `MotionCapture.Record` testini çalıştırır, tahta animasyonlarını 60 fps sabit adımla kare kare kaydeder ve kareleri taslak bir release'e zip olarak ekler. Kare `n`, olaydan `n × 16,7 ms` sonrasıdır; gerçek oyun zamanı her klasördeki `times.csv`'dedir.
+
+Telefonda ölçmek için:
+
 1. Oyunu telefonda 60 fps ekran kaydıyla oyna.
 2. Kareleri şerit olarak çıkar:
 
