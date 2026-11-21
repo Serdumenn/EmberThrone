@@ -109,7 +109,7 @@ Türün liderleri (Royal Match, Royal Kingdom, Candy Crush, Toon Blast, Gardensc
 - [ ] Gerçek oyunculu yarışlar ve takım sandığı (Unity Cloud ile, Faz 4)
 
 ## Faz 2d — Referans eşitleme (2026-11-15)
-Türün liderinin 60 fps ekran kaydından kare kare ölçülen süreler ([docs/reference/](docs/reference/README.md)). Önce oyuncunun her hamlede gördüğü tahta.
+Türün liderinin 60 fps ekran kaydından kare kare ölçülen süreler ([docs/reference/](docs/reference/README.md)). Önce oyuncunun her hamlede gördüğü tahta. Takas, eşleşme, düşüş ve pencere değerleri göz kararıydı; 2026-11-21'de izlemeyle düzeltildi (Faz 2e).
 - [x] Takas 140 ms'den 85 ms'ye (referans 82 ms); his farkının en büyüğü buydu
 - [x] Eşleşme iki aşamalı: 70 ms parlama, 65 ms küçülme; kırıntılar taş kaybolunca çıkar, düşüş yaklaşık 140 ms sonra başlar
 - [x] Renk küresi: hedefler 40 ms arayla sırayla şimşekle işaretlenir, son işaretten 0,44 sn sonra hepsi aynı anda patlar; küre bu sürede tahtada kalır
@@ -117,9 +117,19 @@ Türün liderinin 60 fps ekran kaydından kare kare ölçülen süreler ([docs/r
 - [x] Pencere açılışı 200 ms'den 165 ms'ye
 - [x] Bomba + bomba yarıçapı 3'ten 4'e (9×9); bot kazanma oranı ortalamada +0,1 puan, en çok +3 puan (69. seviye), yeniden ayar gerekmedi
 - [x] Kare şeridi aracı `tools/reference/strip.py`: telefondaki kayıt referansla aynı yöntemle ölçülür
-- [ ] Telefonda dene: takas, eşleşme ve renk küresi hissi; gerekirse süreleri ±1 kare ayarla
+- [x] Telefonda deneme yerine bulutta 60 fps kayıtla kare kare ölçüldü (Faz 2e)
+
+## Faz 2e — Kare kare doğrulama (2026-11-21)
+Telefon gerekmeden: `Motion capture` akışı oyunu 60 fps sabit adımla kaydeder, taşlar referansla aynı yöntemle renklerinden izlenir (`tools/reference/track.py`, [docs/reference/](docs/reference/README.md)).
+- [x] Hareket kaydı: `MotionCapture` testi giriş, takas, eşleşme, düşüş, özel taşlar ve pencereleri kare kare kaydeder; kareler taslak release'e zip olarak gelir
+- [x] Takas 130 ms, yavaşlayarak biter, taşlar büyümez; ilerlemesi referansla kare kare aynı
+- [x] Eşleşme beyazlamadan 70 ms'de küçülür; düşüş taş kaybolduktan 110 ms sonra başlar
+- [x] Düşüş yerçekimiyle: 4 hücre/sn ile başlar, 30 hücre/sn² hızlanır (tek hücre 157 ms, yedi hücre 0,56 sn)
+- [x] Renk küresi ışınları patlamaya kadar yanık kalır, hedefler karışık sırayla işaretlenir
+- [x] Tahta girişi 0,5 sn; seviye başı, ayarlar ve lobi pencereleri tek karede açılır; sonuç penceresi üstten iner, 165 ms'de yerini aşar, 0,43 sn'de oturur
+- [ ] Takasta taşların arkasında kalan ışık izi
 - [ ] HUD üstten, booster çubuğu alttan kayarak girsin (PlayMode testleri bu butonlara seviye açılır açılmaz dokunuyor; testlerle birlikte yapılmalı)
-- [ ] "Hamlen Kalmadı!" afişi (1,6 sn) ve kayıp akışının eksik katmanları
+- [ ] "Hamlen Kalmadı!" afişi (0,1 sn'de iner, 1,6 sn durur) ve devam penceresinin son hamleden 2,1 sn sonra açılması
 - [ ] Büyücü Şapkası (renk değiştirip özel taş yapar) ve Bombardıman Uçağı (3 bomba) booster'ları
 
 ## Faz 3 — Meta ve ekonomi

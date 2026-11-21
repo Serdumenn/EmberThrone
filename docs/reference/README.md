@@ -36,6 +36,27 @@ Hata payı ±1 kare (17 ms). Hareket eden taş, rengine göre maskelenip her kar
 | Sekme geçişi | Kayma yok, tek karede değişir | — | aynı |
 | Hamle bitince | "Hamlen Kalmadı!" afişi 0,1 sn'de iner, 1,6 sn durur; devam penceresi son hamleden ~2,1 sn sonra | `Timing.LoseDelay` | 1,5 sn, afiş yok |
 
+## Doğrulama (2026-11-21)
+
+Bulut kaydıyla (`Motion capture`, 60 fps sabit adım) ölçülen EmberThrone değerleri. Süreler dokunuştan, yani takasın ilk hareketinden ölçülür.
+
+| Olay | Royal Kingdom | EmberThrone, 2026-11-15 | EmberThrone, 2026-11-21 |
+|---|---|---|---|
+| Takas: yolun yarısı / %90'ı / bitiş | ~40 / ~90 / ~117 ms | ~14 / ~34 / 50 ms, hafif aşma | ~39 / ~90 / ~117 ms |
+| Takasta taşın büyümesi | yok | %16 | yok |
+| Eşleşme: küçülmenin başı → kaybolma | ~140 → ~215 ms, beyazlama yok | ~200 → ~265 ms, önce 70 ms beyazlama | ~140 → ~205 ms, beyazlama yok |
+| Düşüşün başı | ~322 ms | ~390 ms | ~325 ms |
+| Tek hücre düşüş | ~158 ms | ~50 ms | ~160 ms |
+| Uzun düşüş | ~7,5 hücre ~0,55 sn | 5 hücre ~0,28 sn | 5 hücre ~0,46 sn |
+| Roket, hücre başına | ~46 ms | ~43 ms | ~43 ms |
+| Renk küresi: ilk işaret / son işaretten patlamaya | 150–200 / ~450 ms | 167 / 440 ms | 167 / 440 ms |
+| Renk küresi ışınları | patlamaya kadar yanık, sıra karışık | 0,2 sn yanar, merkezden dışa | patlamaya kadar yanık, sıra karışık |
+| Tahta girişi, oyun ekranından sonra | ~485 ms | ~390 ms | ~490 ms |
+| Seviye başı penceresi | tek kare | alttan 165 ms kayma | tek kare |
+| Devam penceresi: yerinden geçiş / en çok aşma / oturma | ~117 / ~166 / ~430 ms | alttan 165 ms kayma | ~117 / ~167 / ~433 ms |
+
+Açık farklar: takasta taşların arkasında kalan ışık izi, HUD ve booster çubuğunun girişi, "Hamlen Kalmadı!" afişi.
+
 ## Karşılaştırma yöntemi
 
 EmberThrone kareleri telefona gerek kalmadan alınır: **Actions → Motion capture → Run workflow** `MotionCapture.Record` testini çalıştırır, tahta animasyonlarını 60 fps sabit adımla kare kare kaydeder ve kareleri taslak bir release'e zip olarak ekler. Kare `n`, olaydan `n × 16,7 ms` sonrasıdır; gerçek oyun zamanı her klasördeki `times.csv`'dedir.
