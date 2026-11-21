@@ -72,13 +72,6 @@ namespace EmberThrone.Game
                 play();
             }, panel, "Play");
             BackButton = Ui.Button("Geri", Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", Close, panel, "Back");
-
-            const float from = 1600f;
-            body.style.translate = new Translate(0f, from);
-            Tweens.Run(Timing.ModalIn, t =>
-            {
-                if (Ui.Alive(body)) body.style.translate = new Translate(0f, Mathf.LerpUnclamped(from, 0f, Ease.OutCubic(t)));
-            });
         }
 
         static string HintFor(Board board, bool frost)

@@ -7,8 +7,6 @@ namespace EmberThrone.Game
 {
     public class Popup
     {
-        const float SlideFrom = 1600f;
-
         Action _closed;
 
         public VisualElement Root { get; private set; }
@@ -28,13 +26,6 @@ namespace EmberThrone.Game
             Panel = Ui.El("et-panel et-result__panel", Body, "Panel");
             var ribbon = Ui.El("et-ribbon", Panel);
             Ui.Text(title, title.Length > 11 ? "et-title et-title--small" : "et-title", ribbon, "Title");
-
-            var body = Body;
-            body.style.translate = new Translate(0f, SlideFrom);
-            Tweens.Run(Timing.ModalIn, t =>
-            {
-                if (Ui.Alive(body)) body.style.translate = new Translate(0f, Mathf.LerpUnclamped(SlideFrom, 0f, Ease.OutCubic(t)));
-            });
         }
 
         protected Button AddClose(string label = "Tamam", ButtonKind kind = ButtonKind.Secondary)

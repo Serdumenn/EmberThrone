@@ -141,12 +141,12 @@ Dokunma hedefi en az 144 px (yaklaşık 48dp).
 Kural: 3B ikonlar kutularından %10–20 taşabilir (para hapı, sekme, hedef). Bu, referanstaki "dolu, hacimli" görünümü verir.
 
 ## Hareket
-Süreler UX-001 §6.2'ye bağlıdır; tahta süreleri 2026-11-15'te referans ölçümlerine çekildi ([docs/reference/](../reference/README.md)). Kodda tek kaynakları `Anim/Tweens.cs` → `Timing` sınıfıdır (testler ve ekran turu da onu bekler); USS'de yalnız basma süresi yazılıdır.
+Süreler UX-001 §6.2'ye bağlıdır; tahta ve pencere hareketleri 2026-11-21'de kare kare referans ölçümüne çekildi ([docs/reference/](../reference/README.md)). Kodda tek kaynakları `Anim/Tweens.cs` → `Timing` sınıfıdır (testler ve ekran turu da onu bekler); USS'de yalnız basma süresi yazılıdır.
 
 | Ad | Süre | Eğri | Kullanım |
 |---|---|---|---|
 | `--dur-press` | 90 ms | ease-out | Buton basma |
-| `--dur-modal` | 165 ms | ease-out-back | Pencere girişi (ANI-020) |
+| `--dur-modal` | 165 ms | yay (sönümleme 0,54) | Sonuç penceresi üstten iner, 165 ms'de yerini aşar, 430 ms'de oturur. Seviye başı, ayarlar ve lobi pencereleri tek karede açılır (ANI-020) |
 | `--dur-screen` | 220 ms | ease-out-cubic | Ekran geçişi (solma + 48 px kayma) |
 | `--dur-pop` | 320 ms | ease-out-back | Rozet, ödül, yıldız belirişi |
 | `--dur-count` | 100 ms | ease-out | Hamle ve hedef sayacı zıplaması (ANI-019) |
@@ -173,10 +173,10 @@ Lobi bileşenleri (2026-11-12):
 
 Efekt yenilemesi (2026-11-12, telefondaki ilk denemeden sonra):
 - Tahta koyu laciverte döndü. Açık karelerde toplamalı (additive) ışık görünmüyordu.
-- Eşleşme: taş şişer ve parlar, sonra kendi renginde kırıntılar, kıvılcımlar, ışıltı ve küçük bir şok halkasıyla patlar. Hedef taşları tahtadan hedef paneline uçar; sayaç taş varınca düşer.
-- Roket: iki yöne alev izi ve duman bırakarak uçar, yolunda ışık şeridi kalır. Bomba: parlama, iki şok halkası, kıvılcım, kor ve duman; çevredeki taşlar dışarı itilip geri gelir, görüntü 50 ms durur. Renk bombası: hedefler sırayla şimşekle işaretlenir, kısa bir bekleyişten sonra hepsi birlikte patlar. Güdümlü: kavisli uçuş ve kıvılcım izi.
+- Eşleşme: taş boyu değişmeden beyazlar, sonra küçülür ve kendi renginde kırıntılar, kıvılcımlar, ışıltı ve küçük bir şok halkasıyla patlar. Hedef taşları tahtadan hedef paneline uçar; sayaç taş varınca düşer.
+- Roket: iki yöne alev izi ve duman bırakarak uçar, yolunda ışık şeridi kalır. Bomba: parlama, iki şok halkası, kıvılcım, kor ve duman; çevredeki taşlar dışarı itilip geri gelir, görüntü 50 ms durur. Renk bombası: hedefler karışık sırayla şimşekle işaretlenir; ışınlar patlamaya kadar yanık kalır, kısa bir bekleyişten sonra hepsi birlikte patlar. Güdümlü: kavisli uçuş ve kıvılcım izi.
 - Özel taş oluşurken arkasında dönen ışık hüzmesi çıkar. Tahtadaki özel taşlar nefes alır gibi hareket eder ve arkalarında renkli hale yanıp söner. Taşların üstünden ara sıra çapraz bir parıltı geçer, rastgele taşlarda ışıltı belirir.
-- Düşen taşlar hızlanarak iner, uzar, yere değince ezilip zıplar. Seviye başında tahta sağdan tek parça kayarak gelir.
+- Takas 130 ms sürer, yavaşlayarak biter, taşlar büyümez. Düşen taşlar yerçekimi gibi yavaş başlayıp hızlanır (tek hücre yaklaşık 160 ms, yedi hücre yaklaşık 0,56 sn), uzar, yere değince ezilip zıplar. Seviye başında tahta 0,5 sn sonra sağdan tek parça kayarak gelir.
 - Kazanınca tahtanın iki alt köşesinden konfeti fışkırır. Arka planda yavaşça yükselen korlar vardır.
 - Olay güçleri yine tek tabloda (`Feel.cs`): sarsıntı, titreşim, ses ve duraklama süresi. "Ekran sarsıntısı" ayarı kapalıyken duraklama da olmaz.
 

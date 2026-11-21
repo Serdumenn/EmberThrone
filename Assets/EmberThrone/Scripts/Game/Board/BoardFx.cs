@@ -162,7 +162,7 @@ namespace EmberThrone.Game
             return line;
         }
 
-        public float Lightning(Vector3 from, Vector3 to, Color color, float delay, float duration)
+        public float Lightning(Vector3 from, Vector3 to, Color color, float delay, float duration, float fadeOut = 0f)
         {
             Tweens.After(delay, () =>
             {
@@ -184,7 +184,7 @@ namespace EmberThrone.Game
                         bolt.Outer.SetPositions(bolt.Points);
                         bolt.Inner.SetPositions(bolt.Points);
                     }
-                    float life = 1f - t * t;
+                    float life = fadeOut > 0f ? Mathf.Clamp01((1f - t) * duration / fadeOut) : 1f - t * t;
                     bolt.Outer.widthMultiplier = 0.42f * life;
                     bolt.Inner.widthMultiplier = 0.14f * life;
                     var outer = Alpha(color, life);

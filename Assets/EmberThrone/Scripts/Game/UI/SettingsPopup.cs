@@ -45,13 +45,6 @@ namespace EmberThrone.Game
             PolicyButton = Ui.Button("Gizlilik politikası", Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", () => OpenUrl(PrivacyPolicyUrl), panel, "Policy");
             CloseButton = Ui.Button("Tamam", Ui.ClassOf(ButtonKind.Cta) + " et-result__button", Close, panel, "Close");
             Refresh();
-
-            const float from = 1600f;
-            body.style.translate = new Translate(0f, from);
-            Tweens.Run(Timing.ModalIn, t =>
-            {
-                if (Ui.Alive(body)) body.style.translate = new Translate(0f, Mathf.LerpUnclamped(from, 0f, Ease.OutCubic(t)));
-            });
         }
 
         void ToggleSound()

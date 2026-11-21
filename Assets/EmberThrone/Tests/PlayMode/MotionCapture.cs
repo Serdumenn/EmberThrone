@@ -109,6 +109,13 @@ namespace EmberThrone.Game.Tests
             for (int i = 0; i < 4; i++) yield return null;
             yield return Clip("10_pencere_acilisi", 0.4f, () => _app.ShowLevelStart(8));
             _app.LevelStart.Close();
+
+            var last = Level("YPOGY", "OGYPO", "RRBRY", "OGRPO", "YPOGY");
+            last.Moves = 1;
+            yield return Begin(last);
+            Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+            while (Game.Popup == null) yield return null;
+            yield return Clip("11_sonuc_penceresi", 0.6f, () => { });
         }
 
         IEnumerator Fire(string name, char token, GridPos cell, float seconds)

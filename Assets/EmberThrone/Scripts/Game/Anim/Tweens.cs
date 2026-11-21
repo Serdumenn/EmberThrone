@@ -24,6 +24,13 @@ namespace EmberThrone.Game
             float u = t - 1f;
             return 1f + (c + 1f) * u * u * u + c * u * u;
         }
+
+        public static float Spring(float seconds, float peak, float damping)
+        {
+            float wd = Mathf.PI / peak;
+            float w = wd / Mathf.Sqrt(1f - damping * damping);
+            return Mathf.Exp(-damping * w * seconds) * (Mathf.Cos(wd * seconds) + damping * w / wd * Mathf.Sin(wd * seconds));
+        }
     }
 
     public sealed class Tweens : MonoBehaviour
@@ -102,11 +109,13 @@ namespace EmberThrone.Game
 
     public static class Timing
     {
-        public const float Swap = 0.085f;
+        public const float Swap = 0.13f;
         public const float Pop = 0.11f;
         public const float MatchFlash = 0.07f;
         public const float MatchShrink = 0.065f;
-        public const float GravityTick = 0.055f;
+        public const float PopToFall = 0.11f;
+        public const float FallSpeed = 4f;
+        public const float FallGravity = 30f;
         public const float LandSquash = 0.09f;
         public const float ObstacleBreak = 0.2f;
         public const float SpecialForm = 0.3f;
@@ -125,6 +134,8 @@ namespace EmberThrone.Game
         public const float Collect = 0.28f;
         public const float CounterBounce = 0.1f;
         public const float ModalIn = 0.165f;
+        public const float ModalDrop = 0.43f;
+        public const float ModalBounce = 0.54f;
         public const float StarFill = 0.2f;
         public const float WinDelay = 0.5f;
         public const float LoseDelay = 1.5f;

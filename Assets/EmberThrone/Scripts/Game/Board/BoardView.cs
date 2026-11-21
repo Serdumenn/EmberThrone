@@ -27,8 +27,9 @@ namespace EmberThrone.Game
         const float LandHop = 0.12f;
         const float BrushDelay = 0.18f;
         const float MarkFlash = 0.45f;
+        const float BeamFade = 0.05f;
         static readonly Vector3 StatueOffset = new Vector3(0.5f, 0.5f, 0f);
-        const float IntroDelay = 0.4f;
+        const float IntroDelay = 0.5f;
         const float IntroSlide = 0.16f;
         const float IntroSettle = 0.04f;
         const float IntroOffset = 2f;
@@ -503,14 +504,14 @@ namespace EmberThrone.Game
                 var b = _grid[Index(e.B)];
                 Sound.Play(Sfx.Swap);
                 a.R.sortingOrder = SortLifted;
-                Glide(a, World(e.B), Timing.Swap, 0.16f);
-                Glide(b, World(e.A), Timing.Swap, -0.1f);
+                Glide(a, World(e.B), Timing.Swap);
+                Glide(b, World(e.A), Timing.Swap);
                 yield return new WaitForSeconds(Timing.Swap);
                 if (e.Reverted)
                 {
                     Sound.Play(Sfx.SwapBack);
-                    Glide(a, World(e.A), Timing.Swap, 0.08f);
-                    Glide(b, World(e.B), Timing.Swap, -0.05f);
+                    Glide(a, World(e.A), Timing.Swap);
+                    Glide(b, World(e.B), Timing.Swap);
                     yield return new WaitForSeconds(Timing.Swap);
                 }
                 else
@@ -524,20 +525,17 @@ namespace EmberThrone.Game
             }
         }
 
-        void Glide(PieceView v, Vector3 to, float duration, float lift)
+        void Glide(PieceView v, Vector3 to, float duration)
         {
             var from = v.T.localPosition;
             int motion = ++v.Motion;
+            v.T.localScale = Vector3.one;
             Tweens.Run(duration, t =>
             {
-                if (v.Motion != motion) return;
-                v.T.localPosition = Vector3.LerpUnclamped(from, to, Ease.OutBackSoft(t));
-                v.T.localScale = Vector3.one * (1f + lift * Mathf.Sin(t * Mathf.PI));
+                if (v.Motion == motion) v.T.localPosition = Vector3.LerpUnclamped(from, to, Ease.OutQuad(t));
             }, 0f, () =>
             {
-                if (v.Motion != motion) return;
-                v.T.localPosition = to;
-                v.T.localScale = Vector3.one;
+                if (v.Motion == motion) v.T.localPosition = to;
             });
         }
 
@@ -794,14 +792,10 @@ namespace EmberThrone.Game
             float shrink = delay + Timing.MatchFlash;
             float gone = shrink + Timing.MatchShrink;
             float flashFrom = _marked.Remove(v.Id) ? MarkFlash : 0f;
-            Tweens.Run(Timing.MatchFlash, t =>
-            {
-                v.T.localScale = Vector3.one * Mathf.Lerp(1f, 1.24f, Ease.OutQuad(t));
-                SetFlash(v, Mathf.Lerp(flashFrom, 0.6f, t));
-            }, delay);
-            Tweens.Run(Timing.MatchShrink, t => v.T.localScale = Vector3.one * Mathf.Lerp(1.24f, 0.2f, t), shrink, () => Recycle(v));
-            float fx = _fx.GemBurst(World(e.Pos), color, gone, e.Reason == ClearReason.Match ? 6 : 4);
-            return Mathf.Max(gone, fx - 0.12f);
+            Tweens.Run(Timing.MatchFlash, t => SetFlash(v, Mathf.Lerp(flashFrom, 0.6f, t)), delay);
+            Tweens.Run(Timing.MatchShrink, t => v.T.localScale = Vector3.one * Mathf.Lerp(1f, 0.2f, t), shrink, () => Recycle(v));
+            _fx.GemBurst(World(e.Pos), color, gone, e.Reason == ClearReason.Match ? 6 : 4);
+            return gone + Timing.PopToFall;
         }
 
         void Forget(PieceView v)
@@ -961,13 +955,19 @@ namespace EmberThrone.Game
             var list = new List<GridPos>();
             foreach (var cell in s.Area)
                 if (cell != s.Pos) list.Add(cell);
-            list.Sort((a, b) =>
-            {
-                int byDistance = s.Pos.Chebyshev(a).CompareTo(s.Pos.Chebyshev(b));
-                if (byDistance != 0) return byDistance;
-                return a.Y != b.Y ? a.Y.CompareTo(b.Y) : a.X.CompareTo(b.X);
-            });
+            list.Sort((a, b) => MarkOrder(s.Pos, a).CompareTo(MarkOrder(s.Pos, b)));
             return list;
+        }
+
+        static uint MarkOrder(GridPos origin, GridPos cell)
+        {
+            uint h = (uint)(cell.X + 31 * cell.Y + 961 * origin.X + 29791 * origin.Y);
+            h ^= h >> 16;
+            h *= 0x7feb352du;
+            h ^= h >> 15;
+            h *= 0x846ca68bu;
+            h ^= h >> 16;
+            return h;
         }
 
         static float ColorBurstAt(SpecialActivatedEvent s)
@@ -1059,7 +1059,7 @@ namespace EmberThrone.Game
                 var cell = targets[i];
                 float markAt = Timing.ColorMarkLead + i * Timing.ColorMark;
                 var at = World(cell);
-                _fx.Lightning(center, at, color, markAt, 0.2f);
+                _fx.Lightning(center, at, color, markAt, burstAt - markAt, BeamFade);
                 _fx.Glow(at, Alpha(color, 0.8f), 1.5f, markAt, burstAt - markAt);
                 var marked = InBounds(cell) ? _grid[Index(cell)] : null;
                 if (marked == null) continue;
@@ -1310,7 +1310,14 @@ namespace EmberThrone.Game
             public int Segment;
         }
 
-        static float Fall(float u) => u * (0.45f + 0.55f * u);
+        static float Fallen(float seconds) => Timing.FallSpeed * seconds + 0.5f * Timing.FallGravity * seconds * seconds;
+
+        static float TickTime(int tick)
+        {
+            if (tick <= 0) return 0f;
+            float v = Timing.FallSpeed;
+            return (Mathf.Sqrt(v * v + 2f * Timing.FallGravity * tick) - v) / Timing.FallGravity;
+        }
 
         IEnumerator PlayGravity(BoardStep step)
         {
@@ -1328,9 +1335,9 @@ namespace EmberThrone.Game
                 var track = new FallTrack { View = v, FadesIn = true };
                 var above = World(s.Pos) + Vector3.up;
                 track.Points.Add(above);
-                track.Times.Add((s.Tick - 1) * Timing.GravityTick);
+                track.Times.Add(TickTime(s.Tick - 1));
                 track.Points.Add(World(s.Pos));
-                track.Times.Add(s.Tick * Timing.GravityTick);
+                track.Times.Add(TickTime(s.Tick));
                 v.T.localPosition = above;
                 v.R.color = new Color(1f, 1f, 1f, 0f);
                 tracks.Add(track);
@@ -1353,7 +1360,7 @@ namespace EmberThrone.Game
                 }
                 foreach (var p in m.Path)
                 {
-                    float start = (p.Tick - 1) * Timing.GravityTick;
+                    float start = TickTime(p.Tick - 1);
                     var last = track.Points[track.Points.Count - 1];
                     if (start > track.Times[track.Times.Count - 1])
                     {
@@ -1361,7 +1368,7 @@ namespace EmberThrone.Game
                         track.Times.Add(start);
                     }
                     track.Points.Add(World(p.Pos));
-                    track.Times.Add(p.Tick * Timing.GravityTick);
+                    track.Times.Add(TickTime(p.Tick));
                 }
                 v.Pos = m.To;
             }
@@ -1374,9 +1381,8 @@ namespace EmberThrone.Game
             float time = 0f;
             while (time < total)
             {
-                time += Time.deltaTime;
-                float warped = total * Fall(Mathf.Clamp01(time / total));
-                foreach (var t in tracks) Advance(t, warped);
+                time = Mathf.Min(total, time + Time.deltaTime);
+                foreach (var t in tracks) Advance(t, time);
                 yield return null;
             }
         }
@@ -1391,7 +1397,7 @@ namespace EmberThrone.Game
                 return;
             }
             while (t.Segment < last - 1 && time >= times[t.Segment + 1]) t.Segment++;
-            float s = Mathf.InverseLerp(times[t.Segment], times[t.Segment + 1], time);
+            float s = Mathf.InverseLerp(Fallen(times[t.Segment]), Fallen(times[t.Segment + 1]), Fallen(time));
             var from = t.Points[t.Segment];
             var to = t.Points[t.Segment + 1];
             t.View.T.localPosition = Vector3.LerpUnclamped(from, to, s);

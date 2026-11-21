@@ -8,6 +8,7 @@ namespace EmberThrone.Game
     public sealed class ResultPopup
     {
         const float RaySpin = 6f;
+        const float DropFrom = -500f;
 
         public string Title { get; private set; }
         public int Coins { get; private set; }
@@ -73,11 +74,13 @@ namespace EmberThrone.Game
 
             Ui.El(win ? "et-icon et-result__mascot" : "et-icon et-result__mascot et-result__mascot--sad", body, "Mascot");
 
-            const float from = 1600f;
-            body.style.translate = new Translate(0f, from);
-            Tweens.Run(Timing.ModalIn, t =>
+            body.style.translate = new Translate(0f, DropFrom);
+            Tweens.Run(Timing.ModalDrop, t =>
             {
-                if (Ui.Alive(body)) body.style.translate = new Translate(0f, Mathf.LerpUnclamped(from, 0f, Ease.OutCubic(t)));
+                if (Ui.Alive(body)) body.style.translate = new Translate(0f, DropFrom * Ease.Spring(t * Timing.ModalDrop, Timing.ModalIn, Timing.ModalBounce));
+            }, 0f, () =>
+            {
+                if (Ui.Alive(body)) body.style.translate = new Translate(0f, 0f);
             });
         }
 

@@ -157,6 +157,7 @@ PlayMode testleri bu anahtarları başta kaydeder, sonda geri yazar (`StarsBacku
 | `tools/gen_meta.py` | Eksik `.meta` dosyalarını üretir |
 | `tools/sprites/` | Çizim sayfalarından sprite, arka plan, harita ve arayüz dokusu üretir (Pillow + numpy) |
 | `tools/ui_chrome/`, `tools/fonts/`, `tools/audio/`, `tools/icon/` | Arayüz parçası, font, ses ve uygulama ikonu üreticileri. Pillow gerektirenler (`tools/icon/`) Pillow kurulu Python ile çalışır |
+| `tools/reference/` | Referans ölçümü: kare şeridi (`strip.py`) ve taşı rengiyle kare kare izleme (`track.py`); bkz. [docs/reference/](../reference/README.md) |
 
 ## Kod kuralları
 
