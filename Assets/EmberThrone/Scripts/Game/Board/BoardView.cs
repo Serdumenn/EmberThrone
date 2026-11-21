@@ -789,10 +789,10 @@ namespace EmberThrone.Game
             }
 
             var color = e.Kind == PieceKind.Gem ? Palette.Gem(e.Color) : Warm;
-            float shrink = delay + Timing.MatchFlash;
+            float flash = _marked.Remove(v.Id) ? Timing.MatchFlash : 0f;
+            float shrink = delay + flash;
             float gone = shrink + Timing.MatchShrink;
-            float flashFrom = _marked.Remove(v.Id) ? MarkFlash : 0f;
-            Tweens.Run(Timing.MatchFlash, t => SetFlash(v, Mathf.Lerp(flashFrom, 0.6f, t)), delay);
+            if (flash > 0f) Tweens.Run(flash, t => SetFlash(v, Mathf.Lerp(MarkFlash, 0.6f, t)), delay);
             Tweens.Run(Timing.MatchShrink, t => v.T.localScale = Vector3.one * Mathf.Lerp(1f, 0.2f, t), shrink, () => Recycle(v));
             _fx.GemBurst(World(e.Pos), color, gone, e.Reason == ClearReason.Match ? 6 : 4);
             return gone + Timing.PopToFall;

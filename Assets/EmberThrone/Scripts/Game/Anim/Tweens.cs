@@ -112,7 +112,7 @@ namespace EmberThrone.Game
         public const float Swap = 0.13f;
         public const float Pop = 0.11f;
         public const float MatchFlash = 0.07f;
-        public const float MatchShrink = 0.065f;
+        public const float MatchShrink = 0.07f;
         public const float PopToFall = 0.11f;
         public const float FallSpeed = 4f;
         public const float FallGravity = 30f;

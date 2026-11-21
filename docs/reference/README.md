@@ -9,15 +9,15 @@ Tahta ve pencere animasyonlarının hedefleri, türün liderinden (Royal Kingdom
 | 2026-11-15, kayıt A | 720×1564, 60 fps, 42 sn | Ana ekran, dünya haritası, bölüm videosu |
 | 2026-11-15, kayıt B | 720×1564, ortalama 60 fps, 193 sn | Lobi, mağaza, sıralama, takım, 389. bölüm, kayıp akışı |
 
-Hata payı ±1 kare (17 ms). Hareket eden taş, rengine göre maskelenip her karede ağırlık merkezinden izlenir (`tools/reference/track.py`); hızlı efektlerde her hücrenin ilk değiştiği kare alınır. 2026-11-15'teki ilk tabloda takas, düşüş ve pencere girişi göz kararı okunmuştu; 2026-11-21'de izlemeyle yeniden ölçüldü ve aşağıdaki değerlerle değiştirildi.
+Hata payı ±1 kare (17 ms). Hareket eden taş, rengine göre maskelenip her karede ağırlık merkezinden izlenir (`tools/reference/track.py`); hızlı efektlerde her hücrenin ilk değiştiği kare alınır. 2026-11-15'teki ilk tabloda takas, eşleşme, düşüş ve pencere girişi göz kararı okunmuştu; 2026-11-21'de izlemeyle yeniden ölçüldü ve aşağıdaki değerlerle değiştirildi.
 
 ## Tahta
 
 | Olay | Referans | EmberThrone | Değer |
 |---|---|---|---|
 | Takas | 125–135 ms, yavaşlayarak biter (yolun yarısı ~45 ms'de, %90'ı ~85 ms'de); taşlar büyümez. İki takas ölçüldü | `Timing.Swap`, `Ease.OutQuad` | 130 ms |
-| Eşleşme parlaması | 70–80 ms; taş boyu değişmeden beyazlar | `Timing.MatchFlash` | 70 ms |
-| Eşleşme küçülmesi | ~65 ms; taş kaybolunca halka ve kırıntılar | `Timing.MatchShrink` | 65 ms |
+| Eşleşme | Beyazlama yok: takas oturur oturmaz taşlar ~70 ms'de küçülüp kaybolur, son karelerde beyaz halka ve kırıntılar çıkar | `Timing.MatchShrink` | 70 ms |
+| Renk küresinin işaretlediği taş | Patlarken önce beyazlar | `Timing.MatchFlash` | 70 ms |
 | Kaybolmadan düşüşe | 100–115 ms; kırıntılar uçarken düşüş başlar | `Timing.PopToFall` | 110 ms |
 | Düşüş | Yerçekimi gibi: ~5 px/kare ile başlar, kare başına ~0,5 px hızlanır (hücre 79 px). Tek hücre ~150 ms, ~7,5 hücre ~0,55 sn | `Timing.FallSpeed`, `Timing.FallGravity` | 4 hücre/sn, 30 hücre/sn² (tek hücre 157 ms, yedi hücre 563 ms) |
 | Roket, hücre başına | ~46 ms; iki uç ters yönlere, ateş izi 0,3 sn kalır | `Timing.RocketPerCell` | 45 ms |

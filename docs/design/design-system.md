@@ -173,7 +173,7 @@ Lobi bileşenleri (2026-11-12):
 
 Efekt yenilemesi (2026-11-12, telefondaki ilk denemeden sonra):
 - Tahta koyu laciverte döndü. Açık karelerde toplamalı (additive) ışık görünmüyordu.
-- Eşleşme: taş boyu değişmeden beyazlar, sonra küçülür ve kendi renginde kırıntılar, kıvılcımlar, ışıltı ve küçük bir şok halkasıyla patlar. Hedef taşları tahtadan hedef paneline uçar; sayaç taş varınca düşer.
+- Eşleşme: taş beyazlamadan 70 ms'de küçülür ve kendi renginde kırıntılar, kıvılcımlar, ışıltı ve küçük bir şok halkasıyla patlar. Hedef taşları tahtadan hedef paneline uçar; sayaç taş varınca düşer.
 - Roket: iki yöne alev izi ve duman bırakarak uçar, yolunda ışık şeridi kalır. Bomba: parlama, iki şok halkası, kıvılcım, kor ve duman; çevredeki taşlar dışarı itilip geri gelir, görüntü 50 ms durur. Renk bombası: hedefler karışık sırayla şimşekle işaretlenir; ışınlar patlamaya kadar yanık kalır, kısa bir bekleyişten sonra hepsi birlikte patlar. Güdümlü: kavisli uçuş ve kıvılcım izi.
 - Özel taş oluşurken arkasında dönen ışık hüzmesi çıkar. Tahtadaki özel taşlar nefes alır gibi hareket eder ve arkalarında renkli hale yanıp söner. Taşların üstünden ara sıra çapraz bir parıltı geçer, rastgele taşlarda ışıltı belirir.
 - Takas 130 ms sürer, yavaşlayarak biter, taşlar büyümez. Düşen taşlar yerçekimi gibi yavaş başlayıp hızlanır (tek hücre yaklaşık 160 ms, yedi hücre yaklaşık 0,56 sn), uzar, yere değince ezilip zıplar. Seviye başında tahta 0,5 sn sonra sağdan tek parça kayarak gelir.
