@@ -13,9 +13,9 @@ namespace EmberThrone.Game
     {
         public const int PixelsPerCell = 64;
         public const float Margin = 0.5f;
-        const float Offset = 0.15f;
-        const float FrameWidth = 0.11f;
-        const float Round = 0.25f;
+        const float Offset = 0.095f;
+        const float FrameWidth = 0.085f;
+        const float Round = 0.2f;
         const float ShadowDrop = 0.1f;
         const float ShadowSoft = 0.24f;
         const float SeamWidth = 0.016f;

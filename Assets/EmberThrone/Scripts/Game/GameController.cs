@@ -8,8 +8,8 @@ namespace EmberThrone.Game
 {
     public sealed class GameController : MonoBehaviour
     {
-        const float BottomMargin = BoosterBar.Height + 24f;
-        const float BoardMargin = 0.24f;
+        const float BottomMargin = BoosterBar.Height;
+        const float BoardMargin = 0.1f;
         const int BackdropOrder = -100;
         const float BackdropOverscan = 1.04f;
         const float AmbientWarmUp = 8f;
