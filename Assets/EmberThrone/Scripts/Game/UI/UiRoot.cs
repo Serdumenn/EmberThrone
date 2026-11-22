@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.TextCore.LowLevel;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UIElements;
 
 namespace EmberThrone.Game
@@ -11,6 +13,10 @@ namespace EmberThrone.Game
         public const float ReferenceWidth = 1080f;
         public const float ReferenceHeight = 1920f;
         public const string ThemePath = "UI/Theme/EmberThrone";
+        public const string FontPath = "UI/Fonts/PaytoneOne-Regular";
+        const int FontSampling = 90;
+        const int FontPadding = 20;
+        const int FontAtlas = 2048;
 
         public static Vector2Int? ScreenSizeOverride;
 
@@ -37,6 +43,7 @@ namespace EmberThrone.Game
         public event Action LayoutChanged;
 
         public PanelSettings Settings { get; private set; }
+        public static FontAsset Font { get; private set; }
         public VisualElement Backdrop { get; private set; }
         public VisualElement Content { get; private set; }
         public VisualElement Popups { get; private set; }
@@ -77,6 +84,7 @@ namespace EmberThrone.Game
 
             var root = document.rootVisualElement;
             root.AddToClassList("et-root");
+            root.style.unityFontDefinition = LoadFont();
             root.pickingMode = PickingMode.Ignore;
             Backdrop = Ui.El("et-fill", root, "Backdrop");
             _safe = Ui.El("et-safe", root, "SafeArea");
@@ -84,6 +92,19 @@ namespace EmberThrone.Game
             Popups = Ui.El("et-fill", root, "Popups");
 
             ApplyLayout();
+        }
+
+        static FontDefinition LoadFont()
+        {
+            if (Font != null) return FontDefinition.FromSDFFont(Font);
+            var source = Resources.Load<Font>(FontPath);
+            if (source == null)
+            {
+                Debug.LogError("[EmberThrone] UI font missing: Resources/" + FontPath);
+                return default;
+            }
+            Font = FontAsset.CreateFontAsset(source, FontSampling, FontPadding, GlyphRenderMode.SDFAA, FontAtlas, FontAtlas);
+            return Font != null ? FontDefinition.FromSDFFont(Font) : FontDefinition.FromFont(source);
         }
 
         void OnDestroy()

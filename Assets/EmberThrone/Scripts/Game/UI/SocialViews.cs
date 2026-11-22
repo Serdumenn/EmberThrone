@@ -58,7 +58,7 @@ namespace EmberThrone.Game
             var rules = Meta.RaceRules;
             Root = Ui.El("et-social", parent, "Race");
 
-            var header = Ui.El("et-panel et-social__header", Root, "Header");
+            var header = Ui.El("et-panel et-panel--royal et-social__header", Root, "Header");
             var top = Ui.El("et-social__top", header, "Top");
             Ui.El("et-icon et-social__emblem et-ic--trophy", top, "Emblem");
             var texts = Ui.El("et-social__texts", top, "Texts");
@@ -216,7 +216,7 @@ namespace EmberThrone.Game
         void BuildList(long now)
         {
             var team = Meta.Team;
-            var header = Ui.El("et-panel et-social__header", _body, "Header");
+            var header = Ui.El("et-panel et-panel--royal et-social__header", _body, "Header");
             var top = Ui.El("et-social__top", header, "Top");
             Ui.El("et-icon et-social__emblem et-ic--team", top, "Emblem");
             var texts = Ui.El("et-social__texts", top, "Texts");
@@ -241,7 +241,7 @@ namespace EmberThrone.Game
         {
             var team = Meta.Team;
             var def = team.Current;
-            var header = Ui.El("et-panel et-social__header", _body, "Header");
+            var header = Ui.El("et-panel et-panel--royal et-social__header", _body, "Header");
             var top = Ui.El("et-social__top", header, "Top");
             Avatar.Build(top, def.Emblem, "et-avatar--big");
             var texts = Ui.El("et-social__texts", top, "Texts");
@@ -263,7 +263,7 @@ namespace EmberThrone.Game
             foreach (var ask in team.Asks(now))
             {
                 int id = ask.Id;
-                var row = Ui.El("et-row", scroll, "Ask" + ask.Id);
+                var row = Ui.El("et-row et-row--rose", scroll, "Ask" + ask.Id);
                 Avatar.Build(row, ask.Avatar, "et-avatar--row");
                 var names = Ui.El("et-row__texts", row);
                 Ui.Text(ask.Name, "et-row__title", names, "Title");

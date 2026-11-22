@@ -73,7 +73,7 @@ namespace EmberThrone.Game
             var rules = Meta.Cards.Rules;
             Root = Ui.El("et-cards", parent, "Collection");
 
-            var header = Ui.El("et-panel et-cards__header", Root, "Header");
+            var header = Ui.El("et-panel et-panel--plum et-cards__header", Root, "Header");
             Ui.Text("Koleksiyon", "et-title et-title--small", header, "Title");
             var total = Ui.El("et-cards__total", header, "Total");
             var bar = Ui.El("et-progress et-cards__bar", total, "Bar");

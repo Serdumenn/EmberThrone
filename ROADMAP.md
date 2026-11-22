@@ -107,6 +107,8 @@ Türün liderleri (Royal Match, Royal Kingdom, Candy Crush, Toon Blast, Gardensc
 - [x] Aşama 7, etkinlik yoğunluğu (2026-11-14): Kıvılcım Koşusu (8 galibiyetten sonra açılır, 1 saatte 5 seviye, 4 rakip, ilk 3'e ödül, 30 dk ara), Fener Yarışı (12 galibiyetten sonra, 3 günde 15 seviye, 9 rakip, 1 gün ara), Kor Merdiveni (5 galibiyetten sonra, her gün 7 seviyeyi art arda kazan, kayıp başa döndürür, 100 oyuncudan zirveye çıkanlar 10000 altını paylaşır), takım sandığı (haftalık, takımın galibiyetleri 30/70/120'de üç ödül açar). Rakipler ve takım arkadaşları köy halkından, profil tohumu ve saatle belirlenir; hepsi cihazda çalışır. Ana ekranda süreli düğmeler, Takım sekmesinde sandık
 - [ ] Yarışları ve merdiveni telefonda dene; hedefleri, rakip hızını ve ödülleri oynayarak ayarla
 - [ ] Gerçek oyunculu yarışlar ve takım sandığı (Unity Cloud ile, Faz 4)
+- [x] Arayüz v2 (2026-11-14): Royal Kingdom ile parça parça karşılaştırma, yazı tipi Paytone One, bordo başlık bandı ve alt menü, lacivert desenli sayfalar, kalın altın kenarlı renkli panolar, çerçeveli parlak butonlar, pencerelerde köşede X, bölümlü mağaza (teklif panoları, elmas ve altın kartları). Oyun dünyası aynı kaldı
+- [ ] Arayüz v2 devamı: ana ekran yan düğmeleri (halkasız büyük simge ve renkli süre etiketi), oyun içi hedef ve hamle panoları, harita ve dünya ekranı, yükleme ekranı; başlıklarda renk geçişli yazı
 
 ## Faz 2d — Referans eşitleme (2026-11-15)
 Türün liderinin 60 fps ekran kaydından kare kare ölçülen süreler ([docs/reference/](docs/reference/README.md)). Önce oyuncunun her hamlede gördüğü tahta. Takas, eşleşme, düşüş ve pencere değerleri göz kararıydı; 2026-11-21'de izlemeyle düzeltildi (Faz 2e).

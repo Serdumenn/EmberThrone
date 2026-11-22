@@ -41,6 +41,7 @@ namespace EmberThrone.Game
         GameApp _app;
         public SettingsPopup Settings { get; private set; }
         public int CurrentIndex { get; private set; }
+        public VisualElement PageHeader { get; private set; }
         public ScrollView Scroll { get; private set; }
 
         readonly List<Button> _buttons = new List<Button>();
@@ -89,6 +90,7 @@ namespace EmberThrone.Game
             Diorama.Show(RestoreFocus);
 
             int current = CurrentIndex;
+            PageHeader = Ui.El("et-page-header", Root, "PageHeader");
             Top = TopBar.Create(Root, app.OpenLives, app.OpenShop, () => OpenSettings(ui));
             SettingsButton = Top.SettingsButton;
             Lobby = LobbyBar.Create(Root, "Seviye " + levels[current].Id, () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests, app.OpenEvent, app.OpenRestore, app.OpenPass, app.OpenContest, app.OpenLadder, () => RestoreFocus, () => Mathf.Max(0, CurrentIndex));

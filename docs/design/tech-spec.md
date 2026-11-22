@@ -53,7 +53,7 @@
 
 ## Tipografi
 
-- Baloo 2 Bold ve ExtraBold. Google Fonts'un değişken fontundan sabit ağırlık olarak, yalnız Latin harfleriyle `tools/fonts/make_baloo2.py` üretir.
+- Paytone One (`tools/fonts/make_paytone.py` olduğu gibi kopyalar). `UiRoot` açılışta yazıyı 90 px örnek ve 20 px boşlukla dinamik bir SDF atlasına alır ve kök öğeye verir; USS'de yazı tipi tanımı yoktur. Baloo 2 dosyaları (`tools/fonts/make_baloo2.py`) artık arayüzde kullanılmaz.
 - Her font Türkçe harfleri (ş, ğ, ı, İ, ç, ö, ü) içermeli; `ThemeTests` kontrol eder.
 
 ## Ses

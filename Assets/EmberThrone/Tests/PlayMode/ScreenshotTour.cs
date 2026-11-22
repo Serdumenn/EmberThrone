@@ -277,6 +277,10 @@ namespace EmberThrone.Game.Tests
             _app.OpenShop();
             yield return GameTime(Timing.ModalIn + 0.1f);
             yield return Shot("01c_magaza");
+            var shop = (ShopPopup)_app.Modal;
+            shop.Reveal(shop.OfferButton("coins_3000"));
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01c1_magaza_paketler");
             _app.Modal.Close();
             for (int i = 0; i < 7; i++) Meta.Economy.ReportStoreWin(Meta.Now);
             Meta.Economy.ClaimPass(1, false, Meta.Now);

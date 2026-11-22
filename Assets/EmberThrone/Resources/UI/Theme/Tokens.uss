@@ -12,6 +12,9 @@
     --color-gold-light: #FFF7C4;
     --color-gold: #FFD447;
     --color-gold-deep: #B96A05;
+    --color-title: #FFE48A;
+    --color-page: #1B2444;
+    --color-off-edge: #3A3448;
     --color-cta: #44AD1C;
     --color-cta-edge: #18480A;
     --color-accent: #F2780E;
@@ -32,13 +35,13 @@
     --color-confetti-purple: #B44AF6;
     --color-none: rgba(0, 0, 0, 0);
 
-    --font-size-display: 120px;
-    --font-size-number: 124px;
-    --font-size-title: 104px;
-    --font-size-button: 76px;
-    --font-size-label: 56px;
-    --font-size-body: 48px;
-    --font-size-caption: 36px;
+    --font-size-display: 112px;
+    --font-size-number: 116px;
+    --font-size-title: 92px;
+    --font-size-button: 68px;
+    --font-size-label: 50px;
+    --font-size-body: 44px;
+    --font-size-caption: 34px;
 
     --space-1: 8px;
     --space-2: 16px;

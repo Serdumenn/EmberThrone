@@ -59,24 +59,24 @@ Renkli dolgu üzerindeki beyaz yazı tek başına yetmez: yeşilde 2,9, turuncud
 
 ## Tipografi
 
-Tek aile: **Baloo 2** (SIL OFL), Türkçe harflerin hepsi var. Ağırlıklar: 700 Bold, 800 ExtraBold.
+Tek aile: **Paytone One** (SIL OFL, 2026-11-14'ten beri), tek ağırlık, Türkçe harflerin hepsi var. Oyun yazıyı açılışta 90 px örnekle ve 20 px boşlukla bir SDF atlasına çizer (`UiRoot.LoadFont`); kalın dış çizgi ve gölge bu boşluk sayesinde kesilmez. Eski Baloo 2 dosyaları yalnız karşılaştırma için durur.
 
 | Token | Boyut | Ağırlık | Kullanım |
 |---|---|---|---|
-| `--font-size-display` | 120 | 800 | Ekran başlığı ("Mağaza"), büyük buton ("Oyna") |
-| `--font-size-number` | 124 | 800 | Hamle sayısı |
-| `--font-size-title` | 104 | 800 | Pencere başlığı ("Seviye 8"), "Muhteşem!" |
-| `--font-size-button` | 76 | 800 | Buton etiketleri, fiyat |
-| `--font-size-label` | 56 | 800 | Satır adı, hedef sayısı, bant yazısı |
-| `--font-size-body` | 48 | 800 | Bölüm başlığı, açıklama |
-| `--font-size-caption` | 36 | 700 | Süre hapı, "Skor", rozet yazısı |
+| `--font-size-display` | 112 | — | Ekran başlığı, büyük buton ("Oyna") |
+| `--font-size-number` | 116 | — | Hamle sayısı |
+| `--font-size-title` | 92 | — | Pencere başlığı ("Seviye 8"), "Muhteşem!" |
+| `--font-size-button` | 68 | — | Buton etiketleri, fiyat |
+| `--font-size-label` | 50 | — | Satır adı, hedef sayısı, bant yazısı |
+| `--font-size-body` | 44 | — | Bölüm başlığı, açıklama |
+| `--font-size-caption` | 34 | — | Süre hapı, rozet yazısı |
 
 **Yazı stilleri**
 
 | Stil | Dolgu | Dış çizgi | Gölge | Nerede |
 |---|---|---|---|---|
-| Altın başlık | `gold` | `outline`, boyutun %7'si | 0, %5 aşağı, `outline` | Ekran ve pencere başlıkları, "Muhteşem!" |
-| Beyaz dış çizgili | beyaz | zeminin kenar rengi (`cta-edge`, `outline`…) | 0, %4 aşağı | Butonlar, bantlar, sayılar |
+| Başlık | `title` (açık altın) | `outline`, 9-10 px | 0, 8 px aşağı, `outline` | Ekran ve pencere başlıkları, "Muhteşem!" |
+| Beyaz dış çizgili | beyaz | zeminin kenar rengi (`cta-edge`, `accent-edge`, `off-edge`, `outline`), 6-7 px | 0, 5 px aşağı | Butonlar, bantlar, sayılar |
 | Mürekkep | `ink` | yok | yok | Krem panel içi |
 
 USS karşılığı: `-unity-text-outline-width`, `-unity-text-outline-color`, `text-shadow`.
@@ -88,6 +88,23 @@ USS karşılığı: `-unity-text-outline-width`, `-unity-text-outline-color`, `t
 - Dış çizgi 3 · altın kenar 7,5 · buton alt dudağı 10
 
 ## Bileşenler
+
+**v2, 2026-11-14 ("kraliyet" görünümü).** Sahibi arayüzün türün liderine yakın olmasını istedi: bordo başlık bandı ve alt menü, lacivert desenli sayfa zemini, kalın altın kenarlı panolar, krem satırlar, köşeleri yuvarlak dikdörtgen parlak butonlar (koyu dış çizgi, altta kalın dudak, üstte parlak bant), pencerelerde köşede kırmızı X. Parçaların hepsi `tools/ui_chrome/chrome.html`'den çizilir (`python tools/ui_chrome/render.py <ad>`):
+
+| Parça | Dosya | Dilim | Nerede |
+|---|---|---|---|
+| Buton yeşil / turuncu / gri | `b2_green`, `b2_orange`, `b2_grey` (300×150) | yan 46, üst 42, alt 52 | `.et-btn--cta`, `.et-btn--secondary`, pasif buton |
+| Çerçeveli buton | `b2_green_framed`, `b2_orange_framed` (320×176) | yan 56, üst 54, alt 64 | Pencere butonları (`.et-result__button`), lobi "Seviye N" |
+| Pano | `p2_cream` (ayrıca `p2_crimson`, `p2_royal`, `p2_plum`, `p2_gold`) | 72, alt 76 | `.et-panel` |
+| Başlık bandı | `band_crimson` (ayrıca `band_royal`, `band_plum`) | yan 60, üst 50, alt 56 | Pencere başlığı (`.et-ribbon`) |
+| Kapat | `btn_close` | — | Pencerenin sağ üst köşesi (`.et-close`) |
+| Satır | `row2`, kendi satırı `row2_me` (yeşil), istek `row3_rose` | 40, alt 48 | `.et-row`, `.et-rank`, pass ve set satırları |
+| Sayfa başlığı | `hdr3` | alt 26 | Bütün sekmelerde üst bant, para göstergelerinin arkası (`.et-page-header`) |
+| Sayfa zemini | `bg3` (512, tekrar eder) | — | `.et-backdrop--map` |
+| Alt menü | `nav3`, seçili sekme `nav3_on` | üst 20 / üst 56 | `.et-tabbar`, `.et-tab`, `.et-tab--active` |
+| Etiket, fiyat plakası, desen | `corner_tab`, `price2`, `pat_star` | 44 / 28 / — | Teklif panoları için hazır |
+
+Aşağıdaki v1 tablosu eski parçaları anlatır; `chip`, `pill`, `ring`, `tag`, `trough`, `fill`, `badge`, `check` hâlâ kullanılır.
 
 Pencere, butonlar, halka, hap, etiket ve kurdele `ArtSource/sheets/ui_kit.png` çiziminden (`tools/sprites/cut_sheets.py`), onay işareti ve ışıltılar `tools/ui_chrome/`'dan üretilir; hepsi `Resources/UI/Chrome/` altındadır. "Dilim" sütunu, köşelerin esnetilmeyen kısmıdır (`-unity-slice-*`).
 
@@ -115,7 +132,7 @@ USS sınıfları `et-` ile başlar: `.et-panel`, `.et-tag`, `.et-chip`, `.et-rin
 **Durumlar:**
 - **normal**
 - **basılı:** %94 ölçek, %8 koyulaşma, 90 ms
-- **pasif:** %45 opaklık, renk doygunluğu düşük, dokunma yok
+- **pasif:** buton gri olur (`b2_grey`, yazı çizgisi `off-edge`), dokunma yok
 - **seçili:** yeşil ışıltılı çerçeve, köşede ✓
 - **kilitli seviye kartı:** `locked` griye boyanır, sayı ve yıldızlar soluk; dokununca kart sallanır
 - **sıradaki seviye kartı:** altına boyanır, %106 ölçek; liste açılınca ona kayar

@@ -28,9 +28,11 @@ namespace EmberThrone.Game
             Ui.Text(title, title.Length > 11 ? "et-title et-title--small" : "et-title", ribbon, "Title");
         }
 
-        protected Button AddClose(string label = "Tamam", ButtonKind kind = ButtonKind.Secondary)
+        protected Button AddClose(string label = null, ButtonKind kind = ButtonKind.Secondary)
         {
-            CloseButton = Ui.Button(label, Ui.ClassOf(kind) + " et-result__button", Close, Panel, "Close");
+            CloseButton = label == null
+                ? Ui.Button(null, "et-pressable et-close", Close, Panel, "Close")
+                : Ui.Button(label, Ui.ClassOf(kind) + " et-result__button", Close, Panel, "Close");
             return CloseButton;
         }
 

@@ -62,23 +62,30 @@ namespace EmberThrone.Game
         void Build(VisualElement parent, Action closed)
         {
             Open(parent, "Shop", "Mağaza", closed);
+            Root.AddToClassList("et-result--page");
             var balance = Ui.El("et-balance", Panel, "Balance");
             Ui.El("et-icon et-balance__icon et-ic--coin", balance);
             _balance = Ui.Text("", "et-ink et-balance__text", balance, "Coins");
 
             var list = new ScrollView(ScrollViewMode.Vertical) { name = "Items" };
             list.AddToClassList("et-shop__list");
+            list.verticalScrollerVisibility = ScrollerVisibility.Hidden;
             Panel.Add(list);
             _list = list;
-            foreach (var product in Meta.Rules.Store.Products)
+            var products = Meta.Rules.Store.Products;
+            Band(list, "Özel teklifler", "crimson");
+            foreach (var product in products)
             {
+                if (!IsFeatured(product)) continue;
                 if (product.Kind == ProductKind.Starter && Meta.Economy.Profile.StarterBought) continue;
-                var p = product;
-                var row = Rows.Row(list, IconOfProduct(p), p.Title, "", out var sub, p.Id);
-                _offerSubs[p.Id] = sub;
-                _offers[p.Id] = Rows.Price(row, _purchases != null ? _purchases.PriceOf(p) : p.Price, null, ButtonKind.Cta, () => BuyProduct(p.Id));
+                Offer(list, product);
             }
+            Band(list, "Elmas ve altın", "royal");
+            var grid = Ui.El("et-buy-grid", list, "Packs");
+            foreach (var product in products)
+                if (!IsFeatured(product)) Pack(grid, product);
 
+            Band(list, "Güçlendiriciler", "crimson");
             foreach (var type in BoosterInventory.All)
             {
                 var t = type;
@@ -99,6 +106,43 @@ namespace EmberThrone.Game
         }
 
         protected override void OnClosed() => Meta.Changed -= Refresh;
+
+        static bool IsFeatured(StoreProduct product) =>
+            product.Kind == ProductKind.Starter || product.Kind == ProductKind.Pass || product.Kind == ProductKind.Piggy;
+
+        static void Band(VisualElement parent, string title, string tone)
+        {
+            var band = Ui.El("et-band et-band--" + tone, parent, "Band");
+            Ui.Text(title, "et-outlined et-band__text", band, "Text");
+        }
+
+        string PriceOf(StoreProduct product) => _purchases != null ? _purchases.PriceOf(product) : product.Price;
+
+        void Offer(VisualElement list, StoreProduct product)
+        {
+            string tone = product.Kind == ProductKind.Starter ? "crimson" : product.Kind == ProductKind.Pass ? "plum" : "gold";
+            string id = product.Id;
+            var card = Ui.El("et-offer et-offer--" + tone, list, id);
+            Ui.El("et-icon et-offer__icon " + IconOfProduct(product), card);
+            var texts = Ui.El("et-offer__texts", card);
+            Ui.Text(product.Title, "et-outlined et-offer__title", texts, "Title");
+            _offerSubs[id] = Ui.Text("", "et-offer__sub", texts, "Sub");
+            var buy = Ui.Button(null, Ui.ClassOf(ButtonKind.Cta) + " et-btn--framed et-offer__buy", () => BuyProduct(id), texts, "Buy");
+            Ui.Text(PriceOf(product), "et-btn__label", buy, "Label");
+            _offers[id] = buy;
+        }
+
+        void Pack(VisualElement grid, StoreProduct product)
+        {
+            string id = product.Id;
+            bool gems = product.Kind == ProductKind.Gems;
+            var card = Ui.El("et-buy-card " + (gems ? "et-buy-card--royal" : "et-buy-card--gold"), grid, id);
+            Ui.El("et-icon et-buy-card__icon " + IconOfProduct(product), card);
+            bool named = product.Kind == ProductKind.Boosters;
+            Ui.Text(named ? product.Title : product.Rewards[0].Amount.ToString(), "et-outlined et-buy-card__amount" + (named ? " et-buy-card__amount--name" : ""), card, "Amount");
+            _offerSubs[id] = Ui.Text("", "et-buy-card__sub", card, "Sub");
+            _offers[id] = Rows.Price(card, PriceOf(product), null, ButtonKind.Cta, () => BuyProduct(id));
+        }
 
         void Refresh()
         {
