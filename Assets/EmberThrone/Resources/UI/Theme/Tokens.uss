@@ -17,6 +17,9 @@
     --color-purple-edge: #400D5D;
     --color-purple-ink: #56107E;
     --color-blue-edge: #0B2550;
+    --color-value-ink: #730C0F;
+    --color-crimson-edge: #742721;
+    --color-nav-floor: #6A0E26;
     --color-page: #1B2444;
     --color-off-edge: #3A3448;
     --color-cta: #44AD1C;

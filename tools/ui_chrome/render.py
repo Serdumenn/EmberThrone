@@ -22,6 +22,7 @@ SIZES = {
     'booster_green': (166, 166), 'count_red': (68, 68), 'count_green': (68, 68), 'btn_purple_round': (130, 130),
     'lvl_band': (600, 262), 'btn_close_gold': (158, 158), 'flag_center': (326, 278), 'flag_side': (185, 150),
     'wide_plum': (1080, 180), 'wide_cream': (1080, 420), 'gold_line': (64, 15), 'hex_red': (260, 270), 'heart_broken': (120, 108),
+    'ic_gear_cream': (96, 96), 'bar_crimson': (400, 132), 'b2_purple_framed': (320, 176), 'ribbon_crimson': (200, 82), 'btn_orange_round': (88, 88),
 }
 
 

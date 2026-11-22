@@ -93,7 +93,7 @@ namespace EmberThrone.Game
             PageHeader = Ui.El("et-page-header", Root, "PageHeader");
             Top = TopBar.Create(Root, app.OpenLives, app.OpenShop, () => OpenSettings(ui));
             SettingsButton = Top.SettingsButton;
-            Lobby = LobbyBar.Create(Root, "Seviye " + levels[current].Id, () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests, app.OpenEvent, app.OpenRestore, app.OpenPass, app.OpenContest, app.OpenLadder, () => RestoreFocus, () => Mathf.Max(0, CurrentIndex));
+            Lobby = LobbyBar.Create(Root, "Bölüm " + levels[current].Id, DifficultyOf(levels[current]), () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests, app.OpenEvent, app.OpenRestore, app.OpenPass, app.OpenContest, app.OpenLadder, () => RestoreFocus, () => Mathf.Max(0, CurrentIndex));
             Tabs = TabBar.Create(Root, app.OpenShop,
                 () => Show(LobbyPage.Rank),
                 () => ShowMap(false),
@@ -107,6 +107,8 @@ namespace EmberThrone.Game
 
             if (CurrentIndex >= 0) CenterWhenLaidOut(_buttons[CurrentIndex]);
         }
+
+        static string DifficultyOf(LevelDefinition level) => level.IsSuperHard ? "Süper Zor!" : level.IsHard ? "Zor" : null;
 
         void BuildChapter(int chapterIndex, IReadOnlyList<LevelDefinition> levels, Func<LevelDefinition, int> starsOf, Action<int> onPick)
         {
@@ -188,6 +190,7 @@ namespace EmberThrone.Game
             Race.Root.EnableInClassList(Ui.Hidden, page != LobbyPage.Rank);
             Team.Root.EnableInClassList(Ui.Hidden, page != LobbyPage.Team);
             Lobby.SetShown(home);
+            PageHeader.EnableInClassList(Ui.Hidden, home);
             Tabs.SetActive(TabOf(page));
             _ui.Backdrop.EnableInClassList("et-backdrop--map", !home);
             _ui.Backdrop.EnableInClassList("et-backdrop--home", home);

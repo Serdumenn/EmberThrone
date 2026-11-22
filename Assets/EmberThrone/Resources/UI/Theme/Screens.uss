@@ -619,8 +619,7 @@
 .et-boosters__home-icon {
     width: 84px;
     height: 84px;
-    background-image: url("../Art/ic_gear.png");
-    -unity-background-image-tint-color: var(--color-cream-text);
+    background-image: url("../Chrome/ic_gear_cream.png");
 }
 
 .et-booster__icon--hammer {
@@ -680,32 +679,159 @@
 
 .et-topbar {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 50%;
     top: 0;
-    height: 150px;
-    padding: 0 22px 0 56px;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
+    width: 1080px;
+    height: 220px;
+    translate: -50% 0;
+}
+
+.et-topbar__bar {
+    position: absolute;
+    left: 8px;
+    top: 86px;
+    width: 1065px;
+    height: 132px;
+    background-image: url("../Chrome/bar_crimson.png");
+    -unity-slice-left: 66;
+    -unity-slice-top: 60;
+    -unity-slice-right: 66;
+    -unity-slice-bottom: 60;
+}
+
+.et-topbar .et-pill {
+    position: absolute;
+    top: 110px;
+    height: 90px;
+    min-width: 0;
+    margin-top: 0;
+    padding: 0 40px 8px 92px;
+}
+
+.et-pill--coins {
+    left: 244px;
+    width: 228px;
+}
+
+.et-pill--lives {
+    left: 488px;
+    width: 236px;
+}
+
+.et-pill--gems {
+    left: 735px;
+    width: 213px;
+}
+
+.et-topbar .et-pill__icon {
+    left: -24px;
+    top: -12px;
+    width: 112px;
+    height: 112px;
+}
+
+.et-topbar .et-pill__count {
+    left: -24px;
+    top: -16px;
+    width: 112px;
+    height: 112px;
+    font-size: 52px;
+}
+
+.et-topbar .et-pill__plus {
+    right: -10px;
+    top: 21px;
+    width: 48px;
+    height: 48px;
+}
+
+.et-topbar .et-pill__text {
+    font-size: 50px;
+    color: var(--color-value-ink);
+}
+
+.et-topbar .et-pill--lives .et-pill__text {
+    font-size: 42px;
 }
 
 .et-lobby {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 204px;
-    height: 250px;
-    padding: 0 30px 0 30px;
-    flex-direction: row;
-    justify-content: space-between;
+    left: 50%;
+    bottom: 0;
+    width: 1080px;
+    height: 720px;
+    translate: -50% 0;
     align-items: center;
 }
 
 .et-lobby__play {
-    width: 530px;
-    height: 196px;
-    font-size: 82px;
+    position: absolute;
+    left: 300px;
+    bottom: 263px;
+    width: 483px;
+    height: 220px;
+    padding: 0 30px 24px 30px;
+    flex-direction: column;
+}
+
+.et-lobby__play-title {
+    font-size: 70px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 6px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 5px 0 var(--color-purple-edge);
+}
+
+.et-lobby__play-sub {
+    margin-top: -6px;
+    font-size: 44px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 5px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 4px 0 var(--color-purple-edge);
+}
+
+.et-lobby__world {
+    position: absolute;
+    left: 60px;
+    bottom: 356px;
+    width: 147px;
+    height: 150px;
+}
+
+.et-lobby__quests {
+    position: absolute;
+    left: 870px;
+    bottom: 356px;
+    width: 147px;
+    height: 150px;
+}
+
+.et-lobby__icon {
+    width: 147px;
+    height: 150px;
+}
+
+.et-lobby__ribbon {
+    position: absolute;
+    left: -22px;
+    top: 165px;
+    width: 200px;
+    height: 82px;
+    padding-bottom: 14px;
+    font-size: 44px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 5px;
+    -unity-text-outline-color: var(--color-crimson-edge);
+    text-shadow: 0 4px 0 var(--color-crimson-edge);
+    background-image: url("../Chrome/ribbon_crimson.png");
+}
+
+.et-lobby__quests > .et-lobby__ribbon {
+    left: -27px;
 }
 
 .et-side {
@@ -868,15 +994,20 @@
 }
 
 .et-topbar__gear {
-    width: 108px;
-    height: 112px;
-    margin-top: 22px;
-    padding-bottom: 4px;
+    position: absolute;
+    left: 964px;
+    top: 118px;
+    width: 88px;
+    height: 88px;
+    align-items: center;
+    justify-content: center;
+    background-image: url("../Chrome/btn_orange_round.png");
 }
 
 .et-topbar__gear-icon {
-    width: 72px;
-    height: 72px;
+    width: 62px;
+    height: 62px;
+    background-image: url("../Chrome/ic_gear_cream.png");
 }
 
 .et-loading {
@@ -914,7 +1045,7 @@
     left: 0;
     right: 0;
     top: 150px;
-    bottom: 176px;
+    bottom: 182px;
     padding: 0 24px;
 }
 
@@ -1031,7 +1162,7 @@
     left: 0;
     right: 0;
     top: 150px;
-    bottom: 176px;
+    bottom: 182px;
     padding: 0 24px;
 }
 

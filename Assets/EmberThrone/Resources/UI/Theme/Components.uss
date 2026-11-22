@@ -214,6 +214,15 @@
     text-shadow: 0 5px 0 var(--color-blue-edge);
 }
 
+.et-btn--purple {
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 5px 0 var(--color-purple-edge);
+}
+
+.et-btn--purple.et-btn--framed {
+    background-image: url("../Chrome/b2_purple_framed.png");
+}
+
 .et-gold-line {
     background-image: url("../Chrome/gold_line.png");
 }
@@ -679,8 +688,8 @@
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 0;
-    height: 176px;
+    bottom: -56px;
+    height: 238px;
     flex-direction: row;
     align-items: flex-end;
     background-image: url("../Chrome/nav3.png");
@@ -690,11 +699,21 @@
     -unity-slice-bottom: 2;
 }
 
+.et-tabbar__floor {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 400px;
+    background-color: var(--color-nav-floor);
+}
+
 .et-tab {
     flex-grow: 1;
     flex-basis: 0;
-    height: 176px;
+    height: 238px;
     padding-top: 14px;
+    padding-bottom: 56px;
     align-items: center;
     justify-content: center;
     background-image: url("../Chrome/nav3.png");
@@ -710,9 +729,12 @@
 }
 
 .et-tab--active {
-    height: 240px;
+    flex-grow: 0;
+    flex-basis: auto;
+    width: 266px;
+    height: 291px;
     padding-top: 10px;
-    padding-bottom: 8px;
+    padding-bottom: 56px;
     background-image: url("../Chrome/nav3_on.png");
     -unity-slice-left: 40;
     -unity-slice-top: 56;

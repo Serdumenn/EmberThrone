@@ -968,7 +968,7 @@ namespace EmberThrone.Game.Tests
             yield return null;
             var select = _app.LevelSelect;
             Assert.IsFalse(select.MapShown, "the game opens on the home screen");
-            Assert.AreEqual(5, select.Tabs.Root.childCount);
+            Assert.AreEqual(5, select.Tabs.Root.Children().Count(e => e.ClassListContains("et-tab")));
 
             yield return OpenWorld();
             Assert.IsNotNull(select.Buttons[0].panel);
@@ -1458,7 +1458,7 @@ namespace EmberThrone.Game.Tests
             Assert.AreEqual("Dolu", top.LifeTimerText);
             Assert.AreEqual("500", top.CoinsText);
             Assert.AreEqual("50", top.GemsText);
-            Assert.AreEqual("Seviye " + _app.Levels[_app.LevelSelect.CurrentIndex].Id, _app.LevelSelect.Lobby.PlayButton.text);
+            Assert.AreEqual("Bölüm " + _app.Levels[_app.LevelSelect.CurrentIndex].Id, _app.LevelSelect.Lobby.PlayLabel);
 
             yield return TapUi(_app.LevelSelect.Lobby.PlayButton);
             Assert.IsNotNull(_app.LevelStart, "the big button opens the level the player is on");

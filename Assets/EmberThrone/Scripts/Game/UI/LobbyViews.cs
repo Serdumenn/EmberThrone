@@ -38,12 +38,13 @@ namespace EmberThrone.Game
         void Build(VisualElement parent, Action onLives, Action onCoins, Action onSettings)
         {
             Root = Ui.El("et-topbar", parent, "TopBar");
-            LivesPill = Pill("Lives", "et-ic--heart", onLives, true, out _lifeText);
-            _lifeCount = Ui.Text("", "et-outlined et-pill__count", LivesPill, "Count");
-            CoinsPill = Pill("Coins", "et-ic--coin", onCoins, true, out _coins);
+            Ui.El("et-topbar__bar", Root, "Bar");
+            CoinsPill = Pill("Coins", "et-ic--coin", "et-pill--coins", onCoins, true, out _coins);
             _warn = Ui.Text("Harca!", "et-tag et-outlined et-pill__warn " + Ui.Hidden, CoinsPill, "Warn");
-            GemsPill = Pill("Gems", "et-ic--gem", onCoins, false, out _gems);
-            SettingsButton = Ui.Button(null, "et-ring et-pressable et-topbar__gear", onSettings, Root, "SettingsButton");
+            LivesPill = Pill("Lives", "et-ic--heart", "et-pill--lives", onLives, true, out _lifeText);
+            _lifeCount = Ui.Text("", "et-outlined et-pill__count", LivesPill, "Count");
+            GemsPill = Pill("Gems", "et-ic--gem", "et-pill--gems", onCoins, false, out _gems);
+            SettingsButton = Ui.Button(null, "et-pressable et-topbar__gear", onSettings, Root, "SettingsButton");
             Ui.El("et-icon et-topbar__gear-icon et-ic--gear", SettingsButton);
 
             Refresh();
@@ -52,9 +53,9 @@ namespace EmberThrone.Game
             Root.schedule.Execute(Refresh).Every(500);
         }
 
-        Button Pill(string name, string icon, Action onTap, bool plus, out Label text)
+        Button Pill(string name, string icon, string place, Action onTap, bool plus, out Label text)
         {
-            var pill = Ui.Button(null, "et-pressable et-pill", onTap, Root, name);
+            var pill = Ui.Button(null, "et-pressable et-pill " + place, onTap, Root, name);
             Ui.El("et-icon et-pill__icon " + icon, pill);
             text = Ui.Text("", "et-ink et-pill__text", pill, "Text");
             if (plus) Ui.El("et-icon et-pill__plus et-ic--plus", pill);
@@ -153,14 +154,17 @@ namespace EmberThrone.Game
         public bool GiftBadgeShown => !_giftBadge.ClassListContains(Ui.Hidden);
         public string QuestBadgeText => _questBadge.ClassListContains(Ui.Hidden) ? "" : _questBadge.text;
 
-        public static LobbyBar Create(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent, Action onRestore, Action onPass, Action<ContestKind> onContest, Action onLadder, Func<int> focus, Func<int> levelsWon)
+        public string PlayLabel => PlayButton.Q<Label>("Label").text;
+        public string PlaySub => PlayButton.Q<Label>("Sub")?.text;
+
+        public static LobbyBar Create(VisualElement parent, string playLabel, string playSub, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent, Action onRestore, Action onPass, Action<ContestKind> onContest, Action onLadder, Func<int> focus, Func<int> levelsWon)
         {
             var bar = new LobbyBar { _focus = focus, _levelsWon = levelsWon };
-            bar.Build(parent, playLabel, onPlay, onWorld, onGift, onQuests, onEvent, onRestore, onPass, onContest, onLadder);
+            bar.Build(parent, playLabel, playSub, onPlay, onWorld, onGift, onQuests, onEvent, onRestore, onPass, onContest, onLadder);
             return bar;
         }
 
-        void Build(VisualElement parent, string playLabel, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent, Action onRestore, Action onPass, Action<ContestKind> onContest, Action onLadder)
+        void Build(VisualElement parent, string playLabel, string playSub, Action onPlay, Action onWorld, Action onGift, Action onQuests, Action onEvent, Action onRestore, Action onPass, Action<ContestKind> onContest, Action onLadder)
         {
             Side = Ui.El("et-side", parent, "Side");
             GiftButton = Ring(Side, "Gift", "et-ic--gift", "et-side__button", null, onGift, out _giftBadge);
@@ -178,14 +182,25 @@ namespace EmberThrone.Game
             _lanternText = Ui.Text("", "et-chip et-caption et-side__chip", LanternButton, "Progress");
 
             Root = Ui.El("et-lobby", parent, "Lobby");
-            WorldButton = Ring(Root, "World", "et-ic--world", "et-lobby__ring", "Dünya", onWorld, out _);
-            PlayButton = Ui.Button(playLabel, Ui.ClassOf(ButtonKind.Cta) + " et-lobby__play", onPlay, Root, "Play");
-            QuestsButton = Ring(Root, "Quests", "et-ic--quests", "et-lobby__ring", "Görevler", onQuests, out _questBadge);
+            WorldButton = Corner(Root, "World", "et-ic--world", "et-lobby__world", "Dünya", onWorld, out _);
+            PlayButton = Ui.Button(null, "et-btn et-btn--purple et-btn--framed et-lobby__play", onPlay, Root, "Play");
+            Ui.Text(playLabel, "et-lobby__play-title", PlayButton, "Label");
+            if (playSub != null) Ui.Text(playSub, "et-lobby__play-sub", PlayButton, "Sub");
+            QuestsButton = Corner(Root, "Quests", "et-ic--quests", "et-lobby__quests", "Görevler", onQuests, out _questBadge);
 
             Refresh();
             Meta.Changed += Refresh;
             Root.RegisterCallback<DetachFromPanelEvent>(_ => Meta.Changed -= Refresh);
             Root.schedule.Execute(Refresh).Every(2000);
+        }
+
+        static Button Corner(VisualElement parent, string name, string icon, string classes, string caption, Action onTap, out Label badge)
+        {
+            var button = Ui.Button(null, "et-pressable " + classes, onTap, parent, name);
+            Ui.El("et-icon et-lobby__icon " + icon, button);
+            Ui.Text(caption, "et-lobby__ribbon", button, "Caption");
+            badge = Ui.Text("!", "et-badge " + Ui.Hidden, button, "Badge");
+            return button;
         }
 
         static Button Ring(VisualElement parent, string name, string icon, string classes, string caption, Action onTap, out Label badge)
@@ -266,6 +281,7 @@ namespace EmberThrone.Game
         public static TabBar Create(VisualElement parent, Action onShop, Action onRank, Action onHome, Action onTeam, Action onCards)
         {
             var bar = new TabBar { Root = Ui.El("et-tabbar", parent, "Tabs") };
+            Ui.El("et-tabbar__floor", bar.Root, "Floor");
             bar.ShopTab = Tab(bar.Root, "Shop", "et-ic--shop", "Mağaza", onShop);
             bar.RankTab = Tab(bar.Root, "Rank", "et-ic--trophy", "Sıralama", onRank);
             bar.HomeTab = Tab(bar.Root, "Home", "et-ic--home", "Ana Ekran", onHome);
