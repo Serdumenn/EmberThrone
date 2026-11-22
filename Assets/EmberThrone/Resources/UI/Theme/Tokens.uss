@@ -13,6 +13,8 @@
     --color-gold: #FFD447;
     --color-gold-deep: #B96A05;
     --color-title: #FFE48A;
+    --color-cream-text: #FEF5D4;
+    --color-purple-edge: #400D5D;
     --color-page: #1B2444;
     --color-off-edge: #3A3448;
     --color-cta: #44AD1C;

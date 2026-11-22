@@ -20,55 +20,113 @@
 
 .et-hud {
     position: absolute;
-    left: 0;
+    left: 50%;
     top: 0;
-    right: 0;
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 26px var(--space-3) 0 var(--space-3);
+    width: 1080px;
+    height: 375px;
+    translate: -50% 0;
 }
 
-.et-hud__left {
-    width: 210px;
-    align-items: center;
+.et-hud__plate {
+    position: absolute;
+    left: 22px;
+    top: 98px;
+    width: 1040px;
+    height: 244px;
+    background-image: url("../Chrome/hud_plate.png");
+    -unity-slice-left: 60;
+    -unity-slice-top: 60;
+    -unity-slice-right: 60;
+    -unity-slice-bottom: 60;
+}
+
+.et-emby {
+    position: absolute;
+    left: 42px;
+    top: 48px;
+    width: 288px;
+    height: 327px;
+    background-image: url("../Chrome/hex_frame.png");
 }
 
 .et-emby__face {
     position: absolute;
-    left: 6px;
-    right: 6px;
-    top: -18px;
-    bottom: 14px;
+    left: 30px;
+    right: 30px;
+    top: -10px;
+    bottom: 40px;
     -unity-background-scale-mode: scale-to-fit;
     transform-origin: center bottom;
 }
 
-.et-hud__level {
-    margin-top: -34px;
-}
-
 .et-hud__goals {
-    flex-grow: 1;
-    height: 196px;
-    margin: 34px 0 0 18px;
+    position: absolute;
+    left: 354px;
+    top: 132px;
+    width: 447px;
+    height: 182px;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    padding: 22px var(--space-3) 34px var(--space-3);
+    padding: 26px 22px 18px 14px;
+    background-image: url("../Chrome/hud_card.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
 }
 
 .et-hud__moves {
-    width: 260px;
-    height: 196px;
-    margin: 34px 0 0 18px;
+    position: absolute;
+    left: 826px;
+    top: 132px;
+    width: 207px;
+    height: 182px;
     align-items: center;
     justify-content: center;
-    padding: 10px 0 22px 0;
+    padding-top: 18px;
+    background-image: url("../Chrome/hud_card.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
 }
 
 .et-hud__moves-count {
-    font-size: var(--font-size-number);
-    text-shadow: 0 5px 0 var(--color-highlight);
+    font-size: 120px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 8px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 7px 0 var(--color-purple-edge);
+}
+
+.et-hud__tab {
+    position: absolute;
+    top: 84px;
+    height: 68px;
+    padding-bottom: 4px;
+    font-size: 44px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 5px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 4px 0 var(--color-purple-edge);
+    background-image: url("../Chrome/hud_tab.png");
+    -unity-slice-left: 30;
+    -unity-slice-top: 30;
+    -unity-slice-right: 30;
+    -unity-slice-bottom: 30;
+}
+
+.et-hud__tab--goals {
+    left: 476px;
+    width: 201px;
+}
+
+.et-hud__tab--moves {
+    left: 834px;
+    width: 192px;
 }
 
 .et-hud__moves-count--warn {
@@ -80,20 +138,20 @@
 }
 
 .et-goal {
-    width: 132px;
-    height: 132px;
+    width: 105px;
+    height: 105px;
 }
 
 .et-hud__goals--four .et-goal {
-    width: 104px;
-    height: 104px;
+    width: 94px;
+    height: 94px;
 }
 
 .et-goal__count {
     position: absolute;
-    right: -18px;
-    bottom: -20px;
-    font-size: var(--font-size-label);
+    right: -16px;
+    bottom: -18px;
+    font-size: 50px;
 }
 
 .et-goal__check {

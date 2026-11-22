@@ -44,7 +44,7 @@ namespace EmberThrone.Game
 
         public EmbyPortrait(VisualElement parent)
         {
-            Root = Ui.El("et-ring et-emby", parent, "Emby");
+            Root = Ui.El("et-emby", parent, "Emby");
             _face = Ui.El("et-emby__face", Root, "Face");
             _nextBlink = Time.time + BlinkEvery;
             Mood = EmbyMood.Idle;

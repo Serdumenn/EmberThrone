@@ -73,7 +73,7 @@ namespace EmberThrone.Game
             BuildBackdrop();
             BuildView();
 
-            _hud = HudView.Create(app.Ui.Content, Session, "Seviye " + level.Id);
+            _hud = HudView.Create(app.Ui.Content, Session);
             _flyers = GoalFlyers.Create(app.Ui.Content);
             _goalShown = new int[Session.Goals.Count];
             for (int i = 0; i < _goalShown.Length; i++) _goalShown[i] = Session.Goals[i].Remaining;

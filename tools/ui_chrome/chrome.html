@@ -116,6 +116,17 @@ const C = {
     + L(`${E(16)} ${E(16)} 0 ${E(16)}`, `${E(26)} ${E(26)} 0 0`, '', 'background:radial-gradient(ellipse at 50% 20%,#f0567a,#c2264c 55%,#7c0f30);box-shadow:inset 0 .05em 0 rgba(255,255,255,.4)')],
   top3: [300, 100, L('0', E(50), '', 'background:#4a0a1e') + L(E(5), E(45), '', 'background:linear-gradient(180deg,#fffcf4,#ffe9c8);box-shadow:inset 0 -.05em 0 rgba(120,40,20,.18)')],
   row3_rose: [400, 150, row2('#fff4f4', '#ffdcd6', '#7a1a2a')],
+  hud_plate: [520, 244, L('0', E(54), '', 'background:#2a0b40') + L(E(4), E(50), '', 'background:linear-gradient(180deg,#8b2cc9 0%,#6a22a0 16%,#5b1b7c 40%,#4a1666 100%);box-shadow:inset 0 .05em 0 rgba(255,255,255,.35),inset 0 -.06em .04em rgba(0,0,0,.35)')],
+  hud_tab: [240, 68, L('0', E(26), '', 'background:#2a0b40') + L(E(3), E(23), 'rim') + L(E(8), E(18), '', 'background:linear-gradient(180deg,#6a2296,#4c1164 60%,#3c0d50);box-shadow:inset 0 .02em 0 rgba(255,255,255,.3)')],
+  hud_card: [240, 182, L('0', E(30), '', 'background:#b9a3cf') + L(E(4), E(26), '', 'background:linear-gradient(180deg,#fffaf2,#fef3e4 60%,#f6e6d2);box-shadow:inset 0 .04em .03em rgba(80,40,120,.16)')],
+  hex_frame: [288, 327, `<svg class="l" viewBox="0 0 288 327" style="inset:0;width:${E(288)};height:${E(327)};overflow:visible">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".25" stop-color="#ffd23a"/><stop offset=".6" stop-color="#fcaf11"/><stop offset=".85" stop-color="#ffd65e"/><stop offset="1" stop-color="#a85f04"/></linearGradient>
+      <radialGradient id="f" cx=".5" cy=".38" r=".7"><stop offset="0" stop-color="#8a5ad8"/><stop offset=".6" stop-color="#4a2a9a"/><stop offset="1" stop-color="#26145e"/></radialGradient></defs>
+      <path d="M144 8 L276 84 L276 243 L144 319 L12 243 L12 84 Z" fill="#3a1a04" stroke="#3a1a04" stroke-width="16" stroke-linejoin="round"/>
+      <path d="M144 14 L270 87 L270 240 L144 313 L18 240 L18 87 Z" fill="url(#g)" stroke="url(#g)" stroke-width="10" stroke-linejoin="round"/>
+      <path d="M144 40 L248 100 L248 227 L144 287 L40 227 L40 100 Z" fill="#7a3d06" stroke="#7a3d06" stroke-width="8" stroke-linejoin="round"/>
+      <path d="M144 46 L243 103 L243 224 L144 281 L45 224 L45 103 Z" fill="url(#f)" stroke="url(#f)" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M40 92 L144 32 L248 92" fill="none" stroke="#fff6c8" stroke-width="5" stroke-linecap="round" opacity=".7"/></svg>`],
   pat_star: [90, 90, L('0', '0', '', `background-image:${star('#ffffff')};background-size:.9em .9em`)],
   top2: [300, 100, L('0', E(50), '', 'background:#2a0e04') + L(E(4), E(46), 'rim') + L(E(10), E(40), '', 'background:linear-gradient(180deg,#5a2a1a,#3a1610);box-shadow:inset 0 .05em .04em rgba(0,0,0,.5)')],
   panel: [360, 360, framed(46, (ins, r) => L(ins, r, 'face'))],

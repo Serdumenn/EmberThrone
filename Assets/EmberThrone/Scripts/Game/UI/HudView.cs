@@ -8,7 +8,7 @@ namespace EmberThrone.Game
 {
     public sealed class HudView
     {
-        public const float Height = 280f;
+        public const float Height = 376f;
 
         const string Warn = "et-hud__moves-count--warn";
         const string Danger = "et-hud__moves-count--danger";
@@ -32,31 +32,28 @@ namespace EmberThrone.Game
         public string GoalText(int index) => _slots[index].Count.text;
         public bool GoalChecked(int index) => !_slots[index].Check.ClassListContains(Ui.Hidden);
 
-        public static HudView Create(VisualElement parent, GameSession session, string levelLabel)
+        public static HudView Create(VisualElement parent, GameSession session)
         {
             var hud = new HudView();
-            hud.Build(parent, session, levelLabel);
+            hud.Build(parent, session);
             return hud;
         }
 
-        void Build(VisualElement parent, GameSession session, string levelLabel)
+        void Build(VisualElement parent, GameSession session)
         {
             Root = Ui.El("et-hud", parent, "Hud");
-            Root.style.height = Height;
+            Ui.El("et-hud__plate", Root, "Plate");
+            Emby = new EmbyPortrait(Root);
 
-            var left = Ui.El("et-hud__left", Root);
-            Emby = new EmbyPortrait(left);
-            Ui.Text(levelLabel, "et-chip et-caption et-hud__level", left, "Level");
-
-            var goals = Ui.El("et-panel et-hud__goals", Root, "Goals");
+            var goals = Ui.El("et-hud__goals", Root, "Goals");
             goals.EnableInClassList("et-hud__goals--four", session.Goals.Count >= 4);
-            Ui.Text("Hedefler", "et-tag et-outlined", goals);
             FrostIcons = CoversAreFrost(session.Board);
             foreach (var goal in session.Goals) _slots.Add(BuildSlot(goals, goal, FrostIcons));
+            Ui.Text("Hedef", "et-hud__tab et-hud__tab--goals", Root, "GoalsTab");
 
-            _movesPanel = Ui.El("et-panel et-hud__moves", Root, "Moves");
-            Ui.Text("Hamle", "et-tag et-outlined", _movesPanel);
-            _moves = Ui.Text("0", "et-ink et-hud__moves-count", _movesPanel, "Count");
+            _movesPanel = Ui.El("et-hud__moves", Root, "Moves");
+            _moves = Ui.Text("0", "et-hud__moves-count", _movesPanel, "Count");
+            Ui.Text("Hamle", "et-hud__tab et-hud__tab--moves", Root, "MovesTab");
 
             SetMoves(session.MovesLeft, false);
             for (int i = 0; i < session.Goals.Count; i++) SetGoal(i, session.Goals[i].Remaining, false);
