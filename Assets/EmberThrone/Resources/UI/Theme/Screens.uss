@@ -593,29 +593,28 @@
 
 .et-boosters {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 50%;
     bottom: 0;
-    height: 236px;
+    width: 1080px;
+    height: 166px;
+    translate: -50% 0;
     flex-direction: row;
-    justify-content: center;
-    align-items: flex-end;
-    padding: 0 var(--space-3) 30px var(--space-3);
+    padding-left: 16px;
 }
 
 .et-booster {
-    width: 158px;
-    height: 158px;
-    margin: 0 6px;
+    width: 166px;
+    height: 166px;
+    margin-right: 17px;
     align-items: center;
     justify-content: center;
-    padding-bottom: 6px;
-    background-image: url("../Chrome/booster_slot.png");
+    padding-bottom: 8px;
+    background-image: url("../Chrome/booster_green.png");
 }
 
 .et-booster__icon {
-    width: 116px;
-    height: 116px;
+    width: 128px;
+    height: 128px;
 }
 
 .et-booster__icon--brush {
@@ -623,15 +622,21 @@
 }
 
 .et-boosters__home {
-    width: 128px;
-    height: 132px;
-    margin: 0 0 12px 10px;
+    position: absolute;
+    left: 933px;
+    top: 22px;
+    width: 130px;
+    height: 130px;
+    align-items: center;
+    justify-content: center;
+    background-image: url("../Chrome/btn_purple_round.png");
 }
 
 .et-boosters__home-icon {
-    width: 92px;
-    height: 92px;
-    background-image: url("../Art/ic_home.png");
+    width: 84px;
+    height: 84px;
+    background-image: url("../Art/ic_gear.png");
+    -unity-background-image-tint-color: var(--color-cream-text);
 }
 
 .et-booster__icon--hammer {
@@ -652,13 +657,24 @@
 
 .et-booster__count {
     position: absolute;
-    right: -14px;
+    right: -10px;
     bottom: -10px;
-    height: 78px;
-    min-width: 78px;
-    padding: 0 var(--space-2) 6px var(--space-2);
-    font-size: var(--font-size-body);
+    width: 68px;
+    height: 68px;
+    padding-bottom: 4px;
+    font-size: 46px;
+    color: var(--color-cream-text);
     -unity-text-align: middle-center;
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: var(--color-alert-edge);
+    text-shadow: 0 3px 0 var(--color-alert-edge);
+    background-image: url("../Chrome/count_red.png");
+}
+
+.et-booster__count--plus {
+    -unity-text-outline-color: var(--color-cta-edge);
+    text-shadow: 0 3px 0 var(--color-cta-edge);
+    background-image: url("../Chrome/count_green.png");
 }
 
 .et-booster--active {
@@ -667,7 +683,7 @@
 }
 
 .et-booster--empty {
-    opacity: 0.55;
+    opacity: 1;
 }
 
 .et-map__pad--top {

@@ -19,6 +19,7 @@ SIZES = {
     'p2_crimson': (320, 320), 'p2_royal': (320, 320), 'p2_gold': (320, 320), 'band_crimson': (600, 110), 'band_royal': (600, 110),
     'hdr3': (1080, 250), 'bg3': (512, 512), 'nav3': (200, 230), 'nav3_on': (260, 300), 'top3': (300, 100), 'row3_rose': (400, 150),
     'hud_plate': (520, 244), 'hud_tab': (240, 68), 'hud_card': (240, 182), 'hex_frame': (288, 327),
+    'booster_green': (166, 166), 'count_red': (68, 68), 'count_green': (68, 68), 'btn_purple_round': (130, 130),
 }
 
 

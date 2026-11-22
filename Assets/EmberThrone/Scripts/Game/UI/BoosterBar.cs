@@ -8,10 +8,11 @@ namespace EmberThrone.Game
 {
     public sealed class BoosterBar
     {
-        public const float Height = 236f;
+        public const float Height = 166f;
 
         const string Active = "et-booster--active";
         const string Empty = "et-booster--empty";
+        const string Plus = "et-booster__count--plus";
 
         readonly Dictionary<BoosterType, Button> _buttons = new Dictionary<BoosterType, Button>();
         readonly Dictionary<BoosterType, Label> _counts = new Dictionary<BoosterType, Label>();
@@ -38,16 +39,17 @@ namespace EmberThrone.Game
                 var t = type;
                 var button = Ui.Button(null, "et-pressable et-booster", () => onPick(t), Root, type.ToString());
                 Ui.El("et-icon et-booster__icon et-booster__icon--" + BoosterInventory.Slug(type), button);
-                _counts[type] = Ui.Text("0", "et-chip et-caption et-outlined et-booster__count", button, "Count");
+                _counts[type] = Ui.Text("0", "et-booster__count", button, "Count");
                 _buttons[type] = button;
             }
-            HomeButton = Ui.Button(null, "et-ring et-pressable et-boosters__home", onHome, Root, "Home");
+            HomeButton = Ui.Button(null, "et-pressable et-boosters__home", onHome, Root, "Home");
             Ui.El("et-icon et-boosters__home-icon", HomeButton);
         }
 
         public void SetCount(BoosterType type, int count)
         {
             _counts[type].text = count > 0 ? count.ToString() : "+";
+            _counts[type].EnableInClassList(Plus, count <= 0);
             _buttons[type].EnableInClassList(Empty, count <= 0);
         }
 
