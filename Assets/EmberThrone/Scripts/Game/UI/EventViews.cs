@@ -20,7 +20,7 @@ namespace EmberThrone.Game
         public static EventButton Create(VisualElement parent, Action onTap)
         {
             var button = new EventButton();
-            button.Root = Ui.Button(null, "et-ring et-pressable et-side__button et-side__button--event", onTap, parent, "Event");
+            button.Root = Ui.Button(null, "et-ring et-pressable et-side__button et-side__button--royal", onTap, parent, "Event");
             button._icon = Ui.El("et-icon et-ring__icon", button.Root, "Icon");
             button._left = Ui.Text("", "et-chip et-caption et-side__chip", button.Root, "Left");
             button._badge = Ui.Text("", "et-badge " + Ui.Hidden, button.Root, "Badge");

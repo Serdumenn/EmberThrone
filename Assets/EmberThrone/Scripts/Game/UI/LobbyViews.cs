@@ -107,6 +107,7 @@ namespace EmberThrone.Game
     public sealed class LobbyBar
     {
         Label _giftBadge;
+        Label _giftText;
         Label _questBadge;
 
         public VisualElement Root { get; private set; }
@@ -152,6 +153,7 @@ namespace EmberThrone.Game
         public string LadderText => _ladderText.text;
         public string LadderBadgeText => _ladderBadge.ClassListContains(Ui.Hidden) ? "" : _ladderBadge.text;
         public bool GiftBadgeShown => !_giftBadge.ClassListContains(Ui.Hidden);
+        public string GiftText => _giftText.text;
         public string QuestBadgeText => _questBadge.ClassListContains(Ui.Hidden) ? "" : _questBadge.text;
 
         public string PlayLabel => PlayButton.Q<Label>("Label").text;
@@ -168,17 +170,18 @@ namespace EmberThrone.Game
         {
             Side = Ui.El("et-side", parent, "Side");
             GiftButton = Ring(Side, "Gift", "et-ic--gift", "et-side__button", null, onGift, out _giftBadge);
+            _giftText = Ui.Text("", "et-chip et-caption et-side__chip", GiftButton, "Progress");
             Event = EventButton.Create(Side, onEvent);
-            RushButton = Ring(Side, "Rush", "et-ic--rush", "et-side__button et-side__button--event", null, () => onContest(ContestKind.Rush), out _rushBadge);
+            RushButton = Ring(Side, "Rush", "et-ic--rush", "et-side__button et-side__button--purple", null, () => onContest(ContestKind.Rush), out _rushBadge);
             _rushText = Ui.Text("", "et-chip et-caption et-side__chip", RushButton, "Progress");
-            LadderButton = Ring(Side, "Ladder", "et-ic--ladder", "et-side__button et-side__button--event", null, onLadder, out _ladderBadge);
+            LadderButton = Ring(Side, "Ladder", "et-ic--ladder", "et-side__button", null, onLadder, out _ladderBadge);
             _ladderText = Ui.Text("", "et-chip et-caption et-side__chip", LadderButton, "Progress");
             RightSide = Ui.El("et-side et-side--right", parent, "RightSide");
-            RestoreButton = Ring(RightSide, "Restore", "et-ic--hammer", "et-side__button et-side__button--event", null, onRestore, out _restoreBadge);
+            RestoreButton = Ring(RightSide, "Restore", "et-ic--hammer", "et-side__button", null, onRestore, out _restoreBadge);
             _restoreText = Ui.Text("", "et-chip et-caption et-side__chip", RestoreButton, "Progress");
-            PassButton = Ring(RightSide, "Pass", "et-ic--pass", "et-side__button et-side__button--event", null, onPass, out _passBadge);
+            PassButton = Ring(RightSide, "Pass", "et-ic--pass", "et-side__button et-side__button--royal", null, onPass, out _passBadge);
             _passText = Ui.Text("", "et-chip et-caption et-side__chip", PassButton, "Progress");
-            LanternButton = Ring(RightSide, "Lantern", "et-ic--lantern-race", "et-side__button et-side__button--event", null, () => onContest(ContestKind.Lantern), out _lanternBadge);
+            LanternButton = Ring(RightSide, "Lantern", "et-ic--lantern-race", "et-side__button et-side__button--purple", null, () => onContest(ContestKind.Lantern), out _lanternBadge);
             _lanternText = Ui.Text("", "et-chip et-caption et-side__chip", LanternButton, "Progress");
 
             Root = Ui.El("et-lobby", parent, "Lobby");
@@ -224,6 +227,7 @@ namespace EmberThrone.Game
             var economy = Meta.Economy;
             long now = Meta.Now;
             _giftBadge.EnableInClassList(Ui.Hidden, !economy.DailyReady(now));
+            _giftText.text = economy.DailyReady(now) ? "Al" : Meta.Span((int)(EconomyRules.SecondsPerDay - now % EconomyRules.SecondsPerDay));
             int claimable = economy.ClaimableQuests(now);
             _questBadge.text = claimable.ToString();
             _questBadge.EnableInClassList(Ui.Hidden, claimable <= 0);

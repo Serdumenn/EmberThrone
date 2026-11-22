@@ -1744,6 +1744,7 @@ namespace EmberThrone.Game.Tests
             _app.ShowLevelSelect();
             yield return null;
             Assert.IsTrue(_app.LevelSelect.Lobby.GiftBadgeShown);
+            Assert.AreEqual("Al", _app.LevelSelect.Lobby.GiftText);
             yield return TapUi(_app.LevelSelect.Lobby.GiftButton);
             var daily = _app.Modal as DailyPopup;
             Assert.IsNotNull(daily);
@@ -1756,6 +1757,7 @@ namespace EmberThrone.Game.Tests
             Assert.IsNotNull(_app.Rewards);
             _app.Rewards.Close();
             Assert.IsFalse(_app.LevelSelect.Lobby.GiftBadgeShown);
+            Assert.AreEqual("12s 0dk", _app.LevelSelect.Lobby.GiftText, "time to the next gift");
 
             _app.OpenDaily();
             Assert.IsNull(((DailyPopup)_app.Modal).ClaimButton, "nothing more today");

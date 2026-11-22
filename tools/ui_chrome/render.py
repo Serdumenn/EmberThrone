@@ -23,6 +23,7 @@ SIZES = {
     'lvl_band': (600, 262), 'btn_close_gold': (158, 158), 'flag_center': (326, 278), 'flag_side': (185, 150),
     'wide_plum': (1080, 180), 'wide_cream': (1080, 420), 'gold_line': (64, 15), 'hex_red': (260, 270), 'heart_broken': (120, 108),
     'ic_gear_cream': (96, 96), 'bar_crimson': (400, 132), 'b2_purple_framed': (320, 176), 'ribbon_crimson': (200, 82), 'btn_orange_round': (88, 88),
+    'side_crimson': (170, 170), 'side_royal': (170, 170), 'side_purple': (170, 170), 'pill_navy': (158, 55), 'pill_crimson': (158, 55),
 }
 
 
