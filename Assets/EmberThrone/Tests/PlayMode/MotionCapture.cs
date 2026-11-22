@@ -103,7 +103,7 @@ namespace EmberThrone.Game.Tests
 
             _app.ShowLevelSelect();
             for (int i = 0; i < 4; i++) yield return null;
-            yield return Clip("10_pencere_acilisi", 0.4f, () => _app.ShowLevelStart(8));
+            yield return Clip("10_pencere_acilisi", 0.6f, () => _app.ShowLevelStart(19));
             _app.LevelStart.Close();
 
             var last = Level("YPOGY", "OGYPO", "RRBRY", "OGRPO", "YPOGY");

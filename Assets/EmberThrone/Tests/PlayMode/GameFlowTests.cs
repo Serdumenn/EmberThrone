@@ -209,7 +209,7 @@ namespace EmberThrone.Game.Tests
             yield return TapUi(_app.LevelSelect.Buttons[0]);
             Assert.IsNotNull(_app.LevelStart);
             yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
-            yield return TapUi(_app.LevelStart.BackButton);
+            yield return TapUi(_app.LevelStart.CloseButton);
             Assert.IsNull(_app.LevelStart);
             Assert.IsNull(_app.Game);
         }

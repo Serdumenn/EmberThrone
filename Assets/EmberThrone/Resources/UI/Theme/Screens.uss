@@ -426,16 +426,10 @@
 }
 
 .et-level-start__hard {
-    position: relative;
-    top: 0;
-    left: 0;
-    translate: 0 0;
-    align-self: center;
-    margin: var(--space-3) 0 var(--space-2) 0;
-}
-
-.et-level-start__hard--super {
-    -unity-background-image-tint-color: var(--color-alert);
+    margin-bottom: var(--space-1);
+    font-size: 44px;
+    color: var(--color-alert);
+    -unity-text-align: middle-center;
 }
 
 .et-shop__list {
@@ -575,16 +569,6 @@
     width: 150px;
     height: 150px;
     margin: 0 var(--space-2);
-}
-
-.et-level-start__mascot {
-    position: absolute;
-    right: -70px;
-    top: -210px;
-    width: 280px;
-    height: 280px;
-    rotate: 8deg;
-    background-image: url("../Art/mascot.png");
 }
 
 .et-result__mascot--sad {
@@ -1852,4 +1836,137 @@
 
 .et-buy-card > .et-btn--small {
     min-width: 236px;
+}
+
+.et-stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1080px;
+    height: 2346px;
+    translate: -50% -50%;
+}
+
+.et-level__flag {
+    position: absolute;
+    left: 352px;
+    top: 152px;
+    width: 326px;
+    height: 278px;
+    background-image: url("../Chrome/flag_center.png");
+}
+
+.et-level__flag-text {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 204px;
+    height: 64px;
+    font-size: 46px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 5px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 4px 0 var(--color-purple-edge);
+}
+
+.et-level__flag-side {
+    position: absolute;
+    top: 288px;
+    width: 185px;
+    height: 150px;
+    background-image: url("../Chrome/flag_side.png");
+}
+
+.et-level__flag-side--left {
+    left: 187px;
+}
+
+.et-level__flag-side--right {
+    left: 658px;
+}
+
+.et-level__frame {
+    position: absolute;
+    left: 42px;
+    top: 405px;
+    width: 996px;
+    height: 1350px;
+    background-image: url("../Chrome/p2_plum.png");
+    -unity-slice-left: 72;
+    -unity-slice-top: 72;
+    -unity-slice-right: 72;
+    -unity-slice-bottom: 76;
+}
+
+.et-level__pattern {
+    position: absolute;
+    left: 66px;
+    top: 429px;
+    width: 948px;
+    height: 1296px;
+    border-radius: 36px;
+    opacity: 0.08;
+    background-image: url("../Chrome/pat_star.png");
+    background-repeat: repeat;
+    background-size: 90px 90px;
+}
+
+.et-level__band {
+    position: absolute;
+    left: 90px;
+    top: 405px;
+    width: 900px;
+    height: 262px;
+    padding-bottom: 12px;
+    justify-content: center;
+    background-image: url("../Chrome/lvl_band.png");
+    -unity-slice-left: 130;
+    -unity-slice-top: 90;
+    -unity-slice-right: 130;
+    -unity-slice-bottom: 90;
+}
+
+.et-level__title {
+    font-size: 129px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 9px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 9px 0 var(--color-purple-edge);
+}
+
+.et-level__card {
+    position: absolute;
+    left: 128px;
+    top: 728px;
+    width: 825px;
+    height: 585px;
+    padding: 26px 30px;
+    align-items: center;
+    justify-content: center;
+    background-image: url("../Chrome/hud_card.png");
+    -unity-slice-left: 32;
+    -unity-slice-top: 32;
+    -unity-slice-right: 32;
+    -unity-slice-bottom: 32;
+}
+
+.et-level__play {
+    position: absolute;
+    left: 237px;
+    top: 1362px;
+    width: 606px;
+    height: 270px;
+    padding: 0 40px 28px 40px;
+    font-size: 131px;
+}
+
+.et-level__close {
+    position: absolute;
+    left: 893px;
+    top: 393px;
+    width: 158px;
+    height: 158px;
+    background-image: url("../Chrome/btn_close_gold.png");
 }

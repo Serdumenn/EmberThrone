@@ -136,6 +136,11 @@ namespace EmberThrone.Game
         public const float ModalIn = 0.165f;
         public const float ModalDrop = 0.43f;
         public const float ModalBounce = 0.54f;
+        public const float FlagRise = 0.16f;
+        public const float FlagSettle = 0.3f;
+        public const float FlagSideDelay = 0.12f;
+        public const float FlagSideRise = 0.13f;
+        public const float FlagSideSettle = 0.25f;
         public const float StarFill = 0.2f;
         public const float WinDelay = 0.5f;
         public const float LoseDelay = 1.5f;
