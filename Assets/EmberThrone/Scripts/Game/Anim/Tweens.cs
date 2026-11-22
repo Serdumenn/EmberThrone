@@ -143,7 +143,15 @@ namespace EmberThrone.Game
         public const float FlagSideSettle = 0.25f;
         public const float StarFill = 0.2f;
         public const float WinDelay = 0.5f;
-        public const float LoseDelay = 1.5f;
+        public const float LoseDelay = 0.25f;
+        public const float BannerIn = 0.25f;
+        public const float BannerBack = 0.41f;
+        public const float BannerStop = 0.48f;
+        public const float BannerHold = 1.05f;
+        public const float BannerLift = 0.1f;
+        public const float BannerOut = 0.23f;
+        public const float BannerGap = 0.1f;
+        public const float ScrimFade = 0.1f;
         public const float WinSparkInterval = 0.09f;
         public const float WinSparkFlight = 0.32f;
         public const int WinSparksMax = 10;

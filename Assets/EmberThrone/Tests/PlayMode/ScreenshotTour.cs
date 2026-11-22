@@ -558,11 +558,22 @@ namespace EmberThrone.Game.Tests
 
         IEnumerator Lose(string shot)
         {
+            Meta.Economy.Profile.WinStreak = 3;
             yield return Begin(Level(1, null, "YPOGY", "OGYPO", "RRBRY", "OGRPO", "YPOGY"));
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
-            yield return GameTime(Timing.LoseDelay + Timing.ModalIn + 0.2f);
+            yield return GameTime(Timing.LoseDelay + Timing.BannerStop + 0.2f);
+            yield return Shot(shot + "_hamlen_kalmadi");
+            while (Game.Continue == null) yield return null;
+            yield return GameTime(Timing.ModalDrop + 0.1f);
             yield return Shot(shot);
+            Game.Continue.TapClose();
+            yield return GameTime(0.2f);
+            yield return Shot(shot + "_uyari");
+            Game.Continue.TapClose();
+            yield return GameTime(0.6f);
+            yield return Shot(shot + "_bolum_basarisiz");
+            Meta.Economy.Profile.WinStreak = 0;
         }
 
         IEnumerator Shape(string name, int width, int height, Rect? safeArea)

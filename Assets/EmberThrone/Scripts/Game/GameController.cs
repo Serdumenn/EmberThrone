@@ -45,6 +45,9 @@ namespace EmberThrone.Game
         public BoosterType? Armed => _armed;
         public float HintDelay { get; set; } = Timing.HintDelay;
         public ResultPopup Popup { get; private set; }
+        public OutOfMovesBanner Banner { get; private set; }
+        public ContinuePopup Continue { get; private set; }
+        public LevelStartPopup Fail { get; private set; }
         public bool IsBusy { get; private set; }
         public int WinCoins { get; private set; }
         public int FinaleCoins { get; private set; }
@@ -201,6 +204,9 @@ namespace EmberThrone.Game
             _hud?.Remove();
             _boosters?.Remove();
             Popup?.Close();
+            if (Banner != null && Banner.IsOpen) Banner.Root.RemoveFromHierarchy();
+            Continue?.Close();
+            Fail?.Close();
         }
 
         void Update()
@@ -585,23 +591,29 @@ namespace EmberThrone.Game
             _hud.Emby.Lose();
             yield return new WaitForSeconds(Timing.LoseDelay);
             OnImpact(Impact.Lose);
-            var choices = new List<ResultPopup.Choice>();
-            int moves = Session.Rules.ContinueMoves;
-            bool ad = !_adContinueUsed && _app.Ads.IsRewardedReady;
-            if (ad) choices.Add(new ResultPopup.Choice(ContinueLabel(moves), ButtonKind.Cta, WatchForExtraMoves));
-            int price = Meta.Rules.ExtraMovesCost(_continues);
-            choices.Add(new ResultPopup.Choice(CoinContinueLabel(moves, price), ad ? ButtonKind.Secondary : ButtonKind.Cta, BuyExtraMoves));
-            choices.Add(new ResultPopup.Choice("Tekrar dene", ButtonKind.Secondary, Retry));
-            choices.Add(new ResultPopup.Choice("Seviyeler", ButtonKind.Secondary, Leave));
-            string message = RemainingText();
-            if (Meta.Economy.WinStreak > 0) message += "\nVazgeçersen " + Meta.Economy.WinStreak + " galibiyetlik serin biter";
-            if (LadderAtRisk) message += "\nVazgeçersen Kor Merdiveni başa döner";
-            Popup = ResultPopup.Show(_app.Ui.Popups, "Kaybettin", message, -1, 0, 0, 0, choices.ToArray());
+            bool shown = false;
+            Banner = OutOfMovesBanner.Show(_app.Ui.Popups, () => shown = true);
+            while (!shown) yield return null;
+            Banner = null;
+            ShowContinue();
         }
 
-        public static string ContinueLabel(int moves) => "İzle: +" + moves + " hamle";
+        void ShowContinue()
+        {
+            int moves = Session.Rules.ContinueMoves;
+            bool ad = !_adContinueUsed && _app.Ads.IsRewardedReady;
+            var warnings = new List<string>();
+            if (Meta.Economy.WinStreak > 0) warnings.Add(Meta.Economy.WinStreak + " galibiyetlik serin biter");
+            if (LadderAtRisk) warnings.Add("Kor Merdiveni başa döner");
+            Continue = ContinuePopup.Show(_app.Ui.Popups, moves, Meta.Rules.ExtraMovesCost(_continues), Meta.Economy.Coins, ad, warnings,
+                BuyExtraMoves, WatchForExtraMoves, ShowFail);
+        }
 
-        public static string CoinContinueLabel(int moves, int price) => "+" + moves + " hamle: " + price + " altın";
+        void ShowFail()
+        {
+            Continue = null;
+            Fail = LevelStartPopup.ShowFailed(_app.Ui.Popups, _level, Retry, Leave, () => Fail = null);
+        }
 
         void Retry()
         {
@@ -644,8 +656,8 @@ namespace EmberThrone.Game
 
         void Resume()
         {
-            Popup?.Close();
-            Popup = null;
+            Continue?.Close();
+            Continue = null;
             Session.AddMoves(Session.Rules.ContinueMoves);
             Sound.Play(Sfx.MovesAdded);
             _hud.SetMoves(Session.MovesLeft);
@@ -658,13 +670,6 @@ namespace EmberThrone.Game
             var screen = UiRoot.PanelToScreen(_hud.MovesPanel.worldBound.center);
             var world = _app.Camera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, 10f));
             return new Vector3(world.x, world.y, 0f);
-        }
-
-        string RemainingText()
-        {
-            int left = 0;
-            foreach (var g in Session.Goals) left += Math.Max(0, g.Remaining);
-            return "Hedefe " + left + " kaldı";
         }
     }
 }

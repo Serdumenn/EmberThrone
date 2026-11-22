@@ -149,11 +149,32 @@ namespace EmberThrone.Game.Tests
         IEnumerator WaitForPopup(string why = null)
         {
             float limit = Time.time + 10f;
-            while (Game.Popup == null)
+            while (Game.Popup == null && Game.Continue == null)
             {
                 Assert.Less(Time.time, limit, "no window " + why);
                 yield return null;
             }
+        }
+
+        IEnumerator WaitForContinue()
+        {
+            float limit = Time.time + 10f;
+            while (Game.Continue == null)
+            {
+                Assert.Less(Time.time, limit, "no continue window");
+                yield return null;
+            }
+            yield return new WaitForSeconds(Timing.ModalDrop + 0.05f);
+        }
+
+        IEnumerator GiveUpToFail()
+        {
+            for (int i = 0; i < 2 && Game.Fail == null; i++)
+            {
+                yield return TapUi(Game.Continue.CloseButton);
+                yield return null;
+            }
+            Assert.IsNotNull(Game.Fail, "closing the offer opens the failed level window");
         }
 
         IEnumerator WaitIdle()
@@ -415,13 +436,17 @@ namespace EmberThrone.Game.Tests
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
             Assert.AreEqual(GameState.Lost, Game.Session.State);
-            Assert.IsNull(Game.Popup, "the window waits so the player can see the board first");
+            Assert.IsNull(Game.Banner, "the band waits so the player can see the board first");
+            Assert.IsNull(Game.Continue);
             yield return new WaitForSeconds(Timing.LoseDelay + 0.1f);
-            Assert.AreEqual("Kaybettin", Game.Popup.Title);
-
-            Assert.AreEqual(4, Game.Popup.Buttons.Count, "ad, coins, retry, levels");
-            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
-            yield return TapUi(Game.Popup.Buttons.First(b => b.text == "Tekrar dene"));
+            Assert.IsNotNull(Game.Banner, "Hamlen Kalmadı! comes first");
+            Assert.IsNull(Game.Continue);
+            yield return WaitForContinue();
+            Assert.AreEqual("Devam Et?", Game.Continue.Title);
+            Assert.IsNotNull(Game.Continue.AdButton, "the ad offer is ready in the editor");
+            yield return GiveUpToFail();
+            Assert.AreEqual("Tekrar Dene", Game.Fail.PlayButton.text);
+            yield return TapUi(Game.Fail.PlayButton);
             Assert.AreNotSame(game, _app.Game, "retry starts a new game");
             Assert.AreEqual(GameState.Playing, _app.Game.Session.State);
         }
@@ -433,13 +458,12 @@ namespace EmberThrone.Game.Tests
             var game = Game;
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
-            yield return WaitForPopup();
-            Assert.AreEqual("İzle: +5 hamle", Game.Popup.Buttons[0].text);
-            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
-            yield return TapUi(Game.Popup.Buttons[0]);
+            yield return WaitForContinue();
+            Assert.AreEqual("İzle: +5 hamle", Game.Continue.ButtonText(Game.Continue.AdButton));
+            yield return TapUi(Game.Continue.AdButton);
             Assert.AreEqual(1, _app.Ads.RewardedShown, "the extra moves come from a rewarded ad");
             Assert.AreSame(game, _app.Game, "the same game goes on");
-            Assert.IsNull(Game.Popup);
+            Assert.IsNull(Game.Continue);
             Assert.AreEqual(GameState.Playing, Game.Session.State);
             Assert.AreEqual(5, Game.Session.MovesLeft);
             Assert.AreEqual("5", Game.Hud.MovesText);
@@ -452,15 +476,14 @@ namespace EmberThrone.Game.Tests
             yield return Begin(Level(1, null, Even, Odd, "RRBRY", "OGRPO", Even));
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
-            yield return WaitForPopup();
+            yield return WaitForContinue();
             int price = Meta.Rules.ExtraMovesCost(0);
-            Assert.AreEqual(3, Game.Popup.Buttons.Count);
-            Assert.AreEqual(GameController.CoinContinueLabel(5, price), Game.Popup.Buttons[0].text, "the moves offer is always there");
-            Assert.AreEqual("Tekrar dene", Game.Popup.Buttons[1].text);
+            Assert.IsNull(Game.Continue.AdButton, "no ad, no ad offer");
+            Assert.AreEqual("Devam Et", Game.Continue.ButtonText(Game.Continue.ContinueButton), "the moves offer is always there");
+            Assert.AreEqual(price.ToString(), Game.Continue.PriceText);
             Assert.AreEqual(0, _app.Ads.RewardedShown);
             Assert.Less(Meta.Economy.Coins, price);
-            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
-            yield return TapUi(Game.Popup.Buttons[0]);
+            yield return TapUi(Game.Continue.ContinueButton);
             Assert.IsNotNull(_app.Modal, "short of coins, the offer opens the shop");
             Assert.AreEqual(GameState.Lost, Game.Session.State);
         }
@@ -487,10 +510,15 @@ namespace EmberThrone.Game.Tests
 
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
-            yield return WaitForPopup();
-            StringAssert.Contains("serin biter", Game.Popup.Message);
-            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
-            yield return TapUi(Game.Popup.Buttons.First(b => b.text == "Tekrar dene"));
+            yield return WaitForContinue();
+            Assert.IsFalse(Game.Continue.Warning);
+            yield return TapUi(Game.Continue.CloseButton);
+            Assert.IsTrue(Game.Continue.Warning, "the first close shows what the player would lose");
+            StringAssert.Contains("serin biter", Game.Continue.Message);
+            Assert.IsNull(Game.Fail);
+            yield return TapUi(Game.Continue.CloseButton);
+            Assert.IsNotNull(Game.Fail);
+            yield return TapUi(Game.Fail.PlayButton);
             Assert.AreEqual(0, Meta.Economy.WinStreak, "giving up ends the streak");
         }
 
@@ -1445,10 +1473,11 @@ namespace EmberThrone.Game.Tests
             yield return Begin(Level(1, null, Even, Odd, "RRBRY", "OGRPO", Even));
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
-            yield return WaitForPopup();
+            yield return WaitForContinue();
             Assert.AreEqual(1, Meta.Economy.Lives, "the life goes when the player gives up, not before");
-            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
-            yield return TapUi(Game.Popup.Buttons.First(b => b.text == "Tekrar dene"));
+            yield return GiveUpToFail();
+            Assert.AreEqual(1, Meta.Economy.Lives);
+            yield return TapUi(Game.Fail.PlayButton);
 
             Assert.AreEqual(0, Meta.Economy.Lives);
             Assert.IsNull(_app.Game, "no lives, no retry");
@@ -1646,10 +1675,11 @@ namespace EmberThrone.Game.Tests
             yield return null;
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
             yield return WaitIdle();
-            yield return WaitForPopup();
-            StringAssert.Contains("Kor Merdiveni", Game.Popup.Message);
-            yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
-            yield return TapUi(Game.Popup.Buttons.First(b => b.text == "Tekrar dene"));
+            yield return WaitForContinue();
+            yield return TapUi(Game.Continue.CloseButton);
+            StringAssert.Contains("Kor Merdiveni", Game.Continue.Message);
+            yield return TapUi(Game.Continue.CloseButton);
+            yield return TapUi(Game.Fail.PlayButton);
             Assert.AreEqual(0, Meta.Contests.LadderWins(Meta.Now), "a loss sends the climb back");
 
             for (int i = 0; i < 7; i++) Meta.Contests.ReportWin(Meta.Now);

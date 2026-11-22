@@ -1970,3 +1970,338 @@
     height: 158px;
     background-image: url("../Chrome/btn_close_gold.png");
 }
+
+.et-banner {
+    position: absolute;
+    left: 0;
+    top: 1054px;
+    width: 1080px;
+    height: 340px;
+}
+
+.et-banner__body {
+    position: absolute;
+    left: 0;
+    top: 15px;
+    width: 1080px;
+    height: 310px;
+    background-image: url("../Chrome/wide_plum.png");
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+}
+
+.et-banner__line {
+    position: absolute;
+    left: 0;
+    width: 1080px;
+    height: 15px;
+}
+
+.et-banner__line--top {
+    top: 0;
+}
+
+.et-banner__line--bottom {
+    top: 325px;
+}
+
+.et-banner__text {
+    position: absolute;
+    left: 0;
+    top: 15px;
+    width: 1080px;
+    height: 310px;
+    padding-bottom: 10px;
+    font-size: 116px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 8px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 8px 0 var(--color-purple-edge);
+}
+
+.et-continue {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1080px;
+    height: 2346px;
+}
+
+.et-continue__purse {
+    position: absolute;
+    left: 27px;
+    top: 442px;
+    width: 333px;
+    height: 135px;
+    margin-top: 0;
+    padding: 0 70px 14px 120px;
+}
+
+.et-continue__purse > .et-pill__icon {
+    left: -14px;
+    top: -6px;
+    width: 140px;
+    height: 140px;
+}
+
+.et-continue__purse > .et-pill__plus {
+    right: -4px;
+    top: 30px;
+    width: 72px;
+    height: 72px;
+}
+
+.et-continue__purse-text {
+    font-size: 58px;
+    color: var(--color-purple-ink);
+}
+
+.et-continue__line {
+    position: absolute;
+    left: 0;
+    width: 1080px;
+    height: 15px;
+}
+
+.et-continue__line--top {
+    top: 600px;
+}
+
+.et-continue__line--bottom {
+    top: 1582px;
+}
+
+.et-continue__header {
+    position: absolute;
+    left: 0;
+    top: 615px;
+    width: 1080px;
+    height: 180px;
+    padding-bottom: 8px;
+    justify-content: center;
+    background-image: url("../Chrome/wide_plum.png");
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+}
+
+.et-continue__title {
+    font-size: 116px;
+    color: var(--color-cream-text);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 8px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 8px 0 var(--color-purple-edge);
+}
+
+.et-continue__close {
+    position: absolute;
+    left: 903px;
+    top: 517px;
+    width: 150px;
+    height: 150px;
+    background-image: url("../Chrome/btn_close_gold.png");
+}
+
+.et-continue__cream {
+    position: absolute;
+    left: 0;
+    top: 802px;
+    width: 1080px;
+    height: 420px;
+    background-image: url("../Chrome/wide_cream.png");
+}
+
+.et-continue__offer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1080px;
+    height: 420px;
+}
+
+.et-continue__hex {
+    position: absolute;
+    left: 410px;
+    top: 38px;
+    width: 260px;
+    height: 270px;
+    padding-bottom: 10px;
+    justify-content: center;
+    background-image: url("../Chrome/hex_red.png");
+}
+
+.et-continue__hex-text {
+    font-size: 100px;
+    color: var(--color-gold);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 8px;
+    -unity-text-outline-color: var(--color-outline);
+    text-shadow: 0 7px 0 var(--color-outline);
+}
+
+.et-continue__message {
+    position: absolute;
+    left: 0;
+    top: 328px;
+    width: 1080px;
+    height: 78px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.et-continue__ink {
+    font-size: 54px;
+    color: var(--color-purple-ink);
+    -unity-text-align: middle-center;
+}
+
+.et-continue__ink--red {
+    margin: 0 14px;
+    color: var(--color-alert);
+}
+
+.et-continue__warning {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1080px;
+    height: 420px;
+    align-items: center;
+    justify-content: center;
+}
+
+.et-continue__warning-title {
+    margin-bottom: 24px;
+    font-size: 63px;
+}
+
+.et-continue__warning-line {
+    margin-bottom: 8px;
+    font-size: 48px;
+    color: var(--color-alert);
+}
+
+.et-continue__band {
+    position: absolute;
+    left: 0;
+    top: 1222px;
+    width: 1080px;
+    height: 360px;
+    background-image: url("../Chrome/wide_plum.png");
+    -unity-slice-top: 20;
+    -unity-slice-bottom: 20;
+}
+
+.et-continue__buy {
+    position: absolute;
+    left: 188px;
+    top: 50px;
+    width: 708px;
+    height: 270px;
+    flex-direction: row;
+    padding: 0 24px 28px 24px;
+}
+
+.et-continue__buy-text {
+    flex-shrink: 0;
+    font-size: 80px;
+    color: var(--color-white);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 7px;
+    -unity-text-outline-color: var(--color-cta-edge);
+    text-shadow: 0 6px 0 var(--color-cta-edge);
+}
+
+.et-continue__buy-coin {
+    flex-shrink: 0;
+    width: 92px;
+    height: 92px;
+    margin: 0 8px 0 22px;
+}
+
+.et-continue__ad {
+    position: absolute;
+    left: 188px;
+    top: 1640px;
+    width: 708px;
+    height: 150px;
+    flex-direction: row;
+}
+
+.et-continue__ad-icon {
+    width: 86px;
+    height: 86px;
+    margin-right: 16px;
+}
+
+.et-continue__ad-text {
+    font-size: 60px;
+    color: var(--color-white);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 6px;
+    -unity-text-outline-color: var(--color-blue-edge);
+    text-shadow: 0 5px 0 var(--color-blue-edge);
+}
+
+.et-level__fail {
+    position: absolute;
+    left: 90px;
+    top: 772px;
+    width: 900px;
+    height: 90px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.et-level__fail-icon {
+    width: 96px;
+    height: 86px;
+    margin-right: 18px;
+    background-image: url("../Chrome/heart_broken.png");
+}
+
+.et-level__fail-text {
+    font-size: 60px;
+    color: var(--color-cream-text);
+    -unity-text-outline-width: 6px;
+    -unity-text-outline-color: var(--color-purple-edge);
+    text-shadow: 0 5px 0 var(--color-purple-edge);
+}
+
+.et-level--failed .et-level__frame {
+    top: 510px;
+    height: 1440px;
+}
+
+.et-level--failed .et-level__pattern {
+    top: 534px;
+    height: 1386px;
+}
+
+.et-level--failed .et-level__band {
+    top: 510px;
+}
+
+.et-level--failed .et-level__close {
+    top: 498px;
+}
+
+.et-level--failed .et-level__card {
+    top: 923px;
+}
+
+.et-level--failed .et-level__play {
+    top: 1557px;
+    font-size: 98px;
+}
+
+.et-level--failed .et-level__flag {
+    top: 257px;
+}
+
+.et-level--failed .et-level__flag-side {
+    top: 393px;
+}

@@ -208,6 +208,16 @@
     background-image: url("../Chrome/b2_orange_framed.png");
 }
 
+.et-btn--blue {
+    background-image: url("../Chrome/b2_blue.png");
+    -unity-text-outline-color: var(--color-blue-edge);
+    text-shadow: 0 5px 0 var(--color-blue-edge);
+}
+
+.et-gold-line {
+    background-image: url("../Chrome/gold_line.png");
+}
+
 .et-btn--cta:disabled, .et-btn--secondary:disabled {
     background-image: url("../Chrome/b2_grey.png");
     -unity-text-outline-color: var(--color-off-edge);

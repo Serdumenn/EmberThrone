@@ -20,8 +20,10 @@ namespace EmberThrone.Game
         public int StreakShown { get; private set; }
         public bool FrostHint { get; private set; }
         public string Hint { get; private set; }
+        public bool Failed { get; private set; }
 
         Action _closed;
+        Action _leave;
 
         public static LevelStartPopup Show(VisualElement parent, LevelDefinition level, Action play, Action closed)
         {
@@ -30,9 +32,16 @@ namespace EmberThrone.Game
             return popup;
         }
 
+        public static LevelStartPopup ShowFailed(VisualElement parent, LevelDefinition level, Action retry, Action leave, Action closed)
+        {
+            var popup = new LevelStartPopup { _closed = closed, _leave = leave, Failed = true };
+            popup.Build(parent, level, retry);
+            return popup;
+        }
+
         void Build(VisualElement parent, LevelDefinition level, Action play)
         {
-            Root = Ui.El("et-fill et-scrim", parent, "LevelStart");
+            Root = Ui.El(Failed ? "et-fill et-scrim et-level--failed" : "et-fill et-scrim", parent, Failed ? "Failed" : "LevelStart");
             Root.pickingMode = PickingMode.Position;
             var stage = Ui.El("et-stage", Root, "Stage");
 
@@ -53,6 +62,12 @@ namespace EmberThrone.Game
             Ui.El("et-level__pattern", stage, "Pattern");
             var band = Ui.El("et-level__band", stage, "Band");
             Ui.Text("Bölüm " + level.Id, "et-level__title", band, "Title");
+            if (Failed)
+            {
+                var failed = Ui.El("et-level__fail", stage, "FailLine");
+                Ui.El("et-icon et-level__fail-icon", failed);
+                Ui.Text("Bölüm Başarısız!", "et-level__fail-text", failed, "Text");
+            }
 
             var panel = Ui.El("et-level__card", stage, "Panel");
             if (Hard && !SuperHard) Ui.Text("Zor seviye", "et-level-start__hard", panel, "Hard");
@@ -81,12 +96,16 @@ namespace EmberThrone.Game
             Hint = HintFor(session.Board, FrostHint);
             if (Hint != null) Ui.Text(Hint, "et-ink et-level-start__hint", panel, "Hint");
 
-            PlayButton = Ui.Button("Oyna", Ui.ClassOf(ButtonKind.Cta) + " et-btn--framed et-level__play", () =>
+            PlayButton = Ui.Button(Failed ? "Tekrar Dene" : "Oyna", Ui.ClassOf(ButtonKind.Cta) + " et-btn--framed et-level__play", () =>
             {
                 Close();
                 play();
             }, stage, "Play");
-            CloseButton = Ui.Button(null, "et-pressable et-level__close", Close, stage, "Close");
+            CloseButton = Ui.Button(null, "et-pressable et-level__close", () =>
+            {
+                Close();
+                _leave?.Invoke();
+            }, stage, "Close");
         }
 
         static void Rise(VisualElement e, float delay, float peak, float settle)

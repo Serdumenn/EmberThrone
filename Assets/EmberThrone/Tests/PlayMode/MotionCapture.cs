@@ -110,8 +110,28 @@ namespace EmberThrone.Game.Tests
             last.Moves = 1;
             yield return Begin(last);
             Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
-            while (Game.Popup == null) yield return null;
+            while (Game.Continue == null) yield return null;
             yield return Clip("11_sonuc_penceresi", 0.6f, () => { });
+            Game.Continue.TapClose();
+
+            Meta.Economy.Profile.WinStreak = 2;
+            var flow = Level("YPOGY", "OGYPO", "RRBRY", "OGRPO", "YPOGY");
+            flow.Moves = 1;
+            yield return Begin(flow);
+            yield return Clip("12_kayip_akisi", 5.5f, () =>
+            {
+                Game.RequestSwap(new GridPos(2, 1), new GridPos(2, 2));
+                _app.StartCoroutine(GiveUpTwice());
+            });
+        }
+
+        IEnumerator GiveUpTwice()
+        {
+            while (Game.Continue == null) yield return null;
+            yield return new WaitForSeconds(Timing.ModalDrop + 0.4f);
+            Game.Continue.TapClose();
+            yield return new WaitForSeconds(0.6f);
+            Game.Continue?.TapClose();
         }
 
         IEnumerator Fire(string name, char token, GridPos cell, float seconds)
