@@ -63,6 +63,8 @@ Açık farklar: takasta taşların arkasında kalan ışık izi, HUD ve booster 
 
 EmberThrone kareleri telefona gerek kalmadan alınır: **Actions → Motion capture → Run workflow** `MotionCapture.Record` testini çalıştırır, tahta animasyonlarını 60 fps sabit adımla kare kare kaydeder ve kareleri taslak bir release'e zip olarak ekler. Kare `n`, olaydan `n × 16,7 ms` sonrasıdır; gerçek oyun zamanı her klasördeki `times.csv`'dedir.
 
+Kayıt (`MotionCapture`) ve ekran turu (`ScreenshotTour`) referans telefonun düzeninde çalışır: 720×1564, güvenli alan üstte 60, altta 37 piksel (`FrameGrabber.ReferenceSafeArea`). Böylece kareler referans kayıtlarıyla aynı boyda ve aynı yerleşimde karşılaştırılır.
+
 Telefonda ölçmek için:
 
 1. Oyunu telefonda 60 fps ekran kaydıyla oyna.

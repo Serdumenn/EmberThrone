@@ -14,9 +14,6 @@ namespace EmberThrone.Game.Tests
     public class MotionCapture
     {
         const int Fps = 60;
-        const int Width = 720;
-        const int Height = 1564;
-        const float Inset = 60f;
         const int Quality = 90;
         const string Even = "YPOGYPOGY";
         const string Odd = "OGYPOGYPO";
@@ -44,12 +41,11 @@ namespace EmberThrone.Game.Tests
             GameApp.ShowStories = false;
             GameApp.StreakBoosts = false;
             GameApp.OfferStarter = false;
-            var safe = new Rect(0f, Inset, Width, Height - Inset * 2f);
-            UiRoot.SafeAreaOverride = safe;
-            UiRoot.ScreenSizeOverride = new Vector2Int(Width, Height);
+            UiRoot.SafeAreaOverride = FrameGrabber.ReferenceSafeArea;
+            UiRoot.ScreenSizeOverride = new Vector2Int(FrameGrabber.ReferenceWidth, FrameGrabber.ReferenceHeight);
             _app = GameApp.Create();
             _grabber = new FrameGrabber(_app);
-            _grabber.Use(Width, Height, safe);
+            _grabber.UseReference();
             for (int i = 0; i < 3; i++) yield return null;
         }
 

@@ -41,11 +41,11 @@ namespace EmberThrone.Game.Tests
             GameApp.ShowStories = false;
             GameApp.StreakBoosts = false;
             GameApp.OfferStarter = false;
-            UiRoot.SafeAreaOverride = null;
-            UiRoot.ScreenSizeOverride = new Vector2Int(1080, 1920);
+            UiRoot.SafeAreaOverride = FrameGrabber.ReferenceSafeArea;
+            UiRoot.ScreenSizeOverride = new Vector2Int(FrameGrabber.ReferenceWidth, FrameGrabber.ReferenceHeight);
             _app = GameApp.Create();
             _grabber = new FrameGrabber(_app);
-            UseScreen(1080, 1920, null);
+            _grabber.UseReference();
             for (int i = 0; i < 3; i++) yield return null;
         }
 

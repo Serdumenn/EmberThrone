@@ -4,6 +4,14 @@ namespace EmberThrone.Game.Tests
 {
     public sealed class FrameGrabber
     {
+        public const int ReferenceWidth = 720;
+        public const int ReferenceHeight = 1564;
+        public const float ReferenceSafeTop = 60f;
+        public const float ReferenceSafeBottom = 37f;
+
+        public static Rect ReferenceSafeArea =>
+            new Rect(0f, ReferenceSafeBottom, ReferenceWidth, ReferenceHeight - ReferenceSafeTop - ReferenceSafeBottom);
+
         static readonly float[] Linear = BuildLinear();
 
         readonly GameApp _app;
@@ -11,6 +19,8 @@ namespace EmberThrone.Game.Tests
         RenderTexture _ui;
 
         public FrameGrabber(GameApp app) => _app = app;
+
+        public void UseReference() => Use(ReferenceWidth, ReferenceHeight, ReferenceSafeArea);
 
         public void Use(int width, int height, Rect? safeArea)
         {
