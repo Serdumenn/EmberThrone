@@ -1204,6 +1204,8 @@ namespace EmberThrone.Game.Tests
         public IEnumerator Story_PlaysBeforeADistrictsFirstLevel_OnlyOnce()
         {
             GameApp.ShowStories = true;
+            StarsBackup.Restore(new System.Collections.Generic.Dictionary<int, int>());
+            _app.ShowLevelSelect();
             yield return null;
             yield return TapUi(_app.LevelSelect.Lobby.PlayButton);
             var story = _app.Story;
