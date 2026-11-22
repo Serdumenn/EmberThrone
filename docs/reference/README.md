@@ -2,6 +2,8 @@
 
 Tahta ve pencere animasyonlarının hedefleri, türün liderinden (Royal Kingdom) alınmış 60 fps ekran kayıtlarının kare kare ölçümüdür. Videolar repoya girmez; burada yalnız sayılar ve yöntem durur.
 
+Ekranların yerleşimi, pencere içerikleri, akışlar, renk ve yazı hedefleri ile iş listesi: [ekran-kopya-sartnamesi.md](ekran-kopya-sartnamesi.md).
+
 ## Kaynak
 
 | Kayıt | Görüntü | İçerik |
