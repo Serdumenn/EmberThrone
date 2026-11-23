@@ -175,6 +175,13 @@ namespace EmberThrone.Game.Tests
             for (int i = 0; i < 4; i++) yield return null;
             yield return Shot("01m_takim");
             Meta.Team.Leave();
+            var settings = SettingsPopup.Show(_app.Ui.Popups, null);
+            for (int i = 0; i < 4; i++) yield return null;
+            yield return Shot("01m1_ayarlar");
+            settings.ShakeButton.AddToClassList(SettingsPopup.Off);
+            for (int i = 0; i < 2; i++) yield return null;
+            yield return Shot("01m2_ayarlar_kapali");
+            settings.Close();
 
             long harvest = (long)(new System.DateTime(2026, 11, 12, 14, 0, 0) - new System.DateTime(1970, 1, 1)).TotalSeconds;
             Meta.Clock = () => harvest;

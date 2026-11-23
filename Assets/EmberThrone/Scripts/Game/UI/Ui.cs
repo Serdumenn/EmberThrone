@@ -30,6 +30,15 @@ namespace EmberThrone.Game
             return l;
         }
 
+        public static VisualElement PageHeader(VisualElement parent, string title, string classes = null)
+        {
+            var header = El(classes == null ? "et-page-header" : "et-page-header " + classes, parent, "PageHeader");
+            El("et-page-header__cap", header);
+            El("et-gold-line et-page-header__line", header);
+            Text(title, "et-page-header__title", header, "Title");
+            return header;
+        }
+
         public static Button Button(string text, string classes, Action onClick, VisualElement parent, string name = null)
         {
             var b = new Button(() =>

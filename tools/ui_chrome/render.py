@@ -17,13 +17,14 @@ SIZES = {
     'band_ember': (600, 110), 'band_frost': (600, 110), 'band_plum': (600, 110), 'row2': (400, 150), 'row2_me': (400, 150), 'row2_rose': (400, 150),
     'corner_tab': (360, 110), 'price2': (260, 96), 'hdr2': (1080, 250), 'bg2': (512, 512), 'nav2': (200, 230), 'nav2_on': (260, 300), 'top2': (300, 100), 'pat_star': (90, 90),
     'p2_crimson': (320, 320), 'p2_royal': (320, 320), 'p2_gold': (320, 320), 'band_crimson': (600, 110), 'band_royal': (600, 110),
-    'hdr3': (1080, 250), 'bg3': (512, 512), 'nav3': (200, 230), 'nav3_on': (260, 300), 'top3': (300, 100), 'row3_rose': (400, 150),
+    'hdr3': (1080, 308), 'bg3': (512, 512), 'nav3': (200, 230), 'nav3_on': (260, 300), 'top3': (300, 100), 'row3_rose': (400, 150),
     'hud_plate': (520, 244), 'hud_tab': (240, 68), 'hud_card': (240, 182), 'hex_frame': (288, 327),
     'booster_green': (166, 166), 'count_red': (68, 68), 'count_green': (68, 68), 'btn_purple_round': (130, 130),
     'lvl_band': (600, 262), 'btn_close_gold': (158, 158), 'flag_center': (326, 278), 'flag_side': (185, 150),
     'wide_plum': (1080, 180), 'wide_cream': (1080, 420), 'gold_line': (64, 15), 'hex_red': (260, 270), 'heart_broken': (120, 108),
     'ic_gear_cream': (96, 96), 'bar_crimson': (400, 132), 'b2_purple_framed': (320, 176), 'ribbon_crimson': (200, 82), 'btn_orange_round': (88, 88),
     'side_crimson': (170, 170), 'side_royal': (170, 170), 'side_purple': (170, 170), 'pill_navy': (158, 55), 'pill_crimson': (158, 55),
+    'toggle_on': (200, 200), 'toggle_slash': (200, 200), 'ic_sound': (128, 128), 'ic_vibrate': (128, 128), 'ic_shake': (128, 128),
 }
 
 

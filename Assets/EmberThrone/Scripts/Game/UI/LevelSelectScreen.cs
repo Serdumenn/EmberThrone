@@ -42,6 +42,8 @@ namespace EmberThrone.Game
         public SettingsPopup Settings { get; private set; }
         public int CurrentIndex { get; private set; }
         public VisualElement PageHeader { get; private set; }
+        public string PageTitle => PageHeader.Q<Label>("Title").text;
+        public bool TopShown => !Top.Root.ClassListContains(Ui.Hidden);
         public ScrollView Scroll { get; private set; }
 
         readonly List<Button> _buttons = new List<Button>();
@@ -90,7 +92,7 @@ namespace EmberThrone.Game
             Diorama.Show(RestoreFocus);
 
             int current = CurrentIndex;
-            PageHeader = Ui.El("et-page-header", Root, "PageHeader");
+            PageHeader = Ui.PageHeader(Root, "");
             Top = TopBar.Create(Root, app.OpenLives, app.OpenShop, () => OpenSettings(ui));
             SettingsButton = Top.SettingsButton;
             Lobby = LobbyBar.Create(Root, "Bölüm " + levels[current].Id, DifficultyOf(levels[current]), () => onPick(current), () => ShowMap(true), app.OpenDaily, app.OpenQuests, app.OpenEvent, app.OpenRestore, app.OpenPass, app.OpenContest, app.OpenLadder, () => RestoreFocus, () => Mathf.Max(0, CurrentIndex));
@@ -181,6 +183,8 @@ namespace EmberThrone.Game
 
         public void ShowMap(bool show) => Show(show ? LobbyPage.World : LobbyPage.Home);
 
+        static string TitleOf(LobbyPage page) => page == LobbyPage.World ? "Dünya" : page == LobbyPage.Rank ? "Sıralama" : page == LobbyPage.Team ? "Takımım" : page == LobbyPage.Cards ? "Koleksiyon" : "";
+
         public void Show(LobbyPage page)
         {
             Page = page;
@@ -191,6 +195,8 @@ namespace EmberThrone.Game
             Team.Root.EnableInClassList(Ui.Hidden, page != LobbyPage.Team);
             Lobby.SetShown(home);
             PageHeader.EnableInClassList(Ui.Hidden, home);
+            PageHeader.Q<Label>("Title").text = TitleOf(page);
+            Top.Root.EnableInClassList(Ui.Hidden, !home);
             Tabs.SetActive(TabOf(page));
             _ui.Backdrop.EnableInClassList("et-backdrop--map", !home);
             _ui.Backdrop.EnableInClassList("et-backdrop--home", home);

@@ -9,13 +9,48 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: -40px;
-    height: 220px;
+    top: -90px;
+    height: 308px;
     background-image: url("../Chrome/hdr3.png");
     -unity-slice-left: 4;
     -unity-slice-top: 4;
     -unity-slice-right: 4;
-    -unity-slice-bottom: 26;
+    -unity-slice-bottom: 4;
+}
+
+.et-page-header--screen {
+    top: 0;
+}
+
+.et-page-header__cap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -400px;
+    height: 400px;
+    background-color: var(--color-header-top);
+}
+
+.et-page-header__line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 308px;
+    height: 15px;
+}
+
+.et-page-header__title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 160px;
+    height: 110px;
+    font-size: var(--font-size-title);
+    color: var(--color-title);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 6px;
+    -unity-text-outline-color: var(--color-crimson-edge);
+    text-shadow: 0 6px 0 var(--color-crimson-edge);
 }
 
 .et-hud {
@@ -670,7 +705,7 @@
 }
 
 .et-map__pad--top {
-    height: 170px;
+    height: 260px;
 }
 
 .et-map__pad--bottom {
@@ -1055,7 +1090,7 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: 150px;
+    top: 250px;
     bottom: 182px;
     padding: 0 24px;
 }
@@ -1172,7 +1207,7 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: 150px;
+    top: 250px;
     bottom: 182px;
     padding: 0 24px;
 }
@@ -2453,4 +2488,90 @@
 
 .et-level--failed .et-level__flag-side {
     top: 393px;
+}
+
+.et-settings {
+    background-color: var(--color-page);
+    background-image: url("../Chrome/bg3.png");
+    background-repeat: repeat;
+    background-size: 512px 512px;
+}
+
+.et-settings__close {
+    position: absolute;
+    right: 28px;
+    top: 150px;
+    width: 120px;
+    height: 128px;
+    background-image: url("../Chrome/btn_close.png");
+}
+
+.et-settings__toggles {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 400px;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.et-settings__cell {
+    width: 290px;
+    align-items: center;
+}
+
+.et-toggle {
+    width: 200px;
+    height: 200px;
+    align-items: center;
+    justify-content: center;
+    background-image: url("../Chrome/toggle_on.png");
+}
+
+.et-toggle__icon {
+    width: 128px;
+    height: 128px;
+}
+
+.et-toggle__slash {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 200px;
+    height: 200px;
+    background-image: url("../Chrome/toggle_slash.png");
+    display: none;
+}
+
+.et-toggle--off > .et-toggle__slash {
+    display: flex;
+}
+
+.et-settings__caption {
+    margin-top: 14px;
+    font-size: var(--font-size-label);
+}
+
+.et-settings__list {
+    position: absolute;
+    left: 90px;
+    right: 90px;
+    top: 780px;
+}
+
+.et-settings__button {
+    height: 170px;
+    margin-bottom: 36px;
+}
+
+.et-ic--sound {
+    background-image: url("../Chrome/ic_sound.png");
+}
+
+.et-ic--vibrate {
+    background-image: url("../Chrome/ic_vibrate.png");
+}
+
+.et-ic--shake {
+    background-image: url("../Chrome/ic_shake.png");
 }

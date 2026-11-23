@@ -7,6 +7,7 @@ namespace EmberThrone.Game
     public sealed class SettingsPopup
     {
         public const string PrivacyPolicyUrl = "https://serdumenn.github.io/ember-throne/privacy/";
+        public const string Off = "et-toggle--off";
 
         public static Action<string> OpenUrl = Application.OpenURL;
 
@@ -17,6 +18,7 @@ namespace EmberThrone.Game
         public Button PrivacyButton { get; private set; }
         public Button PolicyButton { get; private set; }
         public Button CloseButton { get; private set; }
+        public string Title => "Ayarlar";
 
         Action _closed;
 
@@ -29,23 +31,37 @@ namespace EmberThrone.Game
 
         void Build(VisualElement parent)
         {
-            Root = Ui.El("et-fill et-scrim et-result", parent, "Settings");
+            Root = Ui.El("et-fill et-settings", parent, "Settings");
             Root.pickingMode = PickingMode.Position;
-            var body = Ui.El("et-result__body", Root, "Body");
-            var panel = Ui.El("et-panel et-result__panel", body, "Panel");
-            var ribbon = Ui.El("et-ribbon", panel);
-            Ui.Text("Ayarlar", "et-title", ribbon, "Title");
+            Ui.PageHeader(Root, Title, "et-page-header--screen");
+            CloseButton = Ui.Button(null, "et-pressable et-settings__close", Close, Root, "Close");
 
-            SoundButton = Ui.Button(null, Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", ToggleSound, panel, "Sound");
-            HapticsButton = Ui.Button(null, Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", ToggleHaptics, panel, "Haptics");
-            ShakeButton = Ui.Button(null, Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", ToggleShake, panel, "Shake");
+            var toggles = Ui.El("et-settings__toggles", Root, "Toggles");
+            SoundButton = Toggle(toggles, "Sound", "et-ic--sound", "Ses", ToggleSound);
+            HapticsButton = Toggle(toggles, "Haptics", "et-ic--vibrate", "Titreşim", ToggleHaptics);
+            ShakeButton = Toggle(toggles, "Shake", "et-ic--shake", "Sarsıntı", ToggleShake);
+
+            var list = Ui.El("et-settings__list", Root, "List");
             var ads = GameApp.Instance != null ? GameApp.Instance.Ads : null;
             if (ads != null && ads.PrivacyOptionsRequired)
-                PrivacyButton = Ui.Button("Gizlilik seçenekleri", Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", () => ads.ShowPrivacyOptions(null), panel, "Privacy");
-            PolicyButton = Ui.Button("Gizlilik politikası", Ui.ClassOf(ButtonKind.Secondary) + " et-result__button", () => OpenUrl(PrivacyPolicyUrl), panel, "Policy");
-            CloseButton = Ui.Button("Tamam", Ui.ClassOf(ButtonKind.Cta) + " et-result__button", Close, panel, "Close");
+                PrivacyButton = Ui.Button("Gizlilik seçenekleri", "et-btn et-btn--blue et-settings__button", () => ads.ShowPrivacyOptions(null), list, "Privacy");
+            PolicyButton = Ui.Button("Gizlilik politikası", Ui.ClassOf(ButtonKind.Cta) + " et-settings__button", () => OpenUrl(PrivacyPolicyUrl), list, "Policy");
             Refresh();
         }
+
+        static Button Toggle(VisualElement parent, string name, string icon, string caption, Action onTap)
+        {
+            var cell = Ui.El("et-settings__cell", parent, name + "Cell");
+            var button = Ui.Button(null, "et-pressable et-toggle", onTap, cell, name);
+            Ui.El("et-icon et-toggle__icon " + icon, button);
+            Ui.El("et-toggle__slash", button, "Slash");
+            Ui.Text(caption, "et-outlined et-settings__caption", cell, "Caption");
+            return button;
+        }
+
+        public bool IsOn(Button toggle) => !toggle.ClassListContains(Off);
+
+        public string Caption(Button toggle) => toggle.parent.Q<Label>("Caption").text;
 
         void ToggleSound()
         {
@@ -71,9 +87,9 @@ namespace EmberThrone.Game
 
         void Refresh()
         {
-            SoundButton.text = "Ses: " + (Sound.Enabled ? "Açık" : "Kapalı");
-            HapticsButton.text = "Titreşim: " + (Haptics.Enabled ? "Açık" : "Kapalı");
-            ShakeButton.text = "Sarsıntı: " + (CameraShake.Enabled ? "Açık" : "Kapalı");
+            SoundButton.EnableInClassList(Off, !Sound.Enabled);
+            HapticsButton.EnableInClassList(Off, !Haptics.Enabled);
+            ShakeButton.EnableInClassList(Off, !CameraShake.Enabled);
         }
 
         public void Close()

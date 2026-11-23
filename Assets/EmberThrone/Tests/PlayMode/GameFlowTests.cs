@@ -630,21 +630,24 @@ namespace EmberThrone.Game.Tests
             yield return TapUi(_app.LevelSelect.SettingsButton);
             var settings = _app.LevelSelect.Settings;
             Assert.IsNotNull(settings);
-            Assert.AreEqual("Ses: Açık", settings.SoundButton.text);
-            Assert.AreEqual("Titreşim: Açık", settings.HapticsButton.text);
+            Assert.AreEqual("Ayarlar", settings.Title);
+            Assert.AreEqual("Ses", settings.Caption(settings.SoundButton));
+            Assert.IsTrue(settings.IsOn(settings.SoundButton));
+            Assert.IsTrue(settings.IsOn(settings.HapticsButton));
+            Assert.IsTrue(settings.IsOn(settings.ShakeButton));
             yield return new WaitForSeconds(Timing.ModalIn + 0.05f);
 
             yield return TapUi(settings.SoundButton);
             Assert.IsFalse(Sound.Enabled);
-            Assert.AreEqual("Ses: Kapalı", settings.SoundButton.text);
+            Assert.IsFalse(settings.IsOn(settings.SoundButton));
             int count = Sound.Count;
             yield return TapUi(settings.HapticsButton);
             Assert.IsFalse(Haptics.Enabled);
-            Assert.AreEqual("Titreşim: Kapalı", settings.HapticsButton.text);
+            Assert.IsFalse(settings.IsOn(settings.HapticsButton));
             Assert.AreEqual(count, Sound.Count, "a muted game stays silent");
             yield return TapUi(settings.ShakeButton);
             Assert.IsFalse(CameraShake.Enabled);
-            Assert.AreEqual("Sarsıntı: Kapalı", settings.ShakeButton.text);
+            Assert.IsFalse(settings.IsOn(settings.ShakeButton));
             _app.Shake.Add(0.8f);
             Assert.AreEqual(0f, _app.Shake.Trauma, "no shake when it is turned off");
 
@@ -977,11 +980,15 @@ namespace EmberThrone.Game.Tests
 
             yield return TapUi(select.Tabs.TeamTab);
             Assert.AreEqual(LobbyPage.Team, select.Page);
+            Assert.AreEqual("Takımım", select.PageTitle);
+            Assert.IsFalse(select.TopShown, "pages show their own header instead of the top bar");
             Assert.IsNull(_app.Modal);
             yield return TapUi(select.Tabs.RankTab);
             Assert.AreEqual(LobbyPage.Rank, select.Page);
+            Assert.AreEqual("Sıralama", select.PageTitle);
             yield return TapUi(select.Tabs.HomeTab);
             Assert.AreEqual(LobbyPage.Home, select.Page);
+            Assert.IsTrue(select.TopShown);
         }
 
         [UnityTest]
