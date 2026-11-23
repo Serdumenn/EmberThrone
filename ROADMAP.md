@@ -131,8 +131,22 @@ Telefon gerekmeden: `Motion capture` akışı oyunu 60 fps sabit adımla kaydede
 - [x] Tahta girişi 0,5 sn; seviye başı, ayarlar ve lobi pencereleri tek karede açılır; sonuç penceresi üstten iner, 165 ms'de yerini aşar, 0,43 sn'de oturur
 - [ ] Takasta taşların arkasında kalan ışık izi
 - [ ] HUD üstten, booster çubuğu alttan kayarak girsin (PlayMode testleri bu butonlara seviye açılır açılmaz dokunuyor; testlerle birlikte yapılmalı)
-- [ ] "Hamlen Kalmadı!" afişi (0,1 sn'de iner, 1,6 sn durur) ve devam penceresinin son hamleden 2,1 sn sonra açılması
+- [x] "Hamlen Kalmadı!" afişi ve devam penceresinin son hamleden yaklaşık 2,1 sn sonra açılması (2026-11-22 ölçümüyle, Faz 2f madde 1.5)
 - [ ] Büyücü Şapkası (renk değiştirip özel taş yapar) ve Bombardıman Uçağı (3 bomba) booster'ları
+
+## Faz 2f — Ekran kopyası, Faz 1 (2026-11-22)
+Şartname: [docs/reference/ekran-kopya-sartnamesi.md](docs/reference/ekran-kopya-sartnamesi.md). Yerleşim, pencere içerikleri ve akışlar türün liderinin ekranlarından ölçüldü; taşlar, engeller, karakterler, harita ve binalar bizim kaldı. Ölçüm kareleri `MotionCapture` ve `ScreenshotTour` ile 720×1564 referans telefonda çekilir (üstte 60, altta 37 px güvenli alan). Her madde ayrı commit.
+- [x] 1.0 Kare çekimi referans telefon boyunda (`FrameGrabber.ReferenceSafeArea`)
+- [x] 1.1 Oyun HUD'u: mor plaka, altıgen portre, krem hedef ve hamle kartları, mor "Hedef" ve "Hamle" sekmeleri; seviye yazısı kalktı
+- [x] 1.2 Tahta: hücre payı onda bir; 9 sütunlu tahtada hücre 117 px, HUD ile booster çubuğunun arasında ortalı
+- [x] 1.3 Booster çubuğu: 166 px yeşil kareler, kırmızı sayaç (bitince yeşil "+"), sağda mor dişli düğmesi
+- [x] 1.4 Seviye penceresi: mor gövde, altın çerçeve, "Bölüm N" başlık bandı, sağ üstte X; süper zor seviyede bayraklar yükselir (orta bayrak 0,16 sn'de 56 px aşar, 0,30 sn'de oturur; yanlar 0,12 sn sonra)
+- [x] 1.5 Kayıp akışı: "Hamlen Kalmadı!" afişi (yukarıdan iner, 69 px aşar, 1,05 sn durur, aşağı çıkar), tam genişlik "Devam Et?" teklifi (kapatınca kaybedilecekleri sayan uyarı), "Bölüm Başarısız!" penceresi ve "Tekrar Dene"; hareket klibi `12_kayip_akisi`
+- [x] 1.6 Lobi: bordo üst bar (altın, can, elmas, turuncu dişli), mor "Bölüm N" düğmesi (zor ve süper zor seviyede alt satır), Dünya ve Görevler altında bordo kurdele, sekme çubuğunun zemini ekranın dibine iner
+- [x] 1.7 Yan sütunlar: altın kenarlı 170 px daireler (bordo, mavi, mor), 237 px adım, her düğmenin altında süre hapı (solda lacivert, sağda bordo); hediye düğmesi bir sonraki hediyeye kalan süreyi gösterir
+- [x] 1.8 Ortak çerçeve: sekmelerde üst bar yerine bordo başlık bandı (üstte koyu, aşağı açılır, altında altın çizgi, ortada sayfa adı), ızgara desenli lacivert zemin; Ayarlar tam ekran, yuvarlak yeşil anahtarlar (kapalıyken kırmızı çizgi), sağ üstte X
+- [ ] Faz 2: renk kaydırma ve yazı stili (ince kontur, sert gölge). Şu an kontur kalın, büyük yazılarda harfler incelmiş görünüyor
+- [ ] Faz 3 kararları ve lobide boş kalanlar: avatar dairesi, tam genişlik ilerleme çubuğu, "Davet Et" eki, yan sütunlarda kalan 3 yuva, Profil ekranı, mağazanın tam sayfa olması
 
 ## Faz 3 — Meta ve ekonomi
 - [x] Lobi (2026-11-12): harita üstünde üst bar (can ve sayaç, altın, elmas), altta mağaza, büyük "Seviye N" butonu ve ayarlar, solda hediye ve görev butonları, bildirim rozetleri

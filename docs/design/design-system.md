@@ -94,15 +94,29 @@ USS karşılığı: `-unity-text-outline-width`, `-unity-text-outline-color`, `t
 | Parça | Dosya | Dilim | Nerede |
 |---|---|---|---|
 | Buton yeşil / turuncu / gri | `b2_green`, `b2_orange`, `b2_grey` (300×150) | yan 46, üst 42, alt 52 | `.et-btn--cta`, `.et-btn--secondary`, pasif buton |
-| Çerçeveli buton | `b2_green_framed`, `b2_orange_framed` (320×176) | yan 56, üst 54, alt 64 | Pencere butonları (`.et-result__button`), lobi "Seviye N" |
+| Çerçeveli buton | `b2_green_framed`, `b2_orange_framed`, `b2_purple_framed` (320×176) | yan 56, üst 54, alt 64 | Pencere butonları (`.et-result__button`), lobi "Bölüm N" (mor) |
 | Pano | `p2_cream` (ayrıca `p2_crimson`, `p2_royal`, `p2_plum`, `p2_gold`) | 72, alt 76 | `.et-panel` |
 | Başlık bandı | `band_crimson` (ayrıca `band_royal`, `band_plum`) | yan 60, üst 50, alt 56 | Pencere başlığı (`.et-ribbon`) |
 | Kapat | `btn_close` | — | Pencerenin sağ üst köşesi (`.et-close`) |
 | Satır | `row2`, kendi satırı `row2_me` (yeşil), istek `row3_rose` | 40, alt 48 | `.et-row`, `.et-rank`, pass ve set satırları |
-| Sayfa başlığı | `hdr3` | alt 26 | Bütün sekmelerde üst bant, para göstergelerinin arkası (`.et-page-header`) |
-| Sayfa zemini | `bg3` (512, tekrar eder) | — | `.et-backdrop--map` |
+| Sayfa başlığı | `hdr3` (1080×308, üstte koyu, aşağı açılır) + `gold_line` | 4 | Ana ekran dışındaki sekmelerde ve Ayarlar'da üst bant, ortada sayfa adı (`.et-page-header`, `Ui.PageHeader`) |
+| Sayfa zemini | `bg3` (512, tekrar eder, ince ızgara) | — | `.et-backdrop--map`, `.et-settings` |
 | Alt menü | `nav3`, seçili sekme `nav3_on` | üst 20 / üst 56 | `.et-tabbar`, `.et-tab`, `.et-tab--active` |
 | Etiket, fiyat plakası, desen | `corner_tab`, `price2`, `pat_star` | 44 / 28 / — | Teklif panoları için hazır |
+
+**Ekran kopyası Faz 1, 2026-11-23.** Ölçüler [ekran-kopya-sartnamesi.md](../reference/ekran-kopya-sartnamesi.md) tablolarından, panel pikseli (1080×2346). Üst gruptaki öğeler güvenli alanın üstüne göre (y − 90), alt gruptakiler altına göre yerleşir; pencereler ekranın ortasındaki 1080×2346 sahneye (`.et-stage`) konur, böylece şartname koordinatları olduğu gibi yazılır.
+
+| Parça | Dosya | Dilim | Nerede |
+|---|---|---|---|
+| HUD | `hud_plate` (mor plaka), `hud_card` (krem kart), `hud_tab` (mor sekme), `hex_frame` (altıgen portre) | 60 / 32 / 30 / — | `.et-hud__plate`, `.et-hud__goals`, `.et-hud__tab`, `.et-emby` |
+| Booster çubuğu | `booster_green` (166), `count_red`, `count_green` (68), `btn_purple_round` (130), `ic_gear_cream` | — | `.et-booster`, `.et-booster__count`, `.et-boosters__home` |
+| Seviye penceresi | `p2_plum` gövde, `lvl_band`, `btn_close_gold`, `flag_center`, `flag_side` | 72 / 130, 90 / — | `LevelStartPopup` |
+| Kayıp akışı | `wide_plum`, `wide_cream`, `gold_line`, `hex_red`, `heart_broken` | — | `OutOfMovesBanner`, `ContinuePopup`, "Bölüm Başarısız!" |
+| Lobi | `bar_crimson`, `b2_purple_framed`, `ribbon_crimson`, `btn_orange_round` | — | `.et-topbar__bar`, `.et-lobby__play`, `.et-lobby__ribbon`, `.et-topbar__gear` |
+| Yan sütunlar | `side_crimson`, `side_royal`, `side_purple` (170), `pill_navy`, `pill_crimson` (158×55) | — / 27 | `.et-side__button`, `.et-side__chip` |
+| Ayarlar | `toggle_on`, `toggle_slash` (200), `ic_sound`, `ic_vibrate`, `ic_shake` (128) | — | `.et-toggle`, `.et-toggle--off` |
+
+Renkli bir 3B simge `-unity-background-image-tint-color` ile kreme boyanmaz (renkle çarpılır, soluk kalır); krem simge gerekiyorsa `tools/ui_chrome`'da çizgi simge olarak çizilir (`ic_gear_cream`).
 
 Aşağıdaki v1 tablosu eski parçaları anlatır; `chip`, `pill`, `ring`, `tag`, `trough`, `fill`, `badge`, `check` hâlâ kullanılır.
 
